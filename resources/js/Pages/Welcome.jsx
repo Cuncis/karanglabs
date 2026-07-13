@@ -1,7 +1,11 @@
 import { Head, Link } from '@inertiajs/react';
+import { useState } from 'react';
+import Modal from '@/Components/Modal';
+import Dropdown from '@/Components/Dropdown';
 
 export default function Welcome({ auth, laravelVersion, phpVersion, dynamicTools }) {
-    
+    const [showLoginModal, setShowLoginModal] = useState(false);
+
     const flagshipTools = [
         {
             title: 'Planner',
@@ -102,20 +106,46 @@ export default function Welcome({ auth, laravelVersion, phpVersion, dynamicTools
                     
                     {/* Header Nav */}
                     <header className="w-full flex justify-between items-center mb-16 border-b border-[#222] pb-6">
-                        <div className="text-xl font-bold tracking-tight text-white flex items-center gap-2">
-                            <div className="w-6 h-6 bg-white rounded-sm flex items-center justify-center text-black font-black text-xs">
-                                KL
-                            </div>
+                        <div className="text-xl font-bold tracking-tight text-white flex items-center gap-3">
+                            <img src="https://cdn.libradigital.id/logo-01%20(1)%20(1).png" alt="KarangLabs Logo" className="w-8 h-8 object-contain rounded-md" />
                             KarangLabs Directory
                         </div>
-                        <nav className="flex gap-4">
+                        <nav className="flex items-center gap-4">
                             {auth.user ? (
-                                <Link
-                                    href={route('dashboard')}
-                                    className="px-4 py-1.5 rounded-md text-sm font-medium border border-[#333] hover:bg-[#222] transition-colors"
-                                >
-                                    Dashboard
-                                </Link>
+                                <div className="relative">
+                                    <Dropdown>
+                                        <Dropdown.Trigger>
+                                            <button
+                                                type="button"
+                                                className="inline-flex items-center rounded-md px-3 py-1.5 text-sm font-medium text-[#A1A1AA] hover:text-white transition-colors focus:outline-none"
+                                            >
+                                                {auth.user.name}
+                                                <svg
+                                                    className="-me-0.5 ms-2 h-4 w-4"
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    viewBox="0 0 20 20"
+                                                    fill="currentColor"
+                                                >
+                                                    <path
+                                                        fillRule="evenodd"
+                                                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                                                        clipRule="evenodd"
+                                                    />
+                                                </svg>
+                                            </button>
+                                        </Dropdown.Trigger>
+
+                                        <Dropdown.Content align="right">
+                                            <Dropdown.Link
+                                                href={route('logout')}
+                                                method="post"
+                                                as="button"
+                                            >
+                                                Log Out
+                                            </Dropdown.Link>
+                                        </Dropdown.Content>
+                                    </Dropdown>
+                                </div>
                             ) : (
                                 <>
                                     <Link
@@ -183,6 +213,12 @@ export default function Welcome({ auth, laravelVersion, phpVersion, dynamicTools
                                         <Link 
                                             key={idx}
                                             href={tool.href} 
+                                            onClick={(e) => {
+                                                if (!auth.user) {
+                                                    e.preventDefault();
+                                                    setShowLoginModal(true);
+                                                }
+                                            }}
                                             className="group flex flex-col p-5 rounded-xl border border-[#222] bg-[#111] hover:bg-[#1A1A1A] hover:border-[#444] transition-all duration-200"
                                         >
                                             <div className="flex items-center gap-3 mb-3">
@@ -211,6 +247,35 @@ export default function Welcome({ auth, laravelVersion, phpVersion, dynamicTools
                         <span>Laravel v{laravelVersion} &middot; PHP v{phpVersion}</span>
                     </footer>
                 </div>
+
+                <Modal show={showLoginModal} onClose={() => setShowLoginModal(false)} maxWidth="md">
+                    <div className="p-8 bg-[#111] border border-[#222] text-[#EDEDED] flex flex-col items-center text-center">
+                        <div className="w-16 h-16 bg-[#222] rounded-full flex items-center justify-center mb-6">
+                            <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                            </svg>
+                        </div>
+                        <h2 className="text-2xl font-bold mb-2">Authentication Required</h2>
+                        <p className="text-[#A1A1AA] mb-8">
+                            You must be logged in to access this tool and use the AI generation features.
+                        </p>
+                        
+                        <div className="flex flex-col w-full gap-3">
+                            <Link
+                                href={route('login')}
+                                className="w-full py-2.5 rounded-lg text-sm font-medium bg-white text-black hover:bg-gray-200 transition-colors"
+                            >
+                                Log in to your account
+                            </Link>
+                            <Link
+                                href={route('register')}
+                                className="w-full py-2.5 rounded-lg text-sm font-medium border border-[#333] hover:bg-[#222] transition-colors"
+                            >
+                                Create a new account
+                            </Link>
+                        </div>
+                    </div>
+                </Modal>
             </div>
         </>
     );
