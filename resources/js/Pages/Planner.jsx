@@ -3,10 +3,14 @@ import { Head, Link } from '@inertiajs/react';
 import axios from 'axios';
 import StepWizard from '../Components/StepWizard';
 import OutputView from '../Components/OutputView';
+import HelpModal from '@/Components/HelpModal';
+import AboutModal from '@/Components/AboutModal';
 
 export default function Planner() {
     const [isGenerating, setIsGenerating] = useState(false);
     const [error, setError] = useState(null);
+    const [showHelp, setShowHelp] = useState(false);
+    const [showAbout, setShowAbout] = useState(false);
 
     // Initialize result from localStorage if it exists
     const [result, setResult] = useState(() => {
@@ -99,21 +103,69 @@ export default function Planner() {
             <Head title="AI Project Planner" />
 
             <main className="container mx-auto px-4 py-12 md:py-20 max-w-6xl">
-                <Link href="/" className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors text-sm font-medium mb-8 bg-gray-900 hover:bg-gray-800 px-4 py-2 rounded-lg border border-gray-800 w-fit">
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                    </svg>
-                    Back to Collection
-                </Link>
+                <div className="mb-12">
+                    <div className="flex items-center justify-between mb-8 border-b border-gray-800 pb-4">
+                        <Link href="/" className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors text-sm font-medium bg-gray-900 hover:bg-gray-800 px-4 py-2 rounded-lg border border-gray-800 w-fit">
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                            </svg>
+                            Back to Collection
+                        </Link>
 
-                <div className="text-center max-w-3xl mx-auto mb-12">
-                    <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4">
-                        Turn Ideas into <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#7C3AED] to-fuchsia-500">Working Apps</span>
-                    </h1>
-                    <p className="text-lg text-gray-400">
-                        Describe your vision, and we'll generate a complete product plan and a prompt ready for AI coding tools like Claude Code or Cursor.
-                    </p>
+                        <div className="flex items-center gap-3">
+                            <button 
+                                onClick={() => setShowAbout(true)}
+                                className="px-4 py-2 rounded-full bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-400 hover:text-blue-300 flex items-center gap-2 transition-colors shadow-sm text-sm font-semibold"
+                                title="What is this?"
+                            >
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                What is this?
+                            </button>
+                            <button 
+                                onClick={() => setShowHelp(true)}
+                                className="px-4 py-2 rounded-full bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 hover:text-emerald-300 flex items-center gap-2 transition-colors shadow-sm text-sm font-semibold"
+                                title="How to use this tool"
+                            >
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                How to use
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="text-center max-w-3xl mx-auto mb-4">
+                        <div className="flex items-center justify-center gap-2 mb-4">
+                            <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">
+                                Turn Ideas into <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#7C3AED] to-fuchsia-500">Working Apps</span>
+                            </h1>
+                        </div>
+                        <p className="text-lg text-gray-400">
+                            Describe your vision, and we'll generate a complete product plan and a prompt ready for AI coding tools like Claude Code or Cursor.
+                        </p>
+                    </div>
                 </div>
+
+                <HelpModal 
+                    show={showHelp} 
+                    onClose={() => setShowHelp(false)} 
+                    title="AI Project Planner" 
+                    steps={[
+                        { title: "Describe your app idea", description: "Answer the questions in the step-by-step wizard. The more detailed you are, the better the plan!" },
+                        { title: "Review and Generate", description: "Once you answer all the questions, hit generate and wait for the AI to build your full architecture and blueprint." },
+                        { title: "Feed it to an AI Coder", description: "Copy the final generated prompt and paste it directly into Cursor or Claude Code to start building your app." }
+                    ]} 
+                />
+                
+                <AboutModal 
+                    show={showAbout} 
+                    onClose={() => setShowAbout(false)} 
+                    title="AI Project Planner" 
+                    description="Organize your day, track your goals, and manage your tasks efficiently with our intelligent planner tool. It turns your vague app ideas into a comprehensive step-by-step blueprint that you can instantly paste into AI coding tools like Cursor." 
+                    category="Daily Productivity" 
+                />
 
                 {error && (
                     <div className="max-w-2xl mx-auto mb-8 bg-red-900/50 border border-red-500/50 text-red-200 px-4 py-3 rounded-lg text-center">

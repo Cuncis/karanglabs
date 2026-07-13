@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Head, Link } from '@inertiajs/react';
 import axios from 'axios';
+import HelpModal from '@/Components/HelpModal';
+import AboutModal from '@/Components/AboutModal';
 
 export default function DynamicTool({ tool, slug }) {
     const [formData, setFormData] = useState({});
@@ -8,6 +10,8 @@ export default function DynamicTool({ tool, slug }) {
     const [error, setError] = useState(null);
     const [result, setResult] = useState(null);
     const [copiedField, setCopiedField] = useState(null);
+    const [showHelp, setShowHelp] = useState(false);
+    const [showAbout, setShowAbout] = useState(false);
 
     // Map basic color names to Tailwind hexes for dynamic styling without arbitrary class compilation issues
     const colorMap = {
@@ -60,16 +64,41 @@ export default function DynamicTool({ tool, slug }) {
             <main className="container mx-auto px-4 py-12 md:py-20 max-w-6xl">
                 {/* Header */}
                 <div className="mb-12">
-                    <Link href="/" className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors text-sm font-medium mb-8 bg-gray-900 hover:bg-gray-800 px-4 py-2 rounded-lg border border-gray-800 w-fit">
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                        </svg>
-                        Back to Collection
-                    </Link>
+                    <div className="flex items-center justify-between mb-8 border-b border-gray-800 pb-4">
+                        <Link href="/" className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors text-sm font-medium bg-gray-900 hover:bg-gray-800 px-4 py-2 rounded-lg border border-gray-800 w-fit">
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                            </svg>
+                            Back to Collection
+                        </Link>
+
+                        <div className="flex items-center gap-3">
+                            <button 
+                                onClick={() => setShowAbout(true)}
+                                className="px-4 py-2 rounded-full bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-400 hover:text-blue-300 flex items-center gap-2 transition-colors shadow-sm text-sm font-semibold"
+                                title="What is this?"
+                            >
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                What is this?
+                            </button>
+                            <button 
+                                onClick={() => setShowHelp(true)}
+                                className="px-4 py-2 rounded-full bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 hover:text-emerald-300 flex items-center gap-2 transition-colors shadow-sm text-sm font-semibold"
+                                title="How to use this tool"
+                            >
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                How to use
+                            </button>
+                        </div>
+                    </div>
                     
                     <div className="flex items-center gap-4 mb-4">
                         <div 
-                            className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg" 
+                            className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg shrink-0" 
                             style={{ backgroundColor: theme.hex, boxShadow: `0 10px 15px -3px ${theme.hex}40` }}
                             dangerouslySetInnerHTML={{ __html: tool.icon }}
                         />
@@ -81,6 +110,15 @@ export default function DynamicTool({ tool, slug }) {
                         {tool.description}
                     </p>
                 </div>
+
+                <HelpModal show={showHelp} onClose={() => setShowHelp(false)} title={tool.title} />
+                <AboutModal 
+                    show={showAbout} 
+                    onClose={() => setShowAbout(false)} 
+                    title={tool.title} 
+                    description={tool.description} 
+                    category={tool.category} 
+                />
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                     {/* Left Column: Form */}

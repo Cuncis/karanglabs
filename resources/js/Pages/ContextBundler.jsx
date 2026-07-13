@@ -1,5 +1,7 @@
 import { useState, useRef } from 'react';
 import { Head, Link } from '@inertiajs/react';
+import HelpModal from '@/Components/HelpModal';
+import AboutModal from '@/Components/AboutModal';
 
 export default function ContextBundler() {
     const [files, setFiles] = useState([]);
@@ -10,6 +12,8 @@ export default function ContextBundler() {
     const [manualName, setManualName] = useState('');
     const [manualContent, setManualContent] = useState('');
     const [showManualInput, setShowManualInput] = useState(false);
+    const [showHelp, setShowHelp] = useState(false);
+    const [showAbout, setShowAbout] = useState(false);
 
     const fileInputRef = useRef(null);
 
@@ -88,15 +92,40 @@ export default function ContextBundler() {
             <main className="container mx-auto px-4 py-12 md:py-20 max-w-5xl">
                 {/* Header */}
                 <div className="mb-12">
-                    <Link href="/" className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors text-sm font-medium mb-8 bg-gray-900 hover:bg-gray-800 px-4 py-2 rounded-lg border border-gray-800 w-fit">
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                        </svg>
-                        Back to Collection
-                    </Link>
+                    <div className="flex items-center justify-between mb-8 border-b border-gray-800 pb-4">
+                        <Link href="/" className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors text-sm font-medium bg-gray-900 hover:bg-gray-800 px-4 py-2 rounded-lg border border-gray-800 w-fit">
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                            </svg>
+                            Back to Collection
+                        </Link>
+
+                        <div className="flex items-center gap-3">
+                            <button 
+                                onClick={() => setShowAbout(true)}
+                                className="px-4 py-2 rounded-full bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-400 hover:text-blue-300 flex items-center gap-2 transition-colors shadow-sm text-sm font-semibold"
+                                title="What is this?"
+                            >
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                What is this?
+                            </button>
+                            <button 
+                                onClick={() => setShowHelp(true)}
+                                className="px-4 py-2 rounded-full bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 hover:text-emerald-300 flex items-center gap-2 transition-colors shadow-sm text-sm font-semibold"
+                                title="How to use this tool"
+                            >
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                How to use
+                            </button>
+                        </div>
+                    </div>
                     
                     <div className="flex items-center gap-4 mb-4">
-                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-pink-500 to-rose-600 flex items-center justify-center shadow-lg shadow-pink-500/20">
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-pink-500 to-rose-600 flex items-center justify-center shadow-lg shadow-pink-500/20 shrink-0">
                             <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                             </svg>
@@ -109,6 +138,25 @@ export default function ContextBundler() {
                         Select multiple files or paste code snippets to instantly generate a single, perfectly formatted prompt to feed to ChatGPT or Claude.
                     </p>
                 </div>
+
+                <HelpModal 
+                    show={showHelp} 
+                    onClose={() => setShowHelp(false)} 
+                    title="Context Bundler" 
+                    steps={[
+                        { title: "Add Your Code", description: "Select files from your computer or manually paste code snippets using the buttons on the left." },
+                        { title: "Generate Bundle", description: "Once you've added all the files you need help with, click the 'Generate Bundle Prompt' button." },
+                        { title: "Copy and Ask AI", description: "Copy the perfectly formatted bundle on the right, paste it into ChatGPT or Claude, and ask your question!" }
+                    ]} 
+                />
+
+                <AboutModal 
+                    show={showAbout} 
+                    onClose={() => setShowAbout(false)} 
+                    title="Context Bundler" 
+                    description="Select or paste code files to instantly generate perfectly formatted context prompts for AI. This prevents hallucinations and saves you from manually copying and pasting dozens of files when you need to ask ChatGPT or Claude a complex codebase question." 
+                    category="Daily Productivity" 
+                />
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     {/* Left Column: Inputs */}
