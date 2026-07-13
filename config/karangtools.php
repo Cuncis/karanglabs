@@ -312,5 +312,77 @@ return [
         'outputs' => [
             ['key' => 'personas', 'label' => 'User Personas', 'type' => 'markdown']
         ]
+    ],
+    
+    // NEW TOOLS ADDED
+    'data-anonymizer' => [
+        'title' => 'Data Anonymizer',
+        'category' => 'Code & Data Lifesavers',
+        'description' => 'Replace sensitive data in JSON datasets with fake equivalents for safe testing.',
+        'color' => 'blue',
+        'icon' => '<svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>',
+        'inputs' => [
+            ['name' => 'json_data', 'label' => 'JSON Dataset', 'type' => 'textarea', 'placeholder' => '[{"name": "John Doe", "email": "john@example.com"}]']
+        ],
+        'system_prompt' => "You are a data privacy expert. Analyze the provided JSON array or object. Replace all personally identifiable information (PII) such as real names, emails, phone numbers, addresses, and IP addresses with realistic but fake synthetic data (e.g., John Doe -> Alex Smith). Keep the JSON structure and non-sensitive data completely identical. Output ONLY valid JSON, do not wrap in markdown blocks. Return a JSON object with a single key 'anonymized_json' containing the formatted JSON string.",
+        'outputs' => [
+            ['key' => 'anonymized_json', 'label' => 'Anonymized JSON', 'type' => 'code']
+        ]
+    ],
+    'corporate-translator' => [
+        'title' => 'Corporate Translator',
+        'category' => 'Daily Productivity',
+        'description' => 'Translate frustrated thoughts into highly professional corporate-speak.',
+        'color' => 'indigo',
+        'icon' => '<svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>',
+        'inputs' => [
+            ['name' => 'raw_thought', 'label' => 'Your Frustrated Thought', 'type' => 'textarea', 'placeholder' => 'This idea is terrible and won\'t work...']
+        ],
+        'system_prompt' => "You are an expert in professional corporate communication and diplomacy. The user will provide a blunt, angry, or frustrated thought. Translate this thought into a highly polite, diplomatic, and professional message suitable for a boss, client, or stakeholder. Return your response as a JSON object with a 'translation' key containing the professional message.",
+        'outputs' => [
+            ['key' => 'translation', 'label' => 'Professional Translation', 'type' => 'text']
+        ]
+    ],
+    'jargon-buster' => [
+        'title' => 'Jargon Buster',
+        'category' => 'Business & Freelance',
+        'description' => 'Explain dense legal documents or API docs like you\'re 5 years old.',
+        'color' => 'green',
+        'icon' => '<svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>',
+        'inputs' => [
+            ['name' => 'document_text', 'label' => 'Dense Text / Jargon', 'type' => 'textarea', 'placeholder' => 'Paste the legal clause or technical documentation here...']
+        ],
+        'system_prompt' => "You are an expert communicator who excels at simplifying complex topics. The user will provide dense legal, corporate, or technical jargon. Explain exactly what the text means in extremely simple, plain English, as if you are explaining it to a 5-year-old or a complete beginner. Remove all jargon. Return your response as a JSON object with a 'simple_explanation' key containing your explanation.",
+        'outputs' => [
+            ['key' => 'simple_explanation', 'label' => 'Simple Explanation', 'type' => 'text']
+        ]
+    ],
+    'secret-generator' => [
+        'title' => 'Secret Generator',
+        'category' => 'DevOps & Architecture',
+        'description' => 'Instantly generate highly secure secrets, App Keys, and database passwords.',
+        'color' => 'red',
+        'icon' => '<svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" /></svg>',
+        'inputs' => [
+            ['name' => 'context', 'label' => 'What do you need secrets for?', 'type' => 'text', 'placeholder' => 'e.g., JWT secret, Database password, API Keys (optional)']
+        ],
+        'system_prompt' => "You are a security expert. Generate 5 highly secure, random strings based on the user's request. If no specific context is given, generate a mix of 256-bit hex strings (for JWT), Base64 encoded keys, and complex 32-character alphanumeric passwords. Return a JSON object with a 'secrets' key containing a newline-separated list of the generated secrets. Ensure they look completely random and are extremely strong.",
+        'outputs' => [
+            ['key' => 'secrets', 'label' => 'Generated Secrets', 'type' => 'code']
+        ]
+    ],
+    'youtube-chapters' => [
+        'title' => 'YouTube Chapters',
+        'category' => 'Marketing & SEO',
+        'description' => 'Generate perfectly formatted YouTube timestamp chapters optimized for SEO.',
+        'color' => 'rose',
+        'icon' => '<svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>',
+        'inputs' => [
+            ['name' => 'transcript', 'label' => 'Video Transcript or Notes', 'type' => 'textarea', 'placeholder' => 'Paste your rough timeline, notes, or transcript here...']
+        ],
+        'system_prompt' => "You are an expert YouTube strategist and SEO specialist. The user will provide a video transcript or rough notes with timestamps. Create perfectly formatted YouTube chapters starting exactly at '00:00'. Make the chapter titles highly engaging, click-worthy, and optimized for SEO. Return your response as a JSON object with a 'chapters' key containing the formatted timestamp list as plain text block.",
+        'outputs' => [
+            ['key' => 'chapters', 'label' => 'YouTube Chapters', 'type' => 'code']
+        ]
     ]
 ];

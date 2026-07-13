@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Head } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import axios from 'axios';
 import StepWizard from '../Components/StepWizard';
 import OutputView from '../Components/OutputView';
@@ -98,7 +98,14 @@ export default function Planner() {
         <div className="min-h-screen bg-[#0B0A0F] text-white selection:bg-[#7C3AED]/30">
             <Head title="AI Project Planner" />
 
-            <main className="container mx-auto px-4 py-12 md:py-20">
+            <main className="container mx-auto px-4 py-12 md:py-20 max-w-6xl">
+                <Link href="/" className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors text-sm font-medium mb-8 bg-gray-900 hover:bg-gray-800 px-4 py-2 rounded-lg border border-gray-800 w-fit">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                    Back to Collection
+                </Link>
+
                 <div className="text-center max-w-3xl mx-auto mb-12">
                     <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4">
                         Turn Ideas into <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#7C3AED] to-fuchsia-500">Working Apps</span>
