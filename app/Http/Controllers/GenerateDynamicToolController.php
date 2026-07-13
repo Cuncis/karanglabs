@@ -21,7 +21,8 @@ class GenerateDynamicToolController extends Controller
         $inputData = [];
         $rules = [];
         foreach ($tool['inputs'] as $input) {
-            $rules[$input['name']] = 'required|string';
+            $isOptional = $input['optional'] ?? false;
+            $rules[$input['name']] = $isOptional ? 'nullable|string' : 'required|string';
             if ($request->has($input['name'])) {
                 $inputData[$input['name']] = $request->input($input['name']);
             }
@@ -31,7 +32,10 @@ class GenerateDynamicToolController extends Controller
 
         $userPrompt = "";
         foreach ($tool['inputs'] as $input) {
-            $userPrompt .= $input['label'] . ":\n" . $validated[$input['name']] . "\n\n";
+            $val = $validated[$input['name']] ?? '';
+            if ($val !== '') {
+                $userPrompt .= $input['label'] . ":\n" . $val . "\n\n";
+            }
         }
 
         $systemPrompt = $tool['system_prompt'] . "\n\nReturn ONLY valid JSON with exactly these keys: " . implode(', ', array_column($tool['outputs'], 'key')) . ". No markdown fences, no preamble. Ensure all newlines inside strings are escaped.";
@@ -87,6 +91,13 @@ class GenerateDynamicToolController extends Controller
             $error_msg = json_last_error_msg();
             return response()->json(['error' => 'Invalid JSON from AI. ('.$error_msg.')', 'raw' => $content], 500);
         }
+
+        \App\Models\ToolHistory::create([
+            'user_id' => $request->user()->id,
+            'tool_slug' => $slug,
+            'inputs' => $validated,
+            'outputs' => $json,
+        ]);
 
         return response()->json($json);
     }

@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import axios from 'axios';
 import HelpModal from '@/Components/HelpModal';
 import AboutModal from '@/Components/AboutModal';
 
-export default function DynamicTool({ tool, slug }) {
+export default function DynamicTool({ tool, slug, history = [] }) {
+    const { auth } = usePage().props;
     const [formData, setFormData] = useState({});
     const [isGenerating, setIsGenerating] = useState(false);
     const [error, setError] = useState(null);
@@ -37,6 +38,9 @@ export default function DynamicTool({ tool, slug }) {
         try {
             const response = await axios.post(`/api/tools/${slug}/generate`, formData);
             setResult(response.data);
+            
+            // Reload the page data seamlessly to fetch the updated history list
+            router.reload({ only: ['history'] });
         } catch (err) {
             setError(err.response?.data?.error || 'Something went wrong while generating.');
         } finally {
@@ -55,7 +59,7 @@ export default function DynamicTool({ tool, slug }) {
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const isSubmitDisabled = tool.inputs.some(input => !formData[input.name]?.trim());
+    const isSubmitDisabled = tool.inputs.some(input => !input.optional && !formData[input.name]?.trim());
 
     return (
         <div className="min-h-screen bg-[#0B0A0F] text-white" style={{ '--theme-color': theme.hex }}>
@@ -129,12 +133,12 @@ export default function DynamicTool({ tool, slug }) {
                                 {tool.inputs.map((input, idx) => (
                                     <div key={idx} className={input.type === 'textarea' ? 'flex-1 flex flex-col' : ''}>
                                         <label className="block text-sm font-medium text-gray-300 mb-2">
-                                            {input.label} <span className="text-red-400">*</span>
+                                            {input.label} {!input.optional && <span className="text-red-400">*</span>}
                                         </label>
                                         
                                         {input.type === 'textarea' ? (
                                             <textarea
-                                                required
+                                                required={!input.optional}
                                                 value={formData[input.name] || ''}
                                                 onChange={(e) => handleInputChange(input.name, e.target.value)}
                                                 placeholder={input.placeholder}
@@ -143,7 +147,7 @@ export default function DynamicTool({ tool, slug }) {
                                             />
                                         ) : input.type === 'select' ? (
                                             <select
-                                                required
+                                                required={!input.optional}
                                                 value={formData[input.name] || ''}
                                                 onChange={(e) => handleInputChange(input.name, e.target.value)}
                                                 className="w-full bg-gray-950 border border-gray-700 rounded-xl p-4 text-white focus:outline-none transition-all"
@@ -156,7 +160,7 @@ export default function DynamicTool({ tool, slug }) {
                                         ) : (
                                             <input
                                                 type="text"
-                                                required
+                                                required={!input.optional}
                                                 value={formData[input.name] || ''}
                                                 onChange={(e) => handleInputChange(input.name, e.target.value)}
                                                 placeholder={input.placeholder}
@@ -246,6 +250,70 @@ export default function DynamicTool({ tool, slug }) {
                         )}
                     </div>
                 </div>
+
+                {auth?.user && (
+                    <div className="mt-16 pt-16 border-t border-gray-800">
+                        <div className="flex items-center gap-3 mb-8">
+                            <h3 className="text-2xl font-bold text-white">Your Recent Generations</h3>
+                            {history && history.length > 0 && (
+                                <div className="px-3 py-1 rounded-full text-xs font-medium bg-gray-800 text-gray-400">Past {history.length}</div>
+                            )}
+                        </div>
+                        
+                        {(!history || history.length === 0) ? (
+                            <div className="bg-gray-900/50 border border-gray-800 rounded-2xl p-12 flex flex-col items-center justify-center text-center">
+                                <div className="w-16 h-16 mb-4 rounded-full bg-gray-800/50 flex items-center justify-center opacity-50">
+                                    <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                                <h4 className="text-lg font-medium text-gray-300 mb-1">No history yet</h4>
+                                <p className="text-gray-500 text-sm max-w-sm">Your generated results will be securely saved here so you can revisit them anytime.</p>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {history.map((item) => (
+                                    <button 
+                                        key={item.id}
+                                        onClick={() => {
+                                            setFormData(item.inputs || {});
+                                            setResult(item.outputs || null);
+                                            setError(null);
+                                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                                        }}
+                                        className="text-left bg-gray-900/50 border border-gray-800 rounded-xl p-5 hover:border-gray-600 transition-all group"
+                                    >
+                                        <div className="text-xs text-gray-500 mb-3 flex items-center gap-2">
+                                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                            {new Date(item.created_at).toLocaleDateString()} at {new Date(item.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                                        </div>
+                                        <div className="space-y-2 mb-4">
+                                            {item.inputs && Object.keys(item.inputs).slice(0, 3).map(key => {
+                                                const label = tool.inputs.find(i => i.name === key)?.label || key;
+                                                return (
+                                                    <div key={key} className="truncate text-sm">
+                                                        <span className="text-gray-400">{label}:</span> <span className="text-gray-200 font-medium ml-1">{item.inputs[key]}</span>
+                                                    </div>
+                                                )
+                                            })}
+                                            {item.inputs && Object.keys(item.inputs).length > 3 && (
+                                                <div className="text-xs text-gray-500 italic">...and more</div>
+                                            )}
+                                        </div>
+                                        <div className="mt-4 pt-4 border-t border-gray-800/50 text-sm font-medium transition-colors opacity-80 group-hover:opacity-100 flex items-center gap-1" style={{ color: theme.hex }}>
+                                            Load this result 
+                                            <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                                            </svg>
+                                        </div>
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                )}
             </main>
             
             <style dangerouslySetInnerHTML={{__html: `

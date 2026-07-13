@@ -384,5 +384,22 @@ return [
         'outputs' => [
             ['key' => 'chapters', 'label' => 'YouTube Chapters', 'type' => 'code']
         ]
+    ],
+    'job-dork-generator' => [
+        'title' => 'Job Dork Generator',
+        'category' => 'Daily Productivity',
+        'description' => 'Generate highly targeted Google Dorks to find hidden remote jobs with low competition.',
+        'color' => 'yellow',
+        'icon' => '<svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>',
+        'inputs' => [
+            ['name' => 'job_title', 'label' => 'Target Job(s) / Position(s)', 'type' => 'text', 'placeholder' => 'e.g. Laravel Developer, React Developer (comma separated)', 'optional' => false],
+            ['name' => 'work_type', 'label' => 'Work Type', 'type' => 'select', 'options' => ['Remote', 'Hybrid', 'Onsite', 'Any'], 'optional' => false],
+            ['name' => 'country', 'label' => 'Country(s) / Region(s)', 'type' => 'text', 'placeholder' => 'e.g. Worldwide, Indonesia, US (comma separated)', 'optional' => false],
+            ['name' => 'exceptions', 'label' => 'Exclude Terms (Optional)', 'type' => 'text', 'placeholder' => 'e.g. senior, US only, clearance', 'optional' => true]
+        ],
+        'system_prompt' => "You are an expert tech recruiter and OSINT/Google Dorking specialist. The user will provide job title(s), work type, target country/region(s), and terms to exclude. Generate a comprehensive list of Google Dorks optimized for their exact requirements. Structure the output in Markdown with the following sections:\n\n1. **Tier 1 — High Conversion, Low Competition**: Dorks for LinkedIn Easy Apply (with time filters like posted:r86400), Indeed, WeWorkRemotely, RemoteOK.\n2. **Tier 2 — Job Board Specific**: Dorks for major job boards.\n3. **Tier 3 — Hidden Gems**: Dorks to find jobs on direct Company Career Pages (inurl:careers), GitHub, Notion/Coda, Google Forms, and Typeform.\n4. **Quick Copy-Paste Dorks**: A numbered list of the top 10 best dorks for immediate use.\n\nCRITICAL INSTRUCTION: If the user provides multiple comma-separated job titles or countries, you MUST incorporate them intelligently using Google search OR operators (e.g. (\"Laravel Developer\" OR \"React Developer\") and (\"Indonesia\" OR \"Worldwide\")). Ensure you apply the user's selected Work Type, Target Country/Region(s), and Excluded Terms meticulously using operators (e.g., adding \"remote\" if Work Type is Remote, or -\"senior\"). Ensure the dorks are ready to copy-paste and are formatted as code blocks. Return your response as a JSON object with a 'dorks' key containing the formatted Markdown.",
+        'outputs' => [
+            ['key' => 'dorks', 'label' => 'Google Dork Strategy', 'type' => 'markdown']
+        ]
     ]
 ];
