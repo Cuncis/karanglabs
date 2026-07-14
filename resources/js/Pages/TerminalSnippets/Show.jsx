@@ -84,7 +84,7 @@ export default function Show({ auth, snippet }) {
 
                 {/* Content */}
                 <div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden shadow-2xl">
-                    <div className="p-8 md:p-12 overflow-x-auto">
+                    <div className="p-4 sm:p-8 md:p-12 overflow-x-auto">
                         <article className="prose prose-invert prose-slate prose-lg max-w-none 
                             prose-p:leading-relaxed prose-p:mb-6 
                             prose-headings:mt-12 prose-headings:mb-6 prose-headings:font-bold 
