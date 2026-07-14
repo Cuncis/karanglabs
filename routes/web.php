@@ -19,11 +19,7 @@ Route::get('/', function () {
         'phpVersion' => PHP_VERSION,
         'dynamicTools' => config('karangtools'),
     ]);
-});
-
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+})->name('home');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -66,6 +62,11 @@ Route::middleware('auth')->group(function () {
             'history' => $history
         ]);
     })->name('dynamic-tool');
+
+    Route::get('/terminal-converter', [\App\Http\Controllers\TerminalSnippetController::class, 'index'])->name('terminal-converter.index');
+    Route::post('/terminal-converter', [\App\Http\Controllers\TerminalSnippetController::class, 'store'])->name('terminal-converter.store');
+    Route::get('/terminal-converter/{terminalSnippet}', [\App\Http\Controllers\TerminalSnippetController::class, 'show'])->name('terminal-converter.show');
+    Route::delete('/terminal-converter/{terminalSnippet}', [\App\Http\Controllers\TerminalSnippetController::class, 'destroy'])->name('terminal-converter.destroy');
 });
 
 Route::prefix('api')->middleware('auth')->group(function () {
