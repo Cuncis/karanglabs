@@ -10,6 +10,7 @@ use App\Http\Controllers\GenerateMicroCopyController;
 use App\Http\Controllers\GenerateWhispererController;
 use App\Http\Controllers\GenerateChangelogController;
 use App\Http\Controllers\GenerateDynamicToolController;
+use App\Http\Controllers\GenerateSocializerController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -46,6 +47,10 @@ Route::middleware('auth')->group(function () {
         return Inertia::render('ChangelogGenerator');
     })->name('changelog');
 
+    Route::get('/socializer', function () {
+        return Inertia::render('Socializer');
+    })->name('socializer');
+
     Route::get('/t/{slug}', function ($slug) {
         $tools = config('karangtools');
         if (!isset($tools[$slug])) abort(404);
@@ -75,6 +80,7 @@ Route::prefix('api')->middleware('auth')->group(function () {
     Route::post('/generate-micro-copy', GenerateMicroCopyController::class);
     Route::post('/generate-whisper', GenerateWhispererController::class);
     Route::post('/generate-changelog', GenerateChangelogController::class);
+    Route::post('/generate-socializer', GenerateSocializerController::class);
     Route::post('/tools/{slug}/generate', GenerateDynamicToolController::class);
 });
 

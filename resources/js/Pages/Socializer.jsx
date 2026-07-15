@@ -4,66 +4,73 @@ import axios from 'axios';
 import HelpModal from '@/Components/HelpModal';
 import AboutModal from '@/Components/AboutModal';
 
-export default function Whisperer() {
-    const [prompt, setPrompt] = useState('');
-    const [type, setType] = useState('regex');
+export default function Socializer() {
+    const [content, setContent] = useState('');
     const [isGenerating, setIsGenerating] = useState(false);
     const [error, setError] = useState(null);
     const [result, setResult] = useState(() => {
         if (typeof window !== 'undefined') {
             try {
-                const saved = localStorage.getItem('whisperer_latest_result');
+                const saved = localStorage.getItem('socializer_latest_result');
                 return saved ? JSON.parse(saved) : null;
             } catch (e) { return null; }
         }
         return null;
     });
-
+    
     const [history, setHistory] = useState(() => {
         if (typeof window !== 'undefined') {
             try {
-                const saved = localStorage.getItem('whisperer_history');
+                const saved = localStorage.getItem('socializer_history');
                 return saved ? JSON.parse(saved) : [];
             } catch (e) { return []; }
         }
         return [];
     });
 
+    const [activeTab, setActiveTab] = useState('instagram');
     const [isCopied, setIsCopied] = useState(false);
     const [showHelp, setShowHelp] = useState(false);
     const [showAbout, setShowAbout] = useState(false);
 
     useEffect(() => {
         if (result) {
-            localStorage.setItem('whisperer_latest_result', JSON.stringify(result));
+            localStorage.setItem('socializer_latest_result', JSON.stringify(result));
         } else {
-            localStorage.removeItem('whisperer_latest_result');
+            localStorage.removeItem('socializer_latest_result');
         }
     }, [result]);
 
     useEffect(() => {
-        localStorage.setItem('whisperer_history', JSON.stringify(history));
+        localStorage.setItem('socializer_history', JSON.stringify(history));
     }, [history]);
+
+    const tabs = [
+        { id: 'instagram', label: 'Instagram' },
+        { id: 'twitter', label: 'Twitter/X' },
+        { id: 'facebook', label: 'Facebook' },
+        { id: 'youtube', label: 'YouTube' },
+        { id: 'tiktok', label: 'TikTok' },
+        { id: 'linkedin', label: 'LinkedIn' },
+    ];
 
     const handleGenerate = async (e) => {
         e.preventDefault();
-        if (!prompt.trim()) return;
+        if (!content.trim()) return;
 
         setIsGenerating(true);
         setError(null);
         
         try {
-            const response = await axios.post('/api/generate-whisper', {
-                prompt: prompt,
-                type: type
+            const response = await axios.post('/api/generate-socializer', {
+                content: content
             });
             
             const newResult = {
                 ...response.data,
                 id: Date.now(),
                 timestamp: new Date().toISOString(),
-                original_prompt: prompt.length > 50 ? prompt.substring(0, 50) + '...' : prompt,
-                type: type
+                original_prompt: content.length > 50 ? content.substring(0, 50) + '...' : content
             };
 
             setResult(newResult);
@@ -71,7 +78,8 @@ export default function Whisperer() {
                 const updatedHistory = [newResult, ...prev].slice(0, 10);
                 return updatedHistory;
             });
-            setPrompt('');
+            setActiveTab('instagram');
+            setContent('');
         } catch (err) {
             setError(err.response?.data?.error || 'Something went wrong while generating.');
         } finally {
@@ -81,7 +89,7 @@ export default function Whisperer() {
 
     const loadFromHistory = (item) => {
         setResult(item);
-        setType(item.type || 'regex');
+        setActiveTab('instagram');
     };
 
     const clearHistory = () => {
@@ -96,20 +104,20 @@ export default function Whisperer() {
     };
 
     const handleCopy = () => {
-        if (!result?.code_snippet) return;
-        navigator.clipboard.writeText(result.code_snippet);
+        if (!result || !result[activeTab]) return;
+        navigator.clipboard.writeText(result[activeTab]);
         setIsCopied(true);
         setTimeout(() => setIsCopied(false), 2000);
     };
 
     return (
-        <div className="min-h-screen bg-[#0B0A0F] text-white selection:bg-[#10B981]/30">
-            <Head title="Regex & Schema Whisperer" />
+        <div className="min-h-screen bg-[#0B0A0F] text-white selection:bg-[#F43F5E]/30">
+            <Head title="Social Media Repurposer" />
 
-            <main className="container mx-auto px-4 py-12 md:py-20 max-w-5xl">
+            <main className="container mx-auto px-4 py-12 md:py-20 max-w-6xl">
                 {/* Header */}
                 <div className="mb-12">
-                    <div className="flex items-center justify-between mb-8 border-b border-gray-800 pb-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 border-b border-gray-800 pb-4">
                         <Link href="/" className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors text-sm font-medium bg-gray-900 hover:bg-gray-800 px-4 py-2 rounded-lg border border-gray-800 w-fit">
                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -117,10 +125,10 @@ export default function Whisperer() {
                             Back to Collection
                         </Link>
 
-                        <div className="flex items-center gap-3">
+                        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                             <button 
                                 onClick={() => setShowAbout(true)}
-                                className="px-4 py-2 rounded-full bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-400 hover:text-blue-300 flex items-center gap-2 transition-colors shadow-sm text-sm font-semibold"
+                                className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-full bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-400 hover:text-blue-300 flex items-center gap-2 transition-colors shadow-sm text-xs sm:text-sm font-semibold whitespace-nowrap"
                                 title="What is this?"
                             >
                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -130,7 +138,7 @@ export default function Whisperer() {
                             </button>
                             <button 
                                 onClick={() => setShowHelp(true)}
-                                className="px-4 py-2 rounded-full bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 hover:text-emerald-300 flex items-center gap-2 transition-colors shadow-sm text-sm font-semibold"
+                                className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-full bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 hover:text-emerald-300 flex items-center gap-2 transition-colors shadow-sm text-xs sm:text-sm font-semibold whitespace-nowrap"
                                 title="How to use this tool"
                             >
                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -142,27 +150,27 @@ export default function Whisperer() {
                     </div>
                     
                     <div className="flex items-center gap-4 mb-4">
-                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#10B981] to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/20 shrink-0">
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#F43F5E] to-rose-600 flex items-center justify-center shadow-lg shadow-rose-500/20 shrink-0">
                             <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
                             </svg>
                         </div>
                         <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">
-                            Regex & Schema <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#10B981] to-teal-400">Whisperer</span>
+                            Social Media <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#F43F5E] to-pink-400">Repurposer</span>
                         </h1>
                     </div>
                     <p className="text-lg text-gray-400 max-w-2xl">
-                        Describe what you need in plain English. Get back the exact Regex, SQL, or Eloquent query you need, fully explained and tested.
+                        Type a raw thought or paragraph, and instantly get perfectly optimized, human-sounding posts for every major social platform.
                     </p>
                 </div>
 
-                <HelpModal show={showHelp} onClose={() => setShowHelp(false)} title="Regex & Schema Whisperer" />
+                <HelpModal show={showHelp} onClose={() => setShowHelp(false)} title="Social Media Repurposer" />
                 <AboutModal 
                     show={showAbout} 
                     onClose={() => setShowAbout(false)} 
-                    title="Regex & Schema Whisperer" 
-                    description="Describe what you need in plain English and instantly get the exact regex, SQL, or Eloquent query you need. It includes full explanations and edge cases so you don't have to memorize complex syntaxes." 
-                    category="Code & Data Lifesavers" 
+                    title="Social Media Repurposer" 
+                    description="Write one paragraph and let AI rewrite it in 6 distinct styles tailored for Instagram, Twitter/X, Facebook, YouTube, TikTok, and LinkedIn. It writes like a real human, minimizes emojis, and provides relevant hashtags." 
+                    category="Content Creation" 
                 />
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -170,48 +178,20 @@ export default function Whisperer() {
                     <div className="lg:col-span-5 space-y-6">
                         <form onSubmit={handleGenerate} className="bg-gray-900/50 border border-gray-800 rounded-2xl p-6 shadow-xl">
                             <div className="space-y-6">
-                                
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-300 mb-3">
-                                        What are you trying to write?
-                                    </label>
-                                    <div className="grid grid-cols-3 gap-3">
-                                        {[
-                                            { id: 'regex', label: 'Regex' },
-                                            { id: 'query', label: 'DB Query' },
-                                            { id: 'schema', label: 'Schema' }
-                                        ].map(option => (
-                                            <button
-                                                key={option.id}
-                                                type="button"
-                                                onClick={() => setType(option.id)}
-                                                className={`py-2 px-3 text-sm font-medium rounded-lg border transition-all ${
-                                                    type === option.id 
-                                                    ? 'bg-[#10B981]/10 border-[#10B981] text-[#10B981]' 
-                                                    : 'bg-gray-950 border-gray-800 text-gray-400 hover:border-gray-700 hover:bg-gray-900'
-                                                }`}
-                                            >
-                                                {option.label}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-
                                 <div>
                                     <label className="block text-sm font-medium text-gray-300 mb-2">
-                                        Describe what you need <span className="text-red-400">*</span>
+                                        Your core idea or paragraph <span className="text-rose-400">*</span>
                                     </label>
                                     <textarea
                                         required
-                                        value={prompt}
-                                        onChange={(e) => setPrompt(e.target.value)}
-                                        placeholder={
-                                            type === 'regex' ? "e.g. A regex that matches phone numbers but only if they have a + country code..." :
-                                            type === 'query' ? "e.g. Write an Eloquent query to get all users who haven't logged in for 30 days..." :
-                                            "e.g. A JSON schema for a product with variants..."
-                                        }
-                                        className="w-full h-32 bg-gray-950 border border-gray-700 rounded-xl p-3 text-white placeholder-gray-600 focus:outline-none focus:border-[#10B981] focus:ring-1 focus:ring-[#10B981] transition-all resize-none"
+                                        value={content}
+                                        onChange={(e) => setContent(e.target.value)}
+                                        placeholder="e.g. We just launched a new feature that lets users export their data to PDF in one click. It was hard to build but we finally did it. Check it out!"
+                                        className="w-full h-48 bg-gray-950 border border-gray-700 rounded-xl p-4 text-white placeholder-gray-600 focus:outline-none focus:border-[#F43F5E] focus:ring-1 focus:ring-[#F43F5E] transition-all resize-none leading-relaxed"
                                     />
+                                    <p className="mt-2 text-xs text-gray-500">
+                                        Type anything from a quick thought to a rough draft. We'll humanize it and format it for every network.
+                                    </p>
                                 </div>
 
                                 {error && (
@@ -222,16 +202,16 @@ export default function Whisperer() {
 
                                 <button
                                     type="submit"
-                                    disabled={!prompt.trim() || isGenerating}
-                                    className="w-full py-3.5 bg-gradient-to-r from-[#10B981] to-emerald-500 hover:from-[#10B981]/90 hover:to-emerald-500/90 text-white rounded-xl font-bold shadow-lg shadow-[#10B981]/25 transition-all hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:translate-y-0 flex items-center justify-center gap-2"
+                                    disabled={!content.trim() || isGenerating}
+                                    className="w-full py-3.5 bg-gradient-to-r from-[#F43F5E] to-rose-600 hover:from-[#F43F5E]/90 hover:to-rose-600/90 text-white rounded-xl font-bold shadow-lg shadow-[#F43F5E]/25 transition-all hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:translate-y-0 flex items-center justify-center gap-2"
                                 >
                                     {isGenerating ? (
                                         <>
                                             <span className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full" />
-                                            Thinking...
+                                            Writing posts...
                                         </>
                                     ) : (
-                                        'Generate'
+                                        'Convert to All Platforms'
                                     )}
                                 </button>
                             </div>
@@ -243,7 +223,7 @@ export default function Whisperer() {
                                     <h3 className="text-lg font-bold text-white">History</h3>
                                     <button 
                                         onClick={clearHistory}
-                                        className="text-xs text-[#10B981] hover:text-[#10B981]/70 transition-colors py-1 px-2 rounded hover:bg-[#10B981]/10"
+                                        className="text-xs text-rose-400 hover:text-rose-300 transition-colors py-1 px-2 rounded hover:bg-rose-400/10"
                                     >
                                         Clear
                                     </button>
@@ -253,16 +233,13 @@ export default function Whisperer() {
                                         <button 
                                             key={item.id}
                                             onClick={() => loadFromHistory(item)}
-                                            className="w-full text-left p-4 rounded-lg bg-gray-950 border border-gray-800 hover:border-[#10B981]/50 hover:bg-gray-900 transition-all flex justify-between items-center group"
+                                            className="w-full text-left p-4 rounded-lg bg-gray-950 border border-gray-800 hover:border-[#F43F5E]/50 hover:bg-gray-900 transition-all flex justify-between items-center group"
                                         >
                                             <div className="truncate pr-4 flex-1">
                                                 <p className="text-sm font-medium text-gray-200 truncate">{item.original_prompt}</p>
-                                                <p className="text-xs text-gray-500 mt-1">
-                                                    <span className="uppercase text-xs mr-2">{item.type}</span>
-                                                    {formatDate(item.timestamp)}
-                                                </p>
+                                                <p className="text-xs text-gray-500 mt-1">{formatDate(item.timestamp)}</p>
                                             </div>
-                                            <div className="text-[#10B981] opacity-0 group-hover:opacity-100 transition-opacity transform group-hover:translate-x-1 duration-300">
+                                            <div className="text-[#F43F5E] opacity-0 group-hover:opacity-100 transition-opacity transform group-hover:translate-x-1 duration-300">
                                                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                                                 </svg>
@@ -279,59 +256,58 @@ export default function Whisperer() {
                         {result ? (
                             <div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden shadow-2xl h-full flex flex-col animate-fade-in">
                                 
-                                <div className="p-6 border-b border-gray-800 bg-gray-950 relative group">
-                                    <div className="flex justify-between items-start mb-3">
-                                        <h3 className="font-bold text-white text-lg flex items-center gap-2">
-                                            <div className="w-2 h-2 rounded-full bg-[#10B981] animate-pulse"></div>
-                                            Code Snippet
-                                            <span className="text-xs bg-gray-800 text-gray-400 px-2 py-1 rounded ml-2 uppercase font-mono">{result.language}</span>
+                                {/* Tabs */}
+                                <div className="flex overflow-x-auto border-b border-gray-800 bg-gray-950 custom-scrollbar">
+                                    {tabs.map((tab) => (
+                                        <button
+                                            key={tab.id}
+                                            onClick={() => setActiveTab(tab.id)}
+                                            className={`px-6 py-4 text-sm font-medium transition-colors whitespace-nowrap border-b-2 ${
+                                                activeTab === tab.id
+                                                    ? 'border-[#F43F5E] text-[#F43F5E] bg-[#F43F5E]/5'
+                                                    : 'border-transparent text-gray-400 hover:text-gray-300 hover:bg-gray-900'
+                                            }`}
+                                        >
+                                            {tab.label}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                {/* Content */}
+                                <div className="p-6 md:p-8 flex-1 flex flex-col relative group">
+                                    <div className="flex justify-between items-center mb-6">
+                                        <h3 className="font-semibold text-white text-lg flex items-center gap-2 capitalize">
+                                            {tabs.find(t => t.id === activeTab)?.label} Format
                                         </h3>
                                         <button 
                                             onClick={handleCopy}
-                                            className={`text-sm px-4 py-1.5 rounded-lg transition-colors flex items-center gap-2 font-medium border ${
+                                            className={`text-sm px-4 py-2 rounded-lg transition-colors flex items-center gap-2 font-medium border ${
                                                 isCopied 
-                                                ? 'bg-[#10B981]/10 text-[#10B981] border-[#10B981]/30'
+                                                ? 'bg-[#F43F5E]/10 text-[#F43F5E] border-[#F43F5E]/30'
                                                 : 'bg-gray-800 hover:bg-gray-700 text-gray-300 border-gray-700'
                                             }`}
                                         >
-                                            {isCopied ? 'Copied!' : 'Copy Code'}
+                                            {isCopied ? 'Copied to Clipboard!' : 'Copy Post'}
                                         </button>
                                     </div>
-                                    <div className="bg-black/50 border border-gray-800 rounded-lg p-4 overflow-x-auto">
-                                        <pre className="text-gray-300 font-mono text-sm">
-                                            {result.code_snippet}
-                                        </pre>
-                                    </div>
-                                </div>
-
-                                <div className="p-6 overflow-y-auto custom-scrollbar flex-1 space-y-6">
                                     
-                                    <div>
-                                        <h4 className="text-sm font-semibold text-[#10B981] uppercase tracking-wider mb-3">Explanation</h4>
-                                        <div className="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap">
-                                            {result.explanation}
-                                        </div>
+                                    <div className="bg-gray-950 border border-gray-800 rounded-xl p-6 flex-1">
+                                        <p className="text-gray-200 text-base md:text-lg leading-relaxed whitespace-pre-wrap font-sans">
+                                            {result[activeTab]}
+                                        </p>
                                     </div>
-
-                                    <div className="pt-6 border-t border-gray-800">
-                                        <h4 className="text-sm font-semibold text-[#10B981] uppercase tracking-wider mb-3">Test Cases / Examples</h4>
-                                        <div className="bg-gray-950 rounded-lg p-4 border border-gray-800 text-gray-300 text-sm font-mono whitespace-pre-wrap">
-                                            {result.test_cases}
-                                        </div>
-                                    </div>
-
                                 </div>
                             </div>
                         ) : (
                             <div className="h-full min-h-[400px] bg-gray-900/30 border border-gray-800 border-dashed rounded-2xl flex flex-col items-center justify-center text-gray-500 p-8 text-center">
                                 <div className="w-16 h-16 mb-6 rounded-2xl bg-gray-800/50 flex items-center justify-center">
                                     <svg className="w-8 h-8 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
                                     </svg>
                                 </div>
-                                <h3 className="font-semibold text-xl text-gray-300 mb-2">Awaiting Instructions</h3>
+                                <h3 className="font-semibold text-xl text-gray-300 mb-2">Awaiting Content</h3>
                                 <p className="text-gray-500 max-w-sm leading-relaxed">
-                                    Tell me what you're trying to extract or query. I'll translate your plain English into working code instantly.
+                                    Type your paragraph on the left. I'll perfectly format it into 6 different social media styles for you.
                                 </p>
                             </div>
                         )}

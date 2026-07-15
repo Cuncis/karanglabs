@@ -5,7 +5,13 @@ import TextInput from '@/Components/TextInput';
 import GuestLayout from '@/Layouts/GuestLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
 
+import { useState } from 'react';
+
 export default function Register() {
+    const [hasAccess, setHasAccess] = useState(false);
+    const [accessPassword, setAccessPassword] = useState('');
+    const [accessError, setAccessError] = useState('');
+
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
         email: '',
@@ -20,6 +26,50 @@ export default function Register() {
             onFinish: () => reset('password', 'password_confirmation'),
         });
     };
+
+    const handleAccessSubmit = (e) => {
+        e.preventDefault();
+        if (accessPassword === 'rsz761wc73') {
+            setHasAccess(true);
+        } else {
+            setAccessError('Incorrect password');
+        }
+    };
+
+    if (!hasAccess) {
+        return (
+            <GuestLayout>
+                <Head title="Restricted Access" />
+                <div className="text-center mb-6">
+                    <h2 className="text-2xl font-bold text-gray-900">Restricted Access</h2>
+                    <p className="text-sm text-gray-600 mt-2">Please enter the access password to register.</p>
+                </div>
+                <form onSubmit={handleAccessSubmit}>
+                    <div>
+                        <InputLabel htmlFor="access_password" value="Access Password" />
+                        <TextInput
+                            id="access_password"
+                            type="password"
+                            value={accessPassword}
+                            className="mt-1 block w-full"
+                            isFocused={true}
+                            onChange={(e) => setAccessPassword(e.target.value)}
+                        />
+                        {accessError && <InputError message={accessError} className="mt-2" />}
+                    </div>
+                    <div className="mt-4 flex items-center justify-between">
+                        <Link
+                            href={route('login')}
+                            className="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                        >
+                            Back to login
+                        </Link>
+                        <PrimaryButton>Verify</PrimaryButton>
+                    </div>
+                </form>
+            </GuestLayout>
+        );
+    }
 
     return (
         <GuestLayout>

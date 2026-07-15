@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Head, Link } from '@inertiajs/react';
 import axios from 'axios';
 import HelpModal from '@/Components/HelpModal';
@@ -9,11 +9,42 @@ export default function MicroCopy() {
     const [context, setContext] = useState('');
     const [isGenerating, setIsGenerating] = useState(false);
     const [error, setError] = useState(null);
-    const [result, setResult] = useState(null);
+    const [result, setResult] = useState(() => {
+        if (typeof window !== 'undefined') {
+            try {
+                const saved = localStorage.getItem('microcopy_latest_result');
+                return saved ? JSON.parse(saved) : null;
+            } catch (e) { return null; }
+        }
+        return null;
+    });
+
+    const [history, setHistory] = useState(() => {
+        if (typeof window !== 'undefined') {
+            try {
+                const saved = localStorage.getItem('microcopy_history');
+                return saved ? JSON.parse(saved) : [];
+            } catch (e) { return []; }
+        }
+        return [];
+    });
+
     const [activeTone, setActiveTone] = useState('professional');
     const [copiedField, setCopiedField] = useState(null);
     const [showHelp, setShowHelp] = useState(false);
     const [showAbout, setShowAbout] = useState(false);
+
+    useEffect(() => {
+        if (result) {
+            localStorage.setItem('microcopy_latest_result', JSON.stringify(result));
+        } else {
+            localStorage.removeItem('microcopy_latest_result');
+        }
+    }, [result]);
+
+    useEffect(() => {
+        localStorage.setItem('microcopy_history', JSON.stringify(history));
+    }, [history]);
 
     const handleGenerate = async (e) => {
         e.preventDefault();
@@ -27,13 +58,43 @@ export default function MicroCopy() {
                 component_name: componentName,
                 context: context
             });
-            setResult(response.data);
+            
+            const newResult = {
+                ...response.data,
+                id: Date.now(),
+                timestamp: new Date().toISOString(),
+                original_prompt: componentName.length > 50 ? componentName.substring(0, 50) + '...' : componentName
+            };
+
+            setResult(newResult);
+            setHistory(prev => {
+                const updatedHistory = [newResult, ...prev].slice(0, 10);
+                return updatedHistory;
+            });
             setActiveTone('professional');
+            setComponentName('');
+            setContext('');
         } catch (err) {
             setError(err.response?.data?.error || 'Something went wrong while generating the micro-copy.');
         } finally {
             setIsGenerating(false);
         }
+    };
+
+    const loadFromHistory = (item) => {
+        setResult(item);
+        setActiveTone('professional');
+    };
+
+    const clearHistory = () => {
+        setHistory([]);
+        setResult(null);
+    };
+
+    const formatDate = (dateString) => {
+        return new Date(dateString).toLocaleString([], { 
+            month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' 
+        });
     };
 
     const handleCopy = (text, fieldName) => {
@@ -215,6 +276,39 @@ export default function MicroCopy() {
                                 </button>
                             </div>
                         </form>
+
+                        {history.length > 0 && !isGenerating && (
+                            <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-6 mt-6">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h3 className="text-lg font-bold text-white">History</h3>
+                                    <button 
+                                        onClick={clearHistory}
+                                        className="text-xs text-[#00D8FF] hover:text-[#00D8FF]/70 transition-colors py-1 px-2 rounded hover:bg-[#00D8FF]/10"
+                                    >
+                                        Clear
+                                    </button>
+                                </div>
+                                <div className="space-y-3 max-h-72 overflow-y-auto pr-2 custom-scrollbar">
+                                    {history.map(item => (
+                                        <button 
+                                            key={item.id}
+                                            onClick={() => loadFromHistory(item)}
+                                            className="w-full text-left p-4 rounded-lg bg-gray-950 border border-gray-800 hover:border-[#00D8FF]/50 hover:bg-gray-900 transition-all flex justify-between items-center group"
+                                        >
+                                            <div className="truncate pr-4 flex-1">
+                                                <p className="text-sm font-medium text-gray-200 truncate">{item.original_prompt}</p>
+                                                <p className="text-xs text-gray-500 mt-1">{formatDate(item.timestamp)}</p>
+                                            </div>
+                                            <div className="text-[#00D8FF] opacity-0 group-hover:opacity-100 transition-opacity transform group-hover:translate-x-1 duration-300">
+                                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                                                </svg>
+                                            </div>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     {/* Right Column: Results */}
