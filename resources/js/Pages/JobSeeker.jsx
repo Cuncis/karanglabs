@@ -19,6 +19,8 @@ export default function JobSeeker() {
     
     const [isSavingProfile, setIsSavingProfile] = useState(false);
     const [saveProfileMessage, setSaveProfileMessage] = useState('');
+    
+    const [isShortening, setIsShortening] = useState(false);
 
     const [result, setResult] = useState(() => {
         if (typeof window !== 'undefined') {
@@ -61,6 +63,31 @@ export default function JobSeeker() {
         { id: 'resume', label: 'Resume Content' },
         { id: 'message', label: 'HR Message' },
     ];
+
+    const handleShortenMessage = async () => {
+        if (!result || !result.message || isShortening) return;
+        setIsShortening(true);
+        try {
+            const response = await axios.post('/api/shorten-hr-message', {
+                message: result.message
+            });
+            const newResult = { ...result, message: response.data.message };
+            setResult(newResult);
+            // Also update the latest in history
+            setHistory(prev => {
+                const newHistory = [...prev];
+                const index = newHistory.findIndex(h => h.id === result.id);
+                if (index !== -1) {
+                    newHistory[index] = newResult;
+                }
+                return newHistory;
+            });
+        } catch (err) {
+            console.error('Failed to shorten message:', err);
+        } finally {
+            setIsShortening(false);
+        }
+    };
 
     const handleSaveProfile = async () => {
         if (!name.trim() || !email.trim() || !background.trim()) return;
@@ -380,16 +407,39 @@ export default function JobSeeker() {
                                         <h3 className="font-semibold text-white text-lg flex items-center gap-2 capitalize">
                                             {tabs.find(t => t.id === activeTab)?.label}
                                         </h3>
-                                        <button 
-                                            onClick={handleCopy}
-                                            className={`text-sm px-4 py-2 rounded-lg transition-colors flex items-center gap-2 font-medium border ${
-                                                isCopied 
-                                                ? 'bg-[#6366F1]/10 text-[#6366F1] border-[#6366F1]/30'
-                                                : 'bg-gray-800 hover:bg-gray-700 text-gray-300 border-gray-700'
-                                            }`}
-                                        >
-                                            {isCopied ? 'Copied to Clipboard!' : 'Copy Text'}
-                                        </button>
+                                        <div className="flex items-center gap-3">
+                                            {activeTab === 'message' && (
+                                                <button 
+                                                    onClick={handleShortenMessage}
+                                                    disabled={isShortening}
+                                                    className="text-sm px-4 py-2 rounded-lg transition-colors flex items-center gap-2 font-medium border bg-gray-800 hover:bg-gray-700 text-amber-400 border-gray-700 disabled:opacity-50"
+                                                >
+                                                    {isShortening ? (
+                                                        <>
+                                                            <span className="animate-spin h-4 w-4 border-2 border-amber-400 border-t-transparent rounded-full" />
+                                                            Shortening...
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                                            </svg>
+                                                            Make it Shorter
+                                                        </>
+                                                    )}
+                                                </button>
+                                            )}
+                                            <button 
+                                                onClick={handleCopy}
+                                                className={`text-sm px-4 py-2 rounded-lg transition-colors flex items-center gap-2 font-medium border ${
+                                                    isCopied 
+                                                    ? 'bg-[#6366F1]/10 text-[#6366F1] border-[#6366F1]/30'
+                                                    : 'bg-gray-800 hover:bg-gray-700 text-gray-300 border-gray-700'
+                                                }`}
+                                            >
+                                                {isCopied ? 'Copied to Clipboard!' : 'Copy Text'}
+                                            </button>
+                                        </div>
                                     </div>
                                     
                                     <div className="bg-gray-950 border border-gray-800 rounded-xl p-6 flex-1 overflow-y-auto">

@@ -87,6 +87,7 @@ Route::prefix('api')->middleware('auth')->group(function () {
     Route::post('/generate-changelog', GenerateChangelogController::class);
     Route::post('/generate-socializer', GenerateSocializerController::class);
     Route::post('/generate-job-seeker', GenerateJobSeekerController::class);
+    Route::post('/shorten-hr-message', \App\Http\Controllers\ShortenHrMessageController::class);
     
     Route::post('/save-job-profile', function (\Illuminate\Http\Request $request) {
         $validated = $request->validate([
