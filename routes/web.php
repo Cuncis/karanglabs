@@ -11,6 +11,7 @@ use App\Http\Controllers\GenerateWhispererController;
 use App\Http\Controllers\GenerateChangelogController;
 use App\Http\Controllers\GenerateDynamicToolController;
 use App\Http\Controllers\GenerateSocializerController;
+use App\Http\Controllers\GenerateJobSeekerController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -51,6 +52,10 @@ Route::middleware('auth')->group(function () {
         return Inertia::render('Socializer');
     })->name('socializer');
 
+    Route::get('/jobseeker', function () {
+        return Inertia::render('JobSeeker');
+    })->name('jobseeker');
+
     Route::get('/t/{slug}', function ($slug) {
         $tools = config('karangtools');
         if (!isset($tools[$slug])) abort(404);
@@ -81,6 +86,29 @@ Route::prefix('api')->middleware('auth')->group(function () {
     Route::post('/generate-whisper', GenerateWhispererController::class);
     Route::post('/generate-changelog', GenerateChangelogController::class);
     Route::post('/generate-socializer', GenerateSocializerController::class);
+    Route::post('/generate-job-seeker', GenerateJobSeekerController::class);
+    
+    Route::post('/save-job-profile', function (\Illuminate\Http\Request $request) {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            'background' => 'required|string|max:8000',
+        ]);
+        $user = $request->user();
+        $user->name = $validated['name'];
+        if ($user->email !== $validated['email']) {
+            $exists = \App\Models\User::where('email', $validated['email'])->exists();
+            if (!$exists) {
+                $user->email = $validated['email'];
+            } else {
+                return response()->json(['error' => 'Email already in use.'], 422);
+            }
+        }
+        $user->job_background = $validated['background'];
+        $user->save();
+        return response()->json(['message' => 'Profile saved successfully']);
+    });
+
     Route::post('/tools/{slug}/generate', GenerateDynamicToolController::class);
 });
 
