@@ -39,4 +39,13 @@ return [
         'key' => env('ANTHROPIC_API_KEY'),
     ],
 
+    'brave' => [
+        'key' => env('BRAVE_SEARCH_KEY'),
+    ],
+
+    'telegram' => [
+        'bot_token' => env('TELEGRAM_BOT_TOKEN'),
+        'chat_id' => env('TELEGRAM_CHAT_ID'),
+    ],
+
 ];

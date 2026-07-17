@@ -64,6 +64,14 @@ export default function Welcome({ auth, laravelVersion, phpVersion, dynamicTools
             icon: `<svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" /></svg>`
         },
         {
+            title: 'Dork Hunter',
+            description: 'Save Google-style search dorks and let them run automatically every 2 hours, pushing brand-new matches straight to your Telegram.',
+            color: 'red',
+            category: 'Code & Data Lifesavers',
+            href: route('dork-hunter.index'),
+            icon: `<svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>`
+        },
+        {
             title: 'Job Finder Pro',
             description: 'Turn your messy background details into a perfect, human-sounding resume and a compelling email for HR to help you land your dream job.',
             color: 'blue',

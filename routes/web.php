@@ -1,17 +1,23 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
-use Illuminate\Foundation\Application;
-use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
-use App\Http\Controllers\GeneratePlanController;
-use App\Http\Controllers\GenerateQuestionsController;
-use App\Http\Controllers\GenerateMicroCopyController;
-use App\Http\Controllers\GenerateWhispererController;
+use App\Http\Controllers\DorkHunterController;
 use App\Http\Controllers\GenerateChangelogController;
 use App\Http\Controllers\GenerateDynamicToolController;
-use App\Http\Controllers\GenerateSocializerController;
 use App\Http\Controllers\GenerateJobSeekerController;
+use App\Http\Controllers\GenerateMicroCopyController;
+use App\Http\Controllers\GeneratePlanController;
+use App\Http\Controllers\GenerateQuestionsController;
+use App\Http\Controllers\GenerateSocializerController;
+use App\Http\Controllers\GenerateWhispererController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ShortenHrMessageController;
+use App\Http\Controllers\TerminalSnippetController;
+use App\Models\ToolHistory;
+use App\Models\User;
+use Illuminate\Foundation\Application;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -58,25 +64,33 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/t/{slug}', function ($slug) {
         $tools = config('karangtools');
-        if (!isset($tools[$slug])) abort(404);
-        
-        $history = \App\Models\ToolHistory::where('user_id', auth()->id())
+        if (! isset($tools[$slug])) {
+            abort(404);
+        }
+
+        $history = ToolHistory::where('user_id', auth()->id())
             ->where('tool_slug', $slug)
             ->latest()
             ->take(10)
             ->get();
-            
+
         return Inertia::render('DynamicTool', [
             'tool' => $tools[$slug],
             'slug' => $slug,
-            'history' => $history
+            'history' => $history,
         ]);
     })->name('dynamic-tool');
 
-    Route::get('/terminal-converter', [\App\Http\Controllers\TerminalSnippetController::class, 'index'])->name('terminal-converter.index');
-    Route::post('/terminal-converter', [\App\Http\Controllers\TerminalSnippetController::class, 'store'])->name('terminal-converter.store');
-    Route::get('/terminal-converter/{terminalSnippet}', [\App\Http\Controllers\TerminalSnippetController::class, 'show'])->name('terminal-converter.show');
-    Route::delete('/terminal-converter/{terminalSnippet}', [\App\Http\Controllers\TerminalSnippetController::class, 'destroy'])->name('terminal-converter.destroy');
+    Route::get('/dork-hunter', [DorkHunterController::class, 'index'])->name('dork-hunter.index');
+    Route::post('/dork-hunter', [DorkHunterController::class, 'store'])->name('dork-hunter.store');
+    Route::patch('/dork-hunter/{dork}', [DorkHunterController::class, 'update'])->name('dork-hunter.update');
+    Route::delete('/dork-hunter/{dork}', [DorkHunterController::class, 'destroy'])->name('dork-hunter.destroy');
+    Route::post('/dork-hunter/{dork}/run', [DorkHunterController::class, 'run'])->name('dork-hunter.run');
+
+    Route::get('/terminal-converter', [TerminalSnippetController::class, 'index'])->name('terminal-converter.index');
+    Route::post('/terminal-converter', [TerminalSnippetController::class, 'store'])->name('terminal-converter.store');
+    Route::get('/terminal-converter/{terminalSnippet}', [TerminalSnippetController::class, 'show'])->name('terminal-converter.show');
+    Route::delete('/terminal-converter/{terminalSnippet}', [TerminalSnippetController::class, 'destroy'])->name('terminal-converter.destroy');
 });
 
 Route::prefix('api')->middleware('auth')->group(function () {
@@ -87,9 +101,9 @@ Route::prefix('api')->middleware('auth')->group(function () {
     Route::post('/generate-changelog', GenerateChangelogController::class);
     Route::post('/generate-socializer', GenerateSocializerController::class);
     Route::post('/generate-job-seeker', GenerateJobSeekerController::class);
-    Route::post('/shorten-hr-message', \App\Http\Controllers\ShortenHrMessageController::class);
-    
-    Route::post('/save-job-profile', function (\Illuminate\Http\Request $request) {
+    Route::post('/shorten-hr-message', ShortenHrMessageController::class);
+
+    Route::post('/save-job-profile', function (Request $request) {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255',
@@ -98,8 +112,8 @@ Route::prefix('api')->middleware('auth')->group(function () {
         $user = $request->user();
         $user->name = $validated['name'];
         if ($user->email !== $validated['email']) {
-            $exists = \App\Models\User::where('email', $validated['email'])->exists();
-            if (!$exists) {
+            $exists = User::where('email', $validated['email'])->exists();
+            if (! $exists) {
                 $user->email = $validated['email'];
             } else {
                 return response()->json(['error' => 'Email already in use.'], 422);
@@ -107,6 +121,7 @@ Route::prefix('api')->middleware('auth')->group(function () {
         }
         $user->job_background = $validated['background'];
         $user->save();
+
         return response()->json(['message' => 'Profile saved successfully']);
     });
 
