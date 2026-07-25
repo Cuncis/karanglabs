@@ -341,7 +341,7 @@ export const ENGINES = [
             { name: 'resepsiMaps', label: 'Link Google Maps Resepsi (opsional)', type: 'text', placeholder: 'https://maps.google.com/?q=Gedung+Graha+Wangsa' },
             nuansaChoiceField,
             { name: 'rsvpWa', label: 'Nomor WhatsApp RSVP', type: 'text', placeholder: '628123456789' },
-            { name: 'bank', label: 'Amplop Digital (rekening + QRIS)', type: 'textarea', placeholder: 'BCA 1234567890 a.n. Doni Saputra\nQRIS: (upload gambar QR kamu)' },
+            { name: 'bank', label: 'Amplop Digital (rekening + e-wallet)', type: 'textarea', placeholder: 'BCA 1234567890 a.n. Doni Saputra\nGopay: 08123456789 a.n. Doni Saputra' },
             { name: 'features', label: 'Fitur Tambahan', type: 'tags', placeholder: 'Musik latar, Galeri foto, Buku tamu, Live streaming' },
             colorsField('Sage green + cream, elegan & lembut'), outputField,
         ],
