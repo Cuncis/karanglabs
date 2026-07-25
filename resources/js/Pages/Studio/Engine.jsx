@@ -1,6 +1,6 @@
 import { Head, useForm, usePage, router } from '@inertiajs/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Copy, Check, Save, Trash2, Wand2, Palette, X as XIcon, Star } from 'lucide-react';
+import { Copy, Check, Save, Trash2, Wand2, Palette, X as XIcon, Star, Plus } from 'lucide-react';
 import StudioLayout from '@/Layouts/StudioLayout';
 import { findEngine, buildPrompt, ACCENT, MULTI_FILE_OUTPUT } from '@/studioEngines';
 
@@ -117,11 +117,79 @@ function ColorPaletteField({ field, value, onChange }) {
     );
 }
 
+function MultiTextField({ field, value, onChange }) {
+    const max = field.max || 5;
+    const rows = (value || '').split('\n');
+
+    const update = (i, val) => {
+        const next = [...rows];
+        next[i] = val;
+        onChange(next.join('\n'));
+    };
+
+    const add = () => {
+        if (rows.length < max) {
+            onChange([...rows, ''].join('\n'));
+        }
+    };
+
+    const remove = (i) => {
+        const next = rows.filter((_, idx) => idx !== i);
+        onChange((next.length ? next : ['']).join('\n'));
+    };
+
+    return (
+        <div>
+            <FieldTitle field={field} />
+
+            <div className="space-y-2">
+                {rows.map((row, i) => (
+                    <div key={i} className="flex items-center gap-2">
+                        <input
+                            type="text"
+                            className={INPUT_BASE}
+                            placeholder={field.placeholder}
+                            value={row}
+                            onChange={(e) => update(i, e.target.value)}
+                        />
+                        {rows.length > 1 && (
+                            <button
+                                type="button"
+                                onClick={() => remove(i)}
+                                title="Hapus link"
+                                className="flex flex-shrink-0 items-center justify-center rounded-lg border border-[#E4E4E7] px-2.5 py-2 text-[#8A8A93] transition-colors hover:border-red-400/40 hover:text-red-500 dark:border-[#222]"
+                            >
+                                <XIcon className="h-4 w-4" />
+                            </button>
+                        )}
+                    </div>
+                ))}
+            </div>
+
+            {rows.length < max && (
+                <button
+                    type="button"
+                    onClick={add}
+                    className="mt-2 inline-flex items-center gap-1.5 text-sm font-medium text-emerald-600 transition-colors hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300"
+                >
+                    <Plus className="h-4 w-4" /> Tambah link
+                </button>
+            )}
+
+            <FieldHint field={field} />
+        </div>
+    );
+}
+
 function Field({ field, value, onChange }) {
     const base = INPUT_BASE;
 
     if (field.type === 'color') {
         return <ColorPaletteField field={field} value={value} onChange={onChange} />;
+    }
+
+    if (field.type === 'multitext') {
+        return <MultiTextField field={field} value={value} onChange={onChange} />;
     }
 
     // Icon-tile picker: a grid of clickable SVG options instead of a dropdown.

@@ -220,7 +220,7 @@ export const ENGINES = [
             { name: 'categories', label: 'Kategori', type: 'tags', placeholder: 'Biji Kopi, Alat Seduh, Merchandise' },
             orderChoiceField,
             waField,
-            { name: 'marketplace', label: 'Link Marketplace (opsional)', type: 'text', placeholder: 'https://tokopedia.com/kopinusantara' },
+            { name: 'marketplace', label: 'Link Marketplace (opsional)', type: 'multitext', max: 5, placeholder: 'https://tokopedia.com/kopinusantara', hint: 'Bisa tambah beberapa (maks 5): Tokopedia, Shopee, TikTok Shop, dll.' },
             styleField, colorsField('Cokelat tua + krem, hangat & natural'), outputField,
         ],
         details: (v) => [
@@ -230,7 +230,7 @@ export const ENGINES = [
         cta: (v) => [
             line('Metode order', v.orderMethod || 'Order via WhatsApp'),
             line('Nomor WhatsApp', v.whatsapp),
-            line('Link marketplace', v.marketplace),
+            subList('Link marketplace', v.marketplace),
             '- Tiap kartu produk punya tombol "Pesan" yang menyusun pesan WA otomatis',
         ],
     },
@@ -323,8 +323,9 @@ export const ENGINES = [
         sections: [
             'Cover pembuka + nama tamu personal (via parameter ?to=nama)',
             'Profil mempelai / tuan rumah',
-            'Countdown menuju hari-H + tanggal acara',
-            'Detail acara + lokasi + Google Maps',
+            'Countdown menuju hari-H',
+            'Detail Akad: tanggal, waktu, lokasi + Google Maps',
+            'Detail Resepsi: tanggal, waktu, lokasi + Google Maps (bisa beda waktu & tempat dari akad)',
             'RSVP langsung ke WhatsApp',
             'Amplop digital (rekening bank + QRIS)',
             'Galeri foto & love story / timeline',
@@ -332,8 +333,10 @@ export const ENGINES = [
         ],
         fields: [
             { name: 'hosts', label: 'Nama Mempelai / Tuan Rumah', type: 'text', placeholder: 'Rani & Doni', required: true },
-            { name: 'eventDate', label: 'Tanggal & Waktu Acara', type: 'text', placeholder: 'Sabtu, 12 Desember 2026, pukul 10.00 WIB' },
-            { name: 'venue', label: 'Lokasi / Venue', type: 'textarea', placeholder: 'Gedung Graha Wangsa\nJl. Ahmad Yani No. 10, Bandar Lampung' },
+            { name: 'akadDate', label: 'Tanggal & Waktu Akad', type: 'text', placeholder: 'Sabtu, 12 Desember 2026, pukul 08.00 WIB' },
+            { name: 'akadVenue', label: 'Lokasi Akad', type: 'textarea', placeholder: 'Masjid Agung Al-Furqon\nJl. Diponegoro No. 1, Bandar Lampung' },
+            { name: 'resepsiDate', label: 'Tanggal & Waktu Resepsi', type: 'text', placeholder: 'Sabtu, 12 Desember 2026, pukul 11.00 - 14.00 WIB' },
+            { name: 'resepsiVenue', label: 'Lokasi Resepsi', type: 'textarea', placeholder: 'Gedung Graha Wangsa\nJl. Ahmad Yani No. 10, Bandar Lampung' },
             nuansaChoiceField,
             { name: 'rsvpWa', label: 'Nomor WhatsApp RSVP', type: 'text', placeholder: '628123456789' },
             { name: 'bank', label: 'Amplop Digital (rekening + QRIS)', type: 'textarea', placeholder: 'BCA 1234567890 a.n. Doni Saputra\nQRIS: (upload gambar QR kamu)' },
@@ -342,8 +345,10 @@ export const ENGINES = [
         ],
         details: (v) => [
             line('Mempelai / tuan rumah', v.hosts),
-            line('Tanggal & waktu', v.eventDate),
-            line('Lokasi', v.venue),
+            line('Akad (tanggal & waktu)', v.akadDate),
+            line('Akad (lokasi)', v.akadVenue),
+            line('Resepsi (tanggal & waktu)', v.resepsiDate),
+            line('Resepsi (lokasi)', v.resepsiVenue),
             line('RSVP WhatsApp', v.rsvpWa),
             line('Amplop digital', v.bank),
             subList('Fitur tambahan', v.features),
@@ -463,7 +468,7 @@ export function findEngine(slug) {
 }
 
 /**
- * A single restrained brand accent, reused for every engine — no neon rainbow.
+ * A single restrained brand accent, reused for every engine (no neon rainbow).
  * Icons stay calm; emerald is only a subtle tint on a muted surface.
  */
 const ACCENT_STYLE = {
