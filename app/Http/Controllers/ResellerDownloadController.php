@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Support\WhitelabelPackage;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\Response;
 
 class ResellerDownloadController extends Controller
@@ -24,16 +24,6 @@ class ResellerDownloadController extends Controller
 
         abort_unless($user, 403, 'Lisensi tidak valid.');
 
-        $file = config('studio.reseller.file');
-        if ($file && Storage::exists($file)) {
-            return Storage::download($file, 'karanglabs-whitelabel.zip');
-        }
-
-        $url = config('studio.reseller.download_url');
-        if ($url) {
-            return redirect()->away($url);
-        }
-
-        abort(404, 'Paket whitelabel belum tersedia.');
+        return WhitelabelPackage::response();
     }
 }

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Mail\StudioAccessMail;
 use App\Models\Order;
 use App\Services\StudioAccountService;
+use App\Support\WhitelabelPackage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
@@ -29,6 +30,7 @@ class OrderController extends Controller
                 'paid' => Order::where('status', 'paid')->count(),
                 'revenue' => (int) Order::where('status', 'paid')->sum('amount'),
             ],
+            'hasPackage' => WhitelabelPackage::configured(),
         ]);
     }
 

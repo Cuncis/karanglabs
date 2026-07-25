@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Admin\OrderController;
+use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\WhitelabelController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\DorkHunterController;
 use App\Http\Controllers\GenerateChangelogController;
@@ -126,6 +128,9 @@ Route::middleware('auth')->group(function () {
     Route::middleware('admin')->prefix('admin')->group(function () {
         Route::get('/orders', [OrderController::class, 'index'])->name('admin.orders');
         Route::post('/orders/{order}/resend', [OrderController::class, 'resend'])->name('admin.orders.resend');
+        Route::get('/users', [UserController::class, 'index'])->name('admin.users');
+        Route::patch('/users/{user}/role', [UserController::class, 'updateRole'])->name('admin.users.role');
+        Route::get('/whitelabel/download', WhitelabelController::class)->name('admin.whitelabel.download');
     });
 
     Route::get('/dork-hunter', [DorkHunterController::class, 'index'])->name('dork-hunter.index');

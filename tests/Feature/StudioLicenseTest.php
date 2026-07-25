@@ -76,6 +76,31 @@ class StudioLicenseTest extends TestCase
             ->assertForbidden();
     }
 
+    public function test_an_admin_can_view_the_license_page_without_a_license_key(): void
+    {
+        config(['studio.reseller.download_url' => 'https://files.example.com/whitelabel.zip']);
+        $admin = User::factory()->admin()->create();
+
+        $this->actingAs($admin)
+            ->get(route('studio.license'))
+            ->assertOk()
+            ->assertInertia(fn (AssertableInertia $page) => $page
+                ->component('Studio/License')
+                ->where('isAdmin', true)
+                ->where('licenseKey', null)
+                ->where('hasDownload', true));
+    }
+
+    public function test_an_admin_downloads_the_package_directly(): void
+    {
+        config(['studio.reseller.download_url' => 'https://files.example.com/whitelabel.zip']);
+        $admin = User::factory()->admin()->create();
+
+        $this->actingAs($admin)
+            ->get(route('studio.license.download'))
+            ->assertRedirect('https://files.example.com/whitelabel.zip');
+    }
+
     public function test_a_user_without_studio_access_is_redirected_to_locked(): void
     {
         $this->actingAs(User::factory()->create())

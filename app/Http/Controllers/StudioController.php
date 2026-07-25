@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\StudioProject;
 use App\Services\StudioAccountService;
+use App\Support\WhitelabelPackage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -11,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
+use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
 class StudioController extends Controller
 {
@@ -95,35 +97,42 @@ class StudioController extends Controller
     }
 
     /**
-     * Reseller-only license area: license key, whitelabel download, setup guide.
+     * Reseller (and admin) license area: license key, whitelabel download, guide.
      */
     public function license(): Response
     {
         $user = Auth::user();
 
-        abort_unless($user->isReseller(), 403);
+        abort_unless($user->isReseller() || $user->isAdmin(), 403);
 
         return Inertia::render('Studio/License', [
             'licenseKey' => $user->license_key,
-            'hasDownload' => StudioAccountService::packageConfigured(),
+            'hasDownload' => WhitelabelPackage::configured(),
+            'isAdmin' => $user->isAdmin(),
         ]);
     }
 
     /**
-     * Mint a fresh signed download link for the current reseller and redirect
-     * to it, so the dashboard button never hands out a stale/expired token.
+     * Serve the whitelabel package. Resellers go through a fresh signed,
+     * license-validated link; admins download directly (they own the product).
      */
-    public function download(StudioAccountService $accounts): RedirectResponse
+    public function download(StudioAccountService $accounts): SymfonyResponse
     {
         $user = Auth::user();
 
-        abort_unless($user->isReseller(), 403);
+        abort_unless($user->isReseller() || $user->isAdmin(), 403);
 
-        $url = $accounts->resellerDownloadUrl($user, days: 1);
+        if ($user->isReseller() && $user->license_key) {
+            $url = $accounts->resellerDownloadUrl($user, days: 1);
 
-        abort_unless($url, 404, 'Paket whitelabel belum tersedia.');
+            if ($url) {
+                return redirect()->away($url);
+            }
+        }
 
-        return redirect()->away($url);
+        abort_unless(WhitelabelPackage::configured(), 404, 'Paket whitelabel belum tersedia.');
+
+        return WhitelabelPackage::response();
     }
 
     /**

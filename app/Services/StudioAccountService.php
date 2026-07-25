@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Order;
 use App\Models\User;
+use App\Support\WhitelabelPackage;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
@@ -67,7 +68,7 @@ class StudioAccountService
      */
     public function resellerDownloadUrl(User $user, int $days = 14): ?string
     {
-        if (! $user->isReseller() || ! self::packageConfigured()) {
+        if (! $user->isReseller() || ! WhitelabelPackage::configured()) {
             return null;
         }
 
@@ -79,11 +80,22 @@ class StudioAccountService
     }
 
     /**
-     * Whether a downloadable whitelabel package is configured (file or URL).
+     * Set a user's login level. Grants Studio access, and mints a license key
+     * the first time they become a reseller.
      */
-    public static function packageConfigured(): bool
+    public function assignRole(User $user, string $role): void
     {
-        return (bool) (config('studio.reseller.file') || config('studio.reseller.download_url'));
+        $user->forceFill([
+            'role' => $role,
+            'has_studio_access' => true,
+            'studio_access_granted_at' => $user->studio_access_granted_at ?? now(),
+        ]);
+
+        if ($role === User::ROLE_RESELLER && ! $user->license_key) {
+            $user->license_key = $this->generateLicenseKey();
+        }
+
+        $user->save();
     }
 
     /**

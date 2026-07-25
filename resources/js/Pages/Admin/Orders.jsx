@@ -1,6 +1,6 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
-import { ShoppingBag, CheckCircle2, Wallet, ArrowLeft, Send, Check } from 'lucide-react';
+import { ShoppingBag, CheckCircle2, Wallet, ArrowLeft, Send, Check, Download } from 'lucide-react';
 
 const LOGO = 'https://cdn.libradigital.id/logo-01%20(1)%20(1).png';
 
@@ -20,7 +20,7 @@ const STATUS = {
 };
 
 export default function Orders() {
-    const { orders, stats, auth } = usePage().props;
+    const { orders, stats, auth, hasPackage } = usePage().props;
     const [resentId, setResentId] = useState(null);
     const [sendingId, setSendingId] = useState(null);
 
@@ -59,6 +59,16 @@ export default function Orders() {
             </header>
 
             <main className="mx-auto max-w-6xl px-6 py-10">
+                <div className="mb-8 flex flex-wrap items-center gap-2 text-sm">
+                    <Link href={route('admin.orders')} className="rounded-lg border border-emerald-400/30 bg-emerald-400/10 px-4 py-2 font-medium text-emerald-300">Orders</Link>
+                    <Link href={route('admin.users')} className="rounded-lg border border-[#222] px-4 py-2 text-[#A1A1AA] transition-colors hover:bg-[#111] hover:text-white">Users</Link>
+                    {hasPackage && (
+                        <a href={route('admin.whitelabel.download')} className="ml-auto inline-flex items-center gap-1.5 rounded-lg border border-[#222] px-4 py-2 text-[#A1A1AA] transition-colors hover:bg-[#111] hover:text-white">
+                            <Download className="h-4 w-4" /> Download Whitelabel
+                        </a>
+                    )}
+                </div>
+
                 <h1 className="text-2xl font-bold tracking-tight text-white">Orders</h1>
                 <p className="mt-1 text-sm text-[#888]">Semua transaksi yang masuk lewat Midtrans.</p>
 

@@ -3,16 +3,16 @@
 namespace App\Console\Commands;
 
 use App\Models\User;
+use App\Services\StudioAccountService;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
-use Illuminate\Support\Str;
 
 #[Signature('studio:role {email} {role : One of member|reseller|admin}')]
 #[Description('Set a user login level: member, reseller, or admin.')]
 class SetUserRole extends Command
 {
-    public function handle(): int
+    public function handle(StudioAccountService $accounts): int
     {
         $email = $this->argument('email');
         $role = strtolower($this->argument('role'));
@@ -33,21 +33,7 @@ class SetUserRole extends Command
             return self::FAILURE;
         }
 
-        $user->forceFill([
-            'role' => $role,
-            'has_studio_access' => true,
-            'studio_access_granted_at' => $user->studio_access_granted_at ?? now(),
-        ]);
-
-        if ($role === User::ROLE_RESELLER && ! $user->license_key) {
-            $user->license_key = 'KLR-'.implode('-', [
-                Str::upper(Str::random(4)),
-                Str::upper(Str::random(4)),
-                Str::upper(Str::random(4)),
-            ]);
-        }
-
-        $user->save();
+        $accounts->assignRole($user, $role);
 
         $suffix = $role === User::ROLE_RESELLER && $user->license_key ? " License: {$user->license_key}" : '';
         $this->info("{$email} is now a {$role}.".$suffix);
