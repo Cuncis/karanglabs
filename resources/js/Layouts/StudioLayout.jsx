@@ -1,7 +1,7 @@
 import { Link, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import {
-    LayoutDashboard, BookOpen, Puzzle, User, LogOut, Menu, X, ArrowLeft, Sun, Moon, Star, ShieldCheck,
+    LayoutDashboard, BookOpen, Puzzle, User, LogOut, Menu, X, ArrowLeft, Sun, Moon, Star, ShieldCheck, KeyRound,
 } from 'lucide-react';
 import { ENGINES, ACCENT } from '@/studioEngines';
 
@@ -108,6 +108,11 @@ export default function StudioLayout({ children }) {
                         <NavItem href={route('studio.addons')} active={isActive('/studio/addons')} icon={Puzzle}>
                             Add-ons
                         </NavItem>
+                        {auth?.isReseller && (
+                            <NavItem href={route('studio.license')} active={isActive('/studio/license')} icon={KeyRound}>
+                                Lisensi Reseller
+                            </NavItem>
+                        )}
                     </div>
                 </div>
             </nav>
@@ -120,7 +125,7 @@ export default function StudioLayout({ children }) {
                     <div className="min-w-0 flex-1">
                         <div className="truncate text-sm font-medium text-[#18181B] dark:text-white">{auth?.user?.name}</div>
                         <div className="flex items-center gap-1 text-[10px] font-medium text-emerald-600 dark:text-emerald-400">
-                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /> Member aktif
+                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /> {auth?.role || 'Member'} aktif
                         </div>
                     </div>
                 </div>

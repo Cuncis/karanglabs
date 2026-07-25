@@ -45,7 +45,12 @@ class OrderController extends Controller
 
         $password = $this->accounts->resetPassword($user);
 
-        Mail::to($order->email)->send(new StudioAccessMail($user, $password));
+        Mail::to($order->email)->send(new StudioAccessMail(
+            $user,
+            $password,
+            $user->isReseller() ? $user->license_key : null,
+            $this->accounts->resellerDownloadUrl($user),
+        ));
 
         return back()->with('success', 'Email login dikirim ulang ke '.$order->email.'.');
     }

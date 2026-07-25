@@ -49,9 +49,15 @@ class MidtransNotificationController extends Controller
             $order->forceFill(['status' => 'paid', 'paid_at' => now()])->save();
 
             $result = $this->accounts->provisionFromOrder($order);
-            $order->forceFill(['user_id' => $result['user']->id])->save();
+            $user = $result['user'];
+            $order->forceFill(['user_id' => $user->id])->save();
 
-            Mail::to($order->email)->send(new StudioAccessMail($result['user'], $result['password']));
+            Mail::to($order->email)->send(new StudioAccessMail(
+                $user,
+                $result['password'],
+                $user->isReseller() ? $user->license_key : null,
+                $this->accounts->resellerDownloadUrl($user),
+            ));
 
             return response()->json(['message' => 'Access granted']);
         }

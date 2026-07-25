@@ -42,6 +42,25 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Reseller / Whitelabel
+    |--------------------------------------------------------------------------
+    |
+    | Download URL for the whitelabel package delivered to reseller-license
+    | buyers. Leave empty to show a "coming soon" placeholder in the dashboard.
+    |
+    */
+
+    'reseller' => [
+        // A private file on the local disk (storage/app/...) streamed only through
+        // a valid, license-checked signed link. Preferred — the file is never public.
+        'file' => env('RESELLER_PACKAGE_PATH', ''),
+
+        // Fallback: redirect to an external URL if no private file is set.
+        'download_url' => env('RESELLER_DOWNLOAD_URL', ''),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Admin Emails
     |--------------------------------------------------------------------------
     |

@@ -16,16 +16,22 @@ class StudioAccessMail extends Mailable
     /**
      * @param  User  $user  The buyer's account.
      * @param  ?string  $password  The generated password (null for an existing account).
+     * @param  ?string  $licenseKey  The reseller license key (null for non-reseller buyers).
+     * @param  ?string  $downloadUrl  The whitelabel download URL (null/empty until configured).
      */
     public function __construct(
         public User $user,
         public ?string $password = null,
+        public ?string $licenseKey = null,
+        public ?string $downloadUrl = null,
     ) {}
 
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Akses Karanglabs Studio kamu sudah aktif',
+            subject: $this->licenseKey
+                ? 'Lisensi Reseller & akses Karanglabs Studio kamu sudah aktif'
+                : 'Akses Karanglabs Studio kamu sudah aktif',
         );
     }
 
@@ -38,6 +44,8 @@ class StudioAccessMail extends Mailable
                 'email' => $this->user->email,
                 'password' => $this->password,
                 'loginUrl' => route('login'),
+                'licenseKey' => $this->licenseKey,
+                'downloadUrl' => $this->downloadUrl,
             ],
         );
     }

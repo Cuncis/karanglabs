@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\StudioProject;
+use App\Services\StudioAccountService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -91,6 +92,38 @@ class StudioController extends Controller
     public function locked(): Response
     {
         return Inertia::render('Studio/Locked');
+    }
+
+    /**
+     * Reseller-only license area: license key, whitelabel download, setup guide.
+     */
+    public function license(): Response
+    {
+        $user = Auth::user();
+
+        abort_unless($user->isReseller(), 403);
+
+        return Inertia::render('Studio/License', [
+            'licenseKey' => $user->license_key,
+            'hasDownload' => StudioAccountService::packageConfigured(),
+        ]);
+    }
+
+    /**
+     * Mint a fresh signed download link for the current reseller and redirect
+     * to it, so the dashboard button never hands out a stale/expired token.
+     */
+    public function download(StudioAccountService $accounts): RedirectResponse
+    {
+        $user = Auth::user();
+
+        abort_unless($user->isReseller(), 403);
+
+        $url = $accounts->resellerDownloadUrl($user, days: 1);
+
+        abort_unless($url, 404, 'Paket whitelabel belum tersedia.');
+
+        return redirect()->away($url);
     }
 
     /**

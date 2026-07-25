@@ -59,6 +59,32 @@ class MidtransNotificationTest extends TestCase
         Mail::assertSent(StudioAccessMail::class, fn (StudioAccessMail $m) => $m->hasTo('new@buyer.com') && $m->password !== null);
     }
 
+    public function test_a_reseller_order_flags_the_account_and_mints_a_license(): void
+    {
+        $order = Order::factory()->create(['email' => 'reseller@buyer.com', 'plan' => 'reseller', 'amount' => 390000]);
+
+        $this->postJson(route('midtrans.notification'), $this->payload($order))->assertOk();
+
+        $user = User::where('email', 'reseller@buyer.com')->first();
+        $this->assertTrue($user->isReseller());
+        $this->assertNotNull($user->license_key);
+
+        Mail::assertSent(StudioAccessMail::class, fn (StudioAccessMail $m) => $m->licenseKey === $user->license_key);
+    }
+
+    public function test_an_early_access_order_does_not_flag_reseller(): void
+    {
+        $order = Order::factory()->create(['email' => 'basic@buyer.com', 'plan' => 'early-access']);
+
+        $this->postJson(route('midtrans.notification'), $this->payload($order))->assertOk();
+
+        $user = User::where('email', 'basic@buyer.com')->first();
+        $this->assertFalse($user->isReseller());
+        $this->assertNull($user->license_key);
+
+        Mail::assertSent(StudioAccessMail::class, fn (StudioAccessMail $m) => $m->licenseKey === null);
+    }
+
     public function test_an_existing_user_gets_access_without_a_new_password(): void
     {
         $existing = User::factory()->create(['email' => 'old@buyer.com']);

@@ -30,6 +30,7 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
+            'role' => User::ROLE_MEMBER,
         ];
     }
 
@@ -51,6 +52,31 @@ class UserFactory extends Factory
         return $this->state(fn (array $attributes) => [
             'has_studio_access' => true,
             'studio_access_granted_at' => now(),
+        ]);
+    }
+
+    /**
+     * Indicate that the user holds a whitelabel reseller license.
+     */
+    public function reseller(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'has_studio_access' => true,
+            'studio_access_granted_at' => now(),
+            'role' => User::ROLE_RESELLER,
+            'license_key' => 'KLR-TEST-'.strtoupper(fake()->bothify('####-????')),
+        ]);
+    }
+
+    /**
+     * Indicate that the user is an admin (owner).
+     */
+    public function admin(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'has_studio_access' => true,
+            'studio_access_granted_at' => now(),
+            'role' => User::ROLE_ADMIN,
         ]);
     }
 }

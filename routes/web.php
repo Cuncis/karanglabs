@@ -13,6 +13,7 @@ use App\Http\Controllers\GenerateSocializerController;
 use App\Http\Controllers\GenerateWhispererController;
 use App\Http\Controllers\MidtransNotificationController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ResellerDownloadController;
 use App\Http\Controllers\ShortenHrMessageController;
 use App\Http\Controllers\StudioController;
 use App\Http\Controllers\TerminalSnippetController;
@@ -34,6 +35,11 @@ Route::get('/', function (MidtransService $midtrans) {
 // Public payment endpoints (Midtrans).
 Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
 Route::post('/midtrans/notification', [MidtransNotificationController::class, 'handle'])->name('midtrans.notification');
+
+// Whitelabel download — protected by a signed token + license-key validation.
+Route::get('/reseller/download', ResellerDownloadController::class)
+    ->middleware('signed')
+    ->name('reseller.download');
 
 Route::get('/ai-tools', function (Request $request) {
     // The internal tools directory is owner-only; everyone else goes to the Studio.
@@ -109,6 +115,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/studio', [StudioController::class, 'index'])->name('studio.index');
         Route::get('/studio/guides', [StudioController::class, 'guides'])->name('studio.guides');
         Route::get('/studio/addons', [StudioController::class, 'addons'])->name('studio.addons');
+        Route::get('/studio/license', [StudioController::class, 'license'])->name('studio.license');
+        Route::get('/studio/license/download', [StudioController::class, 'download'])->name('studio.license.download');
         Route::post('/studio/projects', [StudioController::class, 'store'])->name('studio.projects.store');
         Route::delete('/studio/projects/{project}', [StudioController::class, 'destroy'])->name('studio.projects.destroy');
         Route::get('/studio/{engine}', [StudioController::class, 'engine'])->name('studio.engine');
