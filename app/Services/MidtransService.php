@@ -51,6 +51,27 @@ class MidtransService
     }
 
     /**
+     * Fetch a transaction's current status from Midtrans (server-to-server),
+     * used to confirm a payment when the async webhook can't reach us.
+     *
+     * @return array<string, mixed>
+     */
+    public function transactionStatus(string $orderId): array
+    {
+        $serverKey = (string) config('services.midtrans.server_key');
+
+        $host = $this->isProduction()
+            ? 'https://api.midtrans.com'
+            : 'https://api.sandbox.midtrans.com';
+
+        $response = Http::withBasicAuth($serverKey, '')
+            ->acceptJson()
+            ->get("{$host}/v2/{$orderId}/status");
+
+        return $response->json() ?? [];
+    }
+
+    /**
      * Verify the SHA-512 signature Midtrans sends with its notification.
      *
      * @param  array<string, mixed>  $payload

@@ -2,8 +2,12 @@
 
 namespace Tests\Feature;
 
+use App\Mail\StudioAccessMail;
+use App\Models\Order;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
 class CheckoutTest extends TestCase
@@ -62,5 +66,56 @@ class CheckoutTest extends TestCase
         $this->postJson(route('checkout.store'), ['email' => 'a@b.com', 'plan' => 'early-access'])
             ->assertStatus(422)
             ->assertJsonStructure(['message']);
+    }
+
+    public function test_finalize_provisions_a_paid_order(): void
+    {
+        Mail::fake();
+        Http::fake([
+            'api.sandbox.midtrans.com/*' => Http::response(['transaction_status' => 'settlement', 'fraud_status' => 'accept']),
+        ]);
+        $order = Order::factory()->create(['email' => 'finalize@buyer.com']);
+
+        $this->postJson(route('checkout.finalize'), ['order_id' => $order->order_id])
+            ->assertOk()
+            ->assertJson(['status' => 'paid']);
+
+        $this->assertDatabaseHas('orders', ['id' => $order->id, 'status' => 'paid']);
+        $this->assertNotNull(User::where('email', 'finalize@buyer.com')->first());
+        Mail::assertSent(StudioAccessMail::class, fn (StudioAccessMail $m) => $m->hasTo('finalize@buyer.com'));
+    }
+
+    public function test_finalize_leaves_an_unpaid_order_pending(): void
+    {
+        Mail::fake();
+        Http::fake([
+            'api.sandbox.midtrans.com/*' => Http::response(['transaction_status' => 'pending']),
+        ]);
+        $order = Order::factory()->create();
+
+        $this->postJson(route('checkout.finalize'), ['order_id' => $order->order_id])
+            ->assertOk()
+            ->assertJson(['status' => 'pending']);
+
+        $this->assertDatabaseHas('orders', ['id' => $order->id, 'status' => 'pending']);
+        Mail::assertNothingSent();
+    }
+
+    public function test_finalize_is_idempotent_for_an_already_paid_order(): void
+    {
+        Mail::fake();
+        $order = Order::factory()->paid()->create();
+
+        $this->postJson(route('checkout.finalize'), ['order_id' => $order->order_id])
+            ->assertOk()
+            ->assertJson(['status' => 'paid']);
+
+        Mail::assertNothingSent();
+    }
+
+    public function test_finalize_returns_404_for_an_unknown_order(): void
+    {
+        $this->postJson(route('checkout.finalize'), ['order_id' => 'KL-DOESNOTEXIST'])
+            ->assertStatus(404);
     }
 }

@@ -283,9 +283,10 @@ export default function Landing() {
                 setPaying(false);
                 return;
             }
+            const finalize = () => window.axios.post('/checkout/finalize', { order_id: data.order_id }).catch(() => {});
             window.snap.pay(data.token, {
-                onSuccess: () => { setPaidDone(true); setPaying(false); },
-                onPending: () => { setPaidDone(true); setPaying(false); },
+                onSuccess: () => { finalize(); setPaidDone(true); setPaying(false); },
+                onPending: () => { finalize(); setPaidDone(true); setPaying(false); },
                 onError: () => { setCheckoutError('Pembayaran gagal diproses. Coba lagi.'); setPaying(false); },
                 onClose: () => { setPaying(false); },
             });

@@ -2,19 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Mail\StudioAccessMail;
 use App\Models\Order;
 use App\Services\MidtransService;
-use App\Services\StudioAccountService;
+use App\Services\OrderFulfillmentService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Mail;
 
 class MidtransNotificationController extends Controller
 {
     public function __construct(
         private MidtransService $midtrans,
-        private StudioAccountService $accounts,
+        private OrderFulfillmentService $fulfillment,
     ) {}
 
     /**
@@ -46,18 +44,7 @@ class MidtransNotificationController extends Controller
             && $fraudStatus === 'accept';
 
         if ($isSettled) {
-            $order->forceFill(['status' => 'paid', 'paid_at' => now()])->save();
-
-            $result = $this->accounts->provisionFromOrder($order);
-            $user = $result['user'];
-            $order->forceFill(['user_id' => $user->id])->save();
-
-            Mail::to($order->email)->send(new StudioAccessMail(
-                $user,
-                $result['password'],
-                $user->isReseller() ? $user->license_key : null,
-                $this->accounts->resellerDownloadUrl($user),
-            ));
+            $this->fulfillment->fulfill($order);
 
             return response()->json(['message' => 'Access granted']);
         }
