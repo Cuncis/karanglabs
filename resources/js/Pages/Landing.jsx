@@ -904,7 +904,9 @@ export default function Landing() {
                             </div>
                             <div className="mt-12 flex flex-col gap-2 border-t border-[#222] pt-6 text-xs text-[#555] sm:flex-row sm:justify-between">
                                 <span>© 2026 Karanglabs · karanglabs.cloud · v1.0 · early access build</span>
-                                <Link href={route('home')} className="transition-colors hover:text-white">AI Tools Directory →</Link>
+                                {auth?.isAdmin && (
+                                    <Link href={route('home')} className="transition-colors hover:text-white">AI Tools Directory →</Link>
+                                )}
                             </div>
                         </div>
                     </footer>

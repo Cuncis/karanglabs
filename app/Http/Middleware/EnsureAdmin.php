@@ -15,10 +15,7 @@ class EnsureAdmin
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $user = $request->user();
-        $admins = config('studio.admin_emails', []);
-
-        abort_unless($user && in_array($user->email, $admins, true), 403);
+        abort_unless($request->user()?->isAdmin(), 403);
 
         return $next($request);
     }

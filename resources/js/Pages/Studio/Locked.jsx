@@ -39,10 +39,14 @@ export default function Locked() {
                     </div>
 
                     <div className="mt-6 flex items-center justify-center gap-4 text-sm">
-                        <Link href={route('home')} className="inline-flex items-center gap-1.5 text-[#52525B] dark:text-[#A1A1AA] transition-colors hover:text-[#18181B] dark:hover:text-white">
-                            <LayoutGrid className="h-4 w-4" /> AI Tools Directory
-                        </Link>
-                        <span className="text-[#C4C4C8] dark:text-[#333]">·</span>
+                        {auth?.isAdmin && (
+                            <>
+                                <Link href={route('home')} className="inline-flex items-center gap-1.5 text-[#52525B] dark:text-[#A1A1AA] transition-colors hover:text-[#18181B] dark:hover:text-white">
+                                    <LayoutGrid className="h-4 w-4" /> AI Tools Directory
+                                </Link>
+                                <span className="text-[#C4C4C8] dark:text-[#333]">·</span>
+                            </>
+                        )}
                         <Link href={route('logout')} method="post" as="button" className="text-[#52525B] dark:text-[#A1A1AA] transition-colors hover:text-[#18181B] dark:hover:text-white">
                             Log out
                         </Link>

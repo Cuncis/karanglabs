@@ -35,9 +35,7 @@ class HandleInertiaRequests extends Middleware
             ...parent::share($request),
             'auth' => [
                 'user' => $user,
-                'isAdmin' => $user
-                    ? in_array($user->email, config('studio.admin_emails', []), true)
-                    : false,
+                'isAdmin' => $user?->isAdmin() ?? false,
             ],
         ];
     }

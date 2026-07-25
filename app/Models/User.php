@@ -40,6 +40,14 @@ class User extends Authenticatable
         return (bool) $this->has_studio_access;
     }
 
+    /**
+     * Whether this user is an owner/admin (email listed in ADMIN_EMAILS).
+     */
+    public function isAdmin(): bool
+    {
+        return in_array($this->email, config('studio.admin_emails', []), true);
+    }
+
     public function terminalSnippets()
     {
         return $this->hasMany(TerminalSnippet::class);

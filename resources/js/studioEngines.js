@@ -414,7 +414,8 @@ export const ENGINES = [
             brandField('Kedai Kopi Senja'),
             { name: 'menu', label: 'Daftar Menu', type: 'lines', placeholder: 'Es Kopi Susu | 18.000 | Minuman\nAmericano | 20.000 | Minuman\nNasi Goreng Spesial | 25.000 | Makanan\nCroissant Cokelat | 22.000 | Snack', hint: 'satu menu per baris, format: Nama | Harga | Kategori', required: true },
             { name: 'hours', label: 'Jam Buka', type: 'text', placeholder: 'Setiap hari, 08.00 - 22.00' },
-            { name: 'location', label: 'Lokasi', type: 'textarea', placeholder: 'Jl. Braga No. 88, Bandung\nhttps://maps.google.com/?q=Braga+88+Bandung' },
+            { name: 'location', label: 'Lokasi', type: 'textarea', placeholder: 'Jl. Braga No. 88, Bandung' },
+            { name: 'maps', label: 'Link Google Maps (opsional)', type: 'text', placeholder: 'https://maps.google.com/?q=Kedai+Kopi+Senja' },
             waField,
             styleField, colorsField('Cokelat hangat + krem, cozy & homey'), outputField,
         ],
@@ -422,6 +423,7 @@ export const ENGINES = [
             subList('Menu (Nama | Harga | Kategori)', v.menu),
             line('Jam buka', v.hours),
             line('Lokasi', v.location),
+            line('Google Maps', v.maps),
         ],
         cta: (v) => [
             line('Nomor WhatsApp', v.whatsapp),

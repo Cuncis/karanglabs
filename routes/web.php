@@ -35,7 +35,12 @@ Route::get('/', function (MidtransService $midtrans) {
 Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
 Route::post('/midtrans/notification', [MidtransNotificationController::class, 'handle'])->name('midtrans.notification');
 
-Route::get('/ai-tools', function () {
+Route::get('/ai-tools', function (Request $request) {
+    // The internal tools directory is owner-only; everyone else goes to the Studio.
+    if (! $request->user()->isAdmin()) {
+        return redirect()->route('studio.index');
+    }
+
     return Inertia::render('Welcome', [
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
@@ -43,7 +48,7 @@ Route::get('/ai-tools', function () {
         'phpVersion' => PHP_VERSION,
         'dynamicTools' => config('karangtools'),
     ]);
-})->name('home');
+})->middleware('auth')->name('home');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
