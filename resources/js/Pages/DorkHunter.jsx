@@ -151,7 +151,7 @@ export default function DorkHunter({ auth, dorks, results, activeCount, maxActiv
                                         className="w-full h-32 font-mono text-sm bg-gray-950 border border-gray-700 rounded-xl p-4 text-gray-300 placeholder-gray-600 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-all custom-scrollbar"
                                     />
                                     <p className="mt-2 text-xs text-gray-500">
-                                        One keyword per line (up to {maxActive} lines total across active dorks). Every line is searched separately and merged into this dork — a single Telegram alert fires when any line finds something new.
+                                        One keyword per line (up to {maxActive} lines total across active dorks). Every line is searched separately and merged into this dork, a single Telegram alert fires when any line finds something new.
                                     </p>
                                     {errors.query && <p className="mt-1 text-sm text-red-500">{errors.query}</p>}
                                 </div>

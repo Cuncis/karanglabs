@@ -22,7 +22,7 @@ function Field({ field, value, onChange }) {
             )}
             {field.type === 'select' && (
                 <select className={base} value={value} onChange={(e) => onChange(e.target.value)}>
-                    <option value="">— pilih —</option>
+                    <option value="">Pilih salah satu</option>
                     {field.options.map((opt) => <option key={opt} value={opt}>{opt}</option>)}
                 </select>
             )}
@@ -85,7 +85,7 @@ export default function Engine() {
 
     return (
         <StudioLayout>
-            <Head title={`Studio — ${engine.name}`} />
+            <Head title={`${engine.name} Studio`} />
 
             <div className="mb-8 flex items-center gap-4">
                 <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${accent.bg}`}>

@@ -19,7 +19,7 @@ export default function Dashboard() {
 
     return (
         <StudioLayout>
-            <Head title="Studio — Dashboard" />
+            <Head title="Dashboard Studio" />
 
             <div className="mb-10">
                 <span className="inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-xs font-medium text-emerald-300">

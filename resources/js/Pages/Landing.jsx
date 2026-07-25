@@ -24,17 +24,17 @@ const PAIN_POINTS = [
     {
         n: '01/04',
         title: 'Jasa developer mahal.',
-        body: 'Company profile sederhana aja dihargai 2–5 juta. Revisi? Bayar lagi.',
+        body: 'Company profile sederhana aja dihargai 2-5 juta. Revisi? Bayar lagi.',
     },
     {
         n: '02/04',
         title: 'Website builder nagih tiap bulan.',
-        body: 'Wix, hosting WordPress, domain premium — belum cuan udah keluar ratusan ribu per bulan.',
+        body: 'Wix, hosting WordPress, domain premium, belum cuan udah keluar ratusan ribu per bulan.',
     },
     {
         n: '03/04',
         title: 'Nyoba AI, hasilnya berantakan.',
-        body: '"Buatkan website toko kue" doang → layout aneh, warna tabrakan, gak ada strukturnya. Masalahnya bukan AI-nya — tapi brief-nya.',
+        body: '"Buatkan website toko kue" doang → layout aneh, warna tabrakan, gak ada strukturnya. Masalahnya bukan AI-nya, tapi brief-nya.',
     },
     {
         n: '04/04',
@@ -46,7 +46,7 @@ const PAIN_POINTS = [
 const ENGINES = [
     {
         code: 'M1', name: 'Landing Page', star: false,
-        desc: 'Jualan produk, kumpulin leads, atau promo event — satu halaman yang fokus closing.',
+        desc: 'Jualan produk, kumpulin leads, atau promo event, satu halaman yang fokus closing.',
         bullets: ['Section lengkap hero→CTA', 'Copywriting persuasif', 'CTA WA / form / link bayar'],
     },
     {
@@ -108,7 +108,7 @@ const STEPS = [
     },
     {
         n: '02', title: 'Copy prompt, paste ke AI.',
-        body: 'ChatGPT, Claude, Gemini — bebas. Prompt-nya udah lengkap, AI tinggal eksekusi.',
+        body: 'ChatGPT, Claude, Gemini, bebas. Prompt-nya udah lengkap, AI tinggal eksekusi.',
     },
     {
         n: '03', title: 'Website jadi, online hari ini.',
@@ -122,7 +122,7 @@ const DIFFERENTIATORS = [
     { title: 'Kompatibel semua AI', body: 'Gak kekunci di satu platform.' },
     { title: 'Sekali bayar', body: 'Tanpa langganan, tanpa kredit, akses penuh selamanya.' },
     { title: 'Unlimited generate', body: 'Sebanyak apapun, gak ada limit harian.' },
-    { title: 'Update selamanya', body: 'Engine baru, panduan baru, add-on baru — otomatis masuk akunmu.' },
+    { title: 'Update selamanya', body: 'Engine baru, panduan baru, add-on baru, otomatis masuk akunmu.' },
 ];
 
 const PERSONAS = [
@@ -135,8 +135,8 @@ const PERSONAS = [
 ];
 
 const COMPARE = [
-    { label: 'Waktu jadi', dev: '1–4 minggu', ok: 'Di bawah 1 jam' },
-    { label: 'Biaya', dev: 'Rp 2–5 juta', ok: 'Sekali Rp 99rb' },
+    { label: 'Waktu jadi', dev: '1-4 minggu', ok: 'Di bawah 1 jam' },
+    { label: 'Biaya', dev: 'Rp 2-5 juta', ok: 'Sekali Rp 99rb' },
     { label: 'Revisi', dev: 'Antri & bayar lagi', ok: 'Re-generate instan' },
     { label: 'Skill', dev: 'HTML/CSS/hosting', ok: 'Cuma isi form' },
     { label: 'Biaya bulanan', dev: 'Hosting + maintenance', ok: 'Rp 0' },
@@ -155,17 +155,17 @@ const TESTIMONIALS = [
 const FAQS = [
     { q: 'Bedanya sama Wix / website builder?', a: 'Builder nyewain tools-nya tiap bulan. Karanglabs sekali bayar, website-nya milikmu penuh, hosting-nya gratis.' },
     { q: 'Aku gak bisa coding sama sekali, bisa?', a: 'Justru buat kamu. Isi form → copy → paste. Sisanya AI + panduan kami.' },
-    { q: 'AI apa aja yang bisa dipakai?', a: 'ChatGPT, Claude, Gemini, v0, Lovable — termasuk versi gratisnya.' },
-    { q: 'Hosting-nya beneran gratis?', a: 'Ya, pakai Netlify/Vercel/GitHub Pages. Panduannya ada di dashboard. Domain sendiri opsional (±15rb–150rb/tahun).' },
+    { q: 'AI apa aja yang bisa dipakai?', a: 'ChatGPT, Claude, Gemini, v0, Lovable, termasuk versi gratisnya.' },
+    { q: 'Hosting-nya beneran gratis?', a: 'Ya, pakai Netlify/Vercel/GitHub Pages. Panduannya ada di dashboard. Domain sendiri opsional (±15rb-150rb/tahun).' },
     { q: 'Ada biaya bulanan?', a: 'Tidak. Rp 99.000 sekali, akses seumur hidup, tanpa limit.' },
     { q: 'Dapat update fitur baru?', a: 'Ya, engine & panduan baru otomatis masuk akunmu, selamanya.' },
     { q: 'Cara akses setelah bayar?', a: 'Login pakai email yang kamu daftarkan, langsung masuk dashboard.' },
     { q: 'Boleh dipakai bikinin website klien?', a: 'Boleh banget. Banyak user justru balik modal dari 1 proyek pertama.' },
     { q: 'Berapa banyak website yang bisa dibuat?', a: 'Unlimited. Generate sepuasnya.' },
-    { q: 'Lisensi whitelabel itu gimana?', a: 'Kamu dapat seluruh file website ini, ganti jadi brand-mu, jual dengan hargamu — untung 100% milikmu.' },
+    { q: 'Lisensi whitelabel itu gimana?', a: 'Kamu dapat seluruh file website ini, ganti jadi brand-mu, jual dengan hargamu, untung 100% milikmu.' },
 ];
 
-const PROMPT_TEXT = `Buat landing page untuk "Kopi Senja" — kedai kopi minimalis modern.
+const PROMPT_TEXT = `Buat landing page untuk "Kopi Senja", kedai kopi minimalis modern.
 Struktur: hero (tagline hangat + foto latte), menu unggulan (6 item + harga),
 tentang kami, galeri suasana, lokasi + Google Maps, dan CTA order via WhatsApp.
 Palet: cokelat hangat + krem, font clean, layout rapi & mobile-first.
@@ -249,7 +249,7 @@ export default function Landing() {
 
     return (
         <>
-            <Head title="Karanglabs — Website Profesional Tanpa Coding" />
+            <Head title="Karanglabs, Website Profesional Tanpa Coding" />
 
             <style>{`
                 html { scroll-behavior: smooth; }
@@ -330,18 +330,18 @@ export default function Landing() {
                                 </span>
 
                                 <h1 className="mt-6 text-4xl font-bold leading-[1.1] tracking-tight text-white sm:text-5xl">
-                                    Tanpa Coding, Tanpa Developer — Semua Orang Bisa Buat Website Profesional
+                                    Tanpa Coding, Tanpa Developer, Semua Orang Bisa Buat Website Profesional
                                 </h1>
 
                                 <p className="mt-6 text-lg leading-relaxed text-[#A1A1AA]">
-                                    Semua orang bisa buat website simpel dan gratis — cuma 99rb. Isi form, copy prompt-nya,
-                                    paste ke ChatGPT / Claude / Gemini — website kamu jadi dan online hari ini juga.
+                                    Semua orang bisa buat website simpel dan gratis, cuma 99rb. Isi form, copy prompt-nya,
+                                    paste ke ChatGPT / Claude / Gemini, website kamu jadi dan online hari ini juga.
                                     Tanpa langganan, tanpa biaya hosting.
                                 </p>
 
                                 <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                                     <a href="#harga" className="rounded-lg bg-emerald-400 px-6 py-3 text-center text-sm font-semibold text-black transition-colors hover:bg-emerald-300">
-                                        Ambil Early Access — Rp 99.000
+                                        Ambil Early Access, Rp 99.000
                                     </a>
                                     <a href="#cara-kerja" className="rounded-lg border border-[#333] px-6 py-3 text-center text-sm font-medium text-[#EDEDED] transition-colors hover:border-[#555] hover:bg-[#111]">
                                         Lihat Cara Kerjanya
@@ -349,7 +349,7 @@ export default function Landing() {
                                 </div>
 
                                 <div className="mt-10 flex flex-wrap gap-x-8 gap-y-3 text-sm text-[#888]">
-                                    <span className="flex items-center gap-2"><Check /> Sekali bayar — seumur hidup</span>
+                                    <span className="flex items-center gap-2"><Check /> Sekali bayar, seumur hidup</span>
                                     <span className="flex items-center gap-2"><Check /> 8 engine generator website</span>
                                     <span className="flex items-center gap-2"><Check /> Unlimited generate</span>
                                 </div>
@@ -461,15 +461,15 @@ export default function Landing() {
                                 Karanglabs bukan website builder. Ini engine brief profesional.
                             </h2>
                             <p className="mt-5 max-w-3xl text-lg leading-relaxed text-[#A1A1AA]">
-                                Setiap prompt yang dihasilkan Karanglabs setara brief web designer senior — struktur section,
-                                copywriting, arahan visual, sampai instruksi teknis — semua sudah diracik. Kamu tinggal paste ke
+                                Setiap prompt yang dihasilkan Karanglabs setara brief web designer senior, struktur section,
+                                copywriting, arahan visual, sampai instruksi teknis, semua sudah diracik. Kamu tinggal paste ke
                                 AI favoritmu, dan AI-nya yang kerja. Hasilnya konsisten, rapi, dan layak tayang.
                             </p>
                             <div className="mt-10 grid gap-3 sm:grid-cols-2">
                                 {[
-                                    '8 engine generator — tiap jenis website punya logic form sendiri',
+                                    '8 engine generator, tiap jenis website punya logic form sendiri',
                                     'Kompatibel semua AI: ChatGPT · Claude · Gemini · v0 · Lovable',
-                                    'Website-nya di-host gratis (Netlify / Vercel / GitHub Pages) — dipandu sampai online',
+                                    'Website-nya di-host gratis (Netlify / Vercel / GitHub Pages), dipandu sampai online',
                                     'Tanpa coding · tanpa langganan · tanpa developer',
                                 ].map((b) => (
                                     <div key={b} className="flex items-start gap-3 rounded-lg border border-[#222] bg-[#111] p-4 text-sm text-[#EDEDED]">
@@ -483,7 +483,7 @@ export default function Landing() {
                     {/* ================================== 6 · SHOWCASE === */}
                     <section id="showcase" className="mx-auto max-w-6xl px-6 py-24">
                         <h2 className="max-w-3xl text-3xl font-bold tracking-tight text-white sm:text-4xl">
-                            Hasil real dari prompt Karanglabs — digenerate AI dalam hitungan menit.
+                            Hasil real dari prompt Karanglabs, digenerate AI dalam hitungan menit.
                         </h2>
                         <div className="mt-12 space-y-8">
                             {SHOWCASE.map((row) => (
@@ -535,10 +535,10 @@ export default function Landing() {
                             <div>
                                 <span className="inline-block rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1 text-xs font-medium text-amber-300">★ engine paling laris</span>
                                 <h2 className="mt-5 text-3xl font-bold tracking-tight text-white">
-                                    Undangan digital yang biasa dijual 150–500rb? Sekarang kamu bisa bikin sendiri.
+                                    Undangan digital yang biasa dijual 150-500rb? Sekarang kamu bisa bikin sendiri.
                                 </h2>
                                 <p className="mt-6 rounded-lg border border-[#222] bg-[#0A0A0A]/50 p-4 text-sm text-[#A1A1AA]">
-                                    Bahkan bisa jadi ladang cuan — bikinin undangan orang, tarif kamu yang tentuin.
+                                    Bahkan bisa jadi ladang cuan, bikinin undangan orang, tarif kamu yang tentuin.
                                 </p>
                                 <a href="#harga" className="mt-6 inline-block rounded-lg bg-emerald-400 px-6 py-3 text-sm font-semibold text-black transition-colors hover:bg-emerald-300">
                                     Lihat Harga
@@ -560,14 +560,14 @@ export default function Landing() {
                         <div className="mx-auto max-w-6xl px-6 py-24">
                             <SectionLabel>bukan cuma prompt</SectionLabel>
                             <h2 className="mt-4 max-w-3xl text-3xl font-bold tracking-tight text-white sm:text-4xl">
-                                Dari nol sampai website-mu punya domain sendiri — dipandu step-by-step.
+                                Dari nol sampai website-mu punya domain sendiri, dipandu step-by-step.
                             </h2>
                             <p className="mt-4 max-w-3xl text-lg text-[#A1A1AA]">
                                 Di dashboard member, kamu gak cuma dapat generator. Ada panduan lengkap yang nuntun kamu sampai website beneran tayang:
                             </p>
                             <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                                 {[
-                                    { n: '01', t: 'Paste prompt ke AI', d: 'ChatGPT / Claude / Gemini — bebas pilih.' },
+                                    { n: '01', t: 'Paste prompt ke AI', d: 'ChatGPT / Claude / Gemini, bebas pilih.' },
                                     { n: '02', t: 'Deploy gratis', d: 'Netlify / Vercel, drag & drop.' },
                                     { n: '03', t: 'Beli domain sendiri', d: 'Mulai ±15rb/tahun.' },
                                     { n: '04', t: 'Connect domain', d: 'Setting DNS dijelasin bahasa awam.' },
@@ -712,7 +712,7 @@ export default function Landing() {
                                     </div>
                                     <p className="mt-1 text-sm text-[#888]">Sekali Bayar · Selamanya · tanpa langganan · tanpa biaya tersembunyi</p>
                                     <p className="mt-5 rounded-lg border border-[#222] bg-[#0D0D0D] p-4 text-sm italic text-[#A1A1AA]">
-                                        "Satu studio, semua jenis website." — Karanglabs meracik prompt setara brief designer profesional — minimalis, luxury, playful, premium — untuk 8 jenis website berbeda.
+                                        "Satu studio, semua jenis website." Karanglabs meracik prompt setara brief designer profesional (minimalis, luxury, playful, premium) untuk 8 jenis website berbeda.
                                     </p>
                                     <ul className="mt-6 space-y-3 text-sm text-[#EDEDED]">
                                         {[
@@ -720,8 +720,8 @@ export default function Landing() {
                                             'Panduan lengkap: deploy gratis → beli domain → connect domain',
                                             'Add-on: SMTP/form kontak · WA float · Analytics · Pixel · SEO · Maps',
                                             'Kompatibel semua AI (ChatGPT · Claude · Gemini · v0 · Lovable)',
-                                            'Unlimited generate — tanpa kuota harian',
-                                            'Update engine & panduan baru — selamanya',
+                                            'Unlimited generate, tanpa kuota harian',
+                                            'Update engine & panduan baru, selamanya',
                                             'Akses dashboard via email kamu',
                                         ].map((f) => (
                                             <li key={f} className="flex items-start gap-2.5"><Check /> {f}</li>
@@ -754,10 +754,10 @@ export default function Landing() {
                                     <p className="mt-1 text-sm text-[#888]">Sekali bayar · file + panduan lengkap · keuntungan 100% milikmu</p>
                                     <ul className="mt-6 space-y-3 text-sm text-[#EDEDED]">
                                         {[
-                                            'File website lengkap + sistem login & dashboard member — siap upload (tanpa coding)',
+                                            'File website lengkap + sistem login & dashboard member, siap upload (tanpa coding)',
                                             'Rebrand bebas: nama, logo, warna, harga, link pembayaran sendiri',
-                                            'Jual ulang sepuasnya — 100% keuntungan milikmu, tanpa bagi hasil',
-                                            'Login pelanggan pakai Google Spreadsheet — tanpa biaya bulanan / server / API',
+                                            'Jual ulang sepuasnya, 100% keuntungan milikmu, tanpa bagi hasil',
+                                            'Login pelanggan pakai Google Spreadsheet, tanpa biaya bulanan / server / API',
                                             'Panduan setup lengkap + tool ganti password (tanpa coding)',
                                             'Semua 8 engine + panduan + add-on + update fitur ke depan ikut',
                                         ].map((f) => (
@@ -805,10 +805,10 @@ export default function Landing() {
                                 Berhenti bayar mahal. Website-mu bisa online hari ini.
                             </h2>
                             <p className="relative mx-auto mt-5 max-w-2xl text-lg text-[#A1A1AA]">
-                                Ambil early access sebelum kuota batch 1 habis — begitu penuh, harga naik dan gak turun lagi.
+                                Ambil early access sebelum kuota batch 1 habis, begitu penuh, harga naik dan gak turun lagi.
                             </p>
                             <a href="#harga" className="relative mt-9 inline-block rounded-lg bg-emerald-400 px-8 py-4 text-base font-semibold text-black transition-colors hover:bg-emerald-300">
-                                Bayar Rp 99.000 — Akses Selamanya
+                                Bayar Rp 99.000, Akses Selamanya
                             </a>
                             <p className="relative mt-4 text-xs text-[#666]">Akses instan setelah pembayaran</p>
                         </div>

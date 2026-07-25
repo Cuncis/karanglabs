@@ -61,7 +61,7 @@ function block(title, rows) {
 
 /**
  * Deterministically assemble a designer-grade prompt from an engine spec and
- * the values the user typed into the form. No AI call — pure templating.
+ * the values the user typed into the form. No AI call, pure templating.
  */
 export function buildPrompt(engine, values) {
     const v = values || {};
@@ -106,7 +106,7 @@ export const ENGINES = [
         label: 'sebuah landing page',
         icon: Rocket,
         accent: 'emerald',
-        tagline: 'Jualan produk, kumpulin leads, atau promo event — satu halaman yang fokus closing.',
+        tagline: 'Jualan produk, kumpulin leads, atau promo event, satu halaman yang fokus closing.',
         sections: [
             'Hero: headline persuasif + subheadline + CTA utama',
             'Keunggulan / benefit produk (grid)',
@@ -118,7 +118,7 @@ export const ENGINES = [
         fields: [
             brandField,
             { name: 'offer', label: 'Produk / Penawaran Utama', type: 'textarea', placeholder: 'Apa yang dijual? Apa promonya?', required: true },
-            { name: 'audience', label: 'Target Audiens', type: 'text', placeholder: 'Pemilik UMKM, umur 25–40' },
+            { name: 'audience', label: 'Target Audiens', type: 'text', placeholder: 'Pemilik UMKM, umur 25-40' },
             { name: 'benefits', label: 'Keunggulan Utama', type: 'tags', placeholder: 'Cepat, murah, garansi', hint: 'pisahkan dengan koma' },
             { name: 'ctaType', label: 'Jenis CTA', type: 'select', options: CTA_OPTIONS },
             waField,
@@ -152,7 +152,7 @@ export const ENGINES = [
         ],
         fields: [
             brandField,
-            { name: 'products', label: 'Daftar Produk', type: 'lines', placeholder: 'Kopi Latte | 25.000 | Minuman\nCroissant | 18.000 | Snack', hint: 'satu produk per baris — format: Nama | Harga | Kategori', required: true },
+            { name: 'products', label: 'Daftar Produk', type: 'lines', placeholder: 'Kopi Latte | 25.000 | Minuman\nCroissant | 18.000 | Snack', hint: 'satu produk per baris, format: Nama | Harga | Kategori', required: true },
             { name: 'categories', label: 'Kategori', type: 'tags', placeholder: 'Minuman, Snack, Merchandise' },
             { name: 'orderMethod', label: 'Metode Order', type: 'select', options: ['Order via WhatsApp', 'Order via Marketplace', 'Keduanya'] },
             waField,
@@ -304,7 +304,7 @@ export const ENGINES = [
         fields: [
             { name: 'name', label: 'Nama / Handle', type: 'text', placeholder: '@kopisenja', required: true },
             { name: 'bio', label: 'Bio Singkat', type: 'textarea', placeholder: 'Kedai kopi & roastery di Bandung' },
-            { name: 'links', label: 'Daftar Link', type: 'lines', placeholder: 'Menu | https://...\nOrder GoFood | https://...', hint: 'satu link per baris — format: Label | URL', required: true },
+            { name: 'links', label: 'Daftar Link', type: 'lines', placeholder: 'Menu | https://...\nOrder GoFood | https://...', hint: 'satu link per baris, format: Label | URL', required: true },
             { name: 'socials', label: 'Sosial Media', type: 'tags', placeholder: 'Instagram, TikTok, YouTube' },
             { name: 'buttonStyle', label: 'Gaya Tombol', type: 'select', options: BUTTON_STYLES },
             styleField, colorsField, outputField,
@@ -338,8 +338,8 @@ export const ENGINES = [
         ],
         fields: [
             brandField,
-            { name: 'menu', label: 'Daftar Menu', type: 'lines', placeholder: 'Nasi Goreng | 22.000 | Makanan\nEs Kopi Susu | 18.000 | Minuman', hint: 'satu menu per baris — format: Nama | Harga | Kategori', required: true },
-            { name: 'hours', label: 'Jam Buka', type: 'text', placeholder: 'Setiap hari 08.00–22.00' },
+            { name: 'menu', label: 'Daftar Menu', type: 'lines', placeholder: 'Nasi Goreng | 22.000 | Makanan\nEs Kopi Susu | 18.000 | Minuman', hint: 'satu menu per baris, format: Nama | Harga | Kategori', required: true },
+            { name: 'hours', label: 'Jam Buka', type: 'text', placeholder: 'Setiap hari 08.00-22.00' },
             { name: 'location', label: 'Lokasi', type: 'textarea', placeholder: 'Alamat + link Google Maps' },
             waField,
             styleField, colorsField, outputField,
@@ -373,7 +373,7 @@ export const ENGINES = [
         fields: [
             brandField,
             { name: 'service', label: 'Deskripsi Jasa', type: 'textarea', placeholder: 'Jasa apa yang ditawarkan?', required: true },
-            { name: 'packages', label: 'Paket Harga (maks 3)', type: 'lines', placeholder: 'Basic | 500.000 | 1 revisi, 3 hari\nPro | 1.000.000 | 3 revisi, 2 hari', hint: 'satu paket per baris — format: Nama | Harga | Fitur' },
+            { name: 'packages', label: 'Paket Harga (maks 3)', type: 'lines', placeholder: 'Basic | 500.000 | 1 revisi, 3 hari\nPro | 1.000.000 | 3 revisi, 2 hari', hint: 'satu paket per baris, format: Nama | Harga | Fitur' },
             { name: 'process', label: 'Proses Kerja', type: 'textarea', placeholder: 'Langkah 1... 2... 3...' },
             { name: 'testimonials', label: 'Testimoni', type: 'textarea', placeholder: 'Kutipan singkat dari klien' },
             { name: 'bookingWa', label: 'Nomor WhatsApp Booking', type: 'text', placeholder: '628123456789' },
@@ -397,7 +397,7 @@ export function findEngine(slug) {
 }
 
 /**
- * Tailwind classes per accent — enumerated so the JIT compiler keeps them.
+ * Tailwind classes per accent, enumerated so the JIT compiler keeps them.
  */
 export const ACCENT = {
     emerald: { text: 'text-emerald-400', bg: 'bg-emerald-400/10', dot: 'bg-emerald-400', ring: 'group-hover:bg-emerald-400/20' },

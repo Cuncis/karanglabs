@@ -14,13 +14,13 @@ const ADDONS = [
 export default function Addons() {
     return (
         <StudioLayout>
-            <Head title="Studio — Add-ons" />
+            <Head title="Add-ons Studio" />
 
             <div className="mb-10">
                 <span className="text-xs font-medium uppercase tracking-[0.2em] text-emerald-400">Add-ons</span>
                 <h1 className="mt-3 text-3xl font-bold tracking-tight text-white">Fitur tambahan untuk website-mu.</h1>
                 <p className="mt-3 max-w-2xl text-[#A1A1AA]">
-                    Semua add-on ini bisa kamu minta langsung ke AI saat generate — cukup sebutkan di brief atau tambahkan di chat lanjutan. Gratis, tanpa biaya bulanan.
+                    Semua add-on ini bisa kamu minta langsung ke AI saat generate, cukup sebutkan di brief atau tambahkan di chat lanjutan. Gratis, tanpa biaya bulanan.
                 </p>
             </div>
 
