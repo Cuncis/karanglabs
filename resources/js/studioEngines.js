@@ -58,6 +58,40 @@ function block(title, rows) {
 }
 
 /**
+ * How each toggleable add-on translates into a prompt instruction. `val` is the
+ * optional extra input the user typed (GA ID, Pixel ID, form endpoint, etc.).
+ */
+const ADDON_INSTRUCTIONS = {
+    form: (val) => `Form kontak: sediakan form (nama, email, pesan) yang mengirim ke ${val || 'email pemilik'}, pakai layanan gratis seperti Formspree/Web3Forms (tanpa backend berbayar)`,
+    wa_float: (val) => `Tombol WhatsApp mengambang di pojok kanan bawah${val ? `, arahkan ke nomor ${val}` : ', arahkan ke nomor WhatsApp yang ada di brief'}`,
+    analytics: (val) => `Google Analytics: pasang GA4${val ? ` dengan Measurement ID ${val}` : ''} di semua halaman`,
+    pixel: (val) => `Meta Pixel: pasang${val ? ` dengan Pixel ID ${val}` : ''} untuk tracking konversi`,
+    seo: () => 'SEO dasar: meta title & description, Open Graph & Twitter card, struktur heading rapi, dan sitemap sederhana',
+};
+
+/**
+ * Turn the selected add-ons (stored as a JSON string on the field) into
+ * instruction lines for the prompt.
+ */
+function addonInstructions(value) {
+    let state = {};
+    try {
+        state = value ? JSON.parse(value) : {};
+    } catch {
+        state = {};
+    }
+
+    return Object.entries(state)
+        .filter(([, entry]) => entry && entry.on)
+        .map(([key, entry]) => {
+            const build = ADDON_INSTRUCTIONS[key];
+
+            return build ? `- ${build((entry.val || '').trim())}` : null;
+        })
+        .filter(Boolean);
+}
+
+/**
  * Deterministically assemble a designer-grade prompt from an engine spec and
  * the values the user typed into the form. No AI call, pure templating.
  */
@@ -86,6 +120,7 @@ export function buildPrompt(engine, values) {
         ]) : null,
         block('DETAIL KONTEN', engine.details(v)),
         block('CTA & KONVERSI', engine.cta ? engine.cta(v) : []),
+        block('ADD-ON', addonInstructions(v.addons)),
         block('OUTPUT', [
             line('Format', format),
             '- Kode bersih & rapi, siap langsung deploy (Netlify / Vercel / GitHub Pages)',
@@ -124,6 +159,18 @@ const outputField = {
 };
 const waField = { name: 'whatsapp', label: 'Nomor WhatsApp', type: 'text', placeholder: '628123456789' };
 const pagesField = (placeholder = 'Beranda, Tentang, Layanan, Kontak') => ({ name: 'pages', label: 'Halaman yang dibutuhkan', type: 'tags', placeholder, hint: 'kosongkan untuk satu halaman; isi (pisah koma) untuk website multi-halaman' });
+
+const addonsField = {
+    name: 'addons', label: 'Add-on (opsional)', type: 'addons',
+    hint: 'Centang fitur tambahan, otomatis ikut masuk ke prompt',
+    options: [
+        { key: 'form', label: 'Form kontak (kirim ke email)', input: { placeholder: 'Endpoint Formspree atau email tujuan' } },
+        { key: 'wa_float', label: 'Tombol WhatsApp mengambang', input: { placeholder: 'Nomor WA (kosong = pakai nomor di brief)' } },
+        { key: 'analytics', label: 'Google Analytics (GA4)', input: { placeholder: 'Measurement ID, mis. G-XXXXXXX' } },
+        { key: 'pixel', label: 'Meta Pixel', input: { placeholder: 'Pixel ID, mis. 1234567890' } },
+        { key: 'seo', label: 'SEO dasar (meta, Open Graph, sitemap)' },
+    ],
+};
 
 /* Icon-tile pickers for the per-engine selects. */
 const ctaChoiceField = {
@@ -186,7 +233,7 @@ export const ENGINES = [
             { name: 'benefits', label: 'Keunggulan Utama', type: 'tags', placeholder: 'Materi terstruktur, Mentor berpengalaman, Sertifikat, Akses grup selamanya', hint: 'pisahkan dengan koma' },
             ctaChoiceField,
             waField,
-            styleField, colorsField('Ungu + putih, modern & energik'), outputField,
+            styleField, colorsField('Ungu + putih, modern & energik'), outputField, addonsField,
         ],
         details: (v) => [
             line('Produk / penawaran', v.offer),
@@ -221,7 +268,7 @@ export const ENGINES = [
             orderChoiceField,
             waField,
             { name: 'marketplace', label: 'Link Marketplace (opsional)', type: 'multitext', max: 5, placeholder: 'https://tokopedia.com/kopinusantara', hint: 'Bisa tambah beberapa (maks 5): Tokopedia, Shopee, TikTok Shop, dll.' },
-            styleField, colorsField('Cokelat tua + krem, hangat & natural'), outputField,
+            styleField, colorsField('Cokelat tua + krem, hangat & natural'), outputField, addonsField,
         ],
         details: (v) => [
             subList('Produk (Nama | Harga | Kategori)', v.products),
@@ -260,7 +307,7 @@ export const ENGINES = [
             { name: 'address', label: 'Alamat', type: 'text', placeholder: 'Jl. Diponegoro No. 45, Bandung' },
             { name: 'maps', label: 'Link / Embed Google Maps', type: 'text', placeholder: 'https://maps.google.com/?q=Jl.+Diponegoro+45+Bandung' },
             pagesField('Beranda, Tentang, Layanan, Portofolio, Kontak'),
-            styleField, colorsField('Biru navy + putih, profesional & bersih'), outputField,
+            styleField, colorsField('Biru navy + putih, profesional & bersih'), outputField, addonsField,
         ],
         details: (v) => [
             line('Tentang', v.about),
@@ -298,7 +345,7 @@ export const ENGINES = [
             { name: 'projects', label: 'Karya / Proyek', type: 'lines', placeholder: 'Redesign aplikasi mobile banking\nWebsite company profile untuk agensi\nDesign system untuk startup SaaS', hint: 'satu karya per baris' },
             { name: 'cvLink', label: 'Link Download CV', type: 'text', placeholder: 'https://drive.google.com/file/cv-andi-pratama' },
             pagesField('Beranda, Karya, Tentang, Kontak'),
-            styleField, colorsField('Hitam + aksen kuning, bold & personal'), outputField,
+            styleField, colorsField('Hitam + aksen kuning, bold & personal'), outputField, addonsField,
         ],
         details: (v) => [
             line('Nama', v.name),
@@ -343,7 +390,7 @@ export const ENGINES = [
             { name: 'rsvpWa', label: 'Nomor WhatsApp RSVP', type: 'text', placeholder: '628123456789' },
             { name: 'bank', label: 'Amplop Digital (rekening + e-wallet)', type: 'textarea', placeholder: 'BCA 1234567890 a.n. Doni Saputra\nGopay: 08123456789 a.n. Doni Saputra' },
             { name: 'features', label: 'Fitur Tambahan', type: 'tags', placeholder: 'Musik latar, Galeri foto, Buku tamu, Live streaming' },
-            colorsField('Sage green + cream, elegan & lembut'), outputField,
+            colorsField('Sage green + cream, elegan & lembut'), outputField, addonsField,
         ],
         details: (v) => [
             line('Mempelai / tuan rumah', v.hosts),
@@ -382,7 +429,7 @@ export const ENGINES = [
             { name: 'links', label: 'Daftar Link', type: 'lines', placeholder: 'Menu & Order | https://gofood.co.id/kopisenja\nReservasi Tempat | https://wa.me/628123456789\nInstagram | https://instagram.com/kopisenja', hint: 'satu link per baris, format: Label | URL', required: true },
             { name: 'socials', label: 'Sosial Media', type: 'tags', placeholder: 'Instagram, TikTok, WhatsApp' },
             buttonStyleChoiceField,
-            styleField, colorsField('Cokelat susu + krem, cozy'), outputField,
+            styleField, colorsField('Cokelat susu + krem, cozy'), outputField, addonsField,
         ],
         details: (v) => [
             line('Nama / handle', v.name),
@@ -417,7 +464,7 @@ export const ENGINES = [
             { name: 'location', label: 'Lokasi', type: 'textarea', placeholder: 'Jl. Braga No. 88, Bandung' },
             { name: 'maps', label: 'Link Google Maps (opsional)', type: 'text', placeholder: 'https://maps.google.com/?q=Kedai+Kopi+Senja' },
             waField,
-            styleField, colorsField('Cokelat hangat + krem, cozy & homey'), outputField,
+            styleField, colorsField('Cokelat hangat + krem, cozy & homey'), outputField, addonsField,
         ],
         details: (v) => [
             subList('Menu (Nama | Harga | Kategori)', v.menu),
@@ -454,7 +501,7 @@ export const ENGINES = [
             { name: 'testimonials', label: 'Testimoni', type: 'textarea', placeholder: 'Hasilnya natural banget, fotografernya sabar dan ramah! - Rani & Doni' },
             { name: 'bookingWa', label: 'Nomor WhatsApp Booking', type: 'text', placeholder: '628123456789' },
             pagesField('Beranda, Layanan, Paket Harga, Kontak'),
-            styleField, colorsField('Krem + cokelat muda, soft & romantis'), outputField,
+            styleField, colorsField('Krem + cokelat muda, soft & romantis'), outputField, addonsField,
         ],
         details: (v) => [
             line('Deskripsi jasa', v.service),

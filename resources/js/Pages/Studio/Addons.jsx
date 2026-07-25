@@ -20,7 +20,7 @@ export default function Addons() {
                 <span className="text-xs font-medium uppercase tracking-[0.2em] text-emerald-600 dark:text-emerald-400">Add-ons</span>
                 <h1 className="mt-3 text-3xl font-bold tracking-tight text-[#18181B] dark:text-white">Fitur tambahan untuk website-mu.</h1>
                 <p className="mt-3 max-w-2xl text-[#52525B] dark:text-[#A1A1AA]">
-                    Semua add-on ini bisa kamu minta langsung ke AI saat generate, cukup sebutkan di brief atau tambahkan di chat lanjutan. Gratis, tanpa biaya bulanan.
+                    Cukup centang add-on ini di bagian <span className="font-medium text-[#27272A] dark:text-white">Add-on (opsional)</span> pada form tiap engine, isi ID/endpoint kalau diminta, dan instruksinya otomatis ikut ke dalam prompt. Gratis, tanpa biaya bulanan.
                 </p>
             </div>
 

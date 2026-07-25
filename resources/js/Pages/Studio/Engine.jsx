@@ -181,6 +181,63 @@ function MultiTextField({ field, value, onChange }) {
     );
 }
 
+function AddonsField({ field, value, onChange }) {
+    let state = {};
+    try {
+        state = value ? JSON.parse(value) : {};
+    } catch {
+        state = {};
+    }
+
+    const commit = (next) => {
+        const anyOn = Object.values(next).some((entry) => entry && entry.on);
+        onChange(anyOn ? JSON.stringify(next) : '');
+    };
+
+    const toggle = (key) => {
+        commit({ ...state, [key]: { ...(state[key] || {}), on: !(state[key]?.on) } });
+    };
+
+    const setVal = (key, val) => {
+        commit({ ...state, [key]: { ...(state[key] || {}), on: true, val } });
+    };
+
+    return (
+        <div>
+            <FieldTitle field={field} />
+            <div className="space-y-2">
+                {field.options.map((opt) => {
+                    const on = !!state[opt.key]?.on;
+
+                    return (
+                        <div key={opt.key} className="rounded-lg border border-[#E4E4E7] bg-[#FAFAFA] p-3 dark:border-[#222] dark:bg-[#0D0D0D]">
+                            <label className="flex cursor-pointer items-center gap-2.5">
+                                <input
+                                    type="checkbox"
+                                    checked={on}
+                                    onChange={() => toggle(opt.key)}
+                                    className="h-4 w-4 rounded border-[#C4C4C8] bg-white text-emerald-500 focus:ring-emerald-400/30 dark:border-[#333] dark:bg-[#111]"
+                                />
+                                <span className="text-sm font-medium text-[#27272A] dark:text-[#EDEDED]">{opt.label}</span>
+                            </label>
+                            {on && opt.input && (
+                                <input
+                                    type="text"
+                                    value={state[opt.key]?.val || ''}
+                                    onChange={(e) => setVal(opt.key, e.target.value)}
+                                    placeholder={opt.input.placeholder}
+                                    className={`${INPUT_BASE} mt-2`}
+                                />
+                            )}
+                        </div>
+                    );
+                })}
+            </div>
+            <FieldHint field={field} />
+        </div>
+    );
+}
+
 function Field({ field, value, onChange }) {
     const base = INPUT_BASE;
 
@@ -190,6 +247,10 @@ function Field({ field, value, onChange }) {
 
     if (field.type === 'multitext') {
         return <MultiTextField field={field} value={value} onChange={onChange} />;
+    }
+
+    if (field.type === 'addons') {
+        return <AddonsField field={field} value={value} onChange={onChange} />;
     }
 
     // Icon-tile picker: a grid of clickable SVG options instead of a dropdown.
