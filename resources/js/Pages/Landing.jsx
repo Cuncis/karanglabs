@@ -46,7 +46,7 @@ const PAIN_POINTS = [
 
 const ENGINES = [
     {
-        code: 'M1', name: 'Landing Page', star: false,
+        code: 'M1', name: 'Landing Page', star: true,
         desc: 'Jualan produk, kumpulin leads, atau promo event, satu halaman yang fokus closing.',
         bullets: ['Section lengkap hero→CTA', 'Copywriting persuasif', 'CTA WA / form / link bayar'],
     },
@@ -56,7 +56,7 @@ const ENGINES = [
         bullets: ['Input produk & harga', 'Filter kategori & badge', 'Order via WA / marketplace'],
     },
     {
-        code: 'M3', name: 'Company Profile', star: false,
+        code: 'M3', name: 'Company Profile', star: true,
         desc: 'Bikin usaha kelihatan kredibel & profesional.',
         bullets: ['Visi-misi & layanan', 'Galeri + klien/partner', 'Kontak + Google Maps'],
     },
@@ -66,7 +66,7 @@ const ENGINES = [
         bullets: ['Showcase grid/studi kasus', 'Skill & pengalaman', 'Tombol download CV'],
     },
     {
-        code: 'M5', name: 'Undangan Digital', star: true,
+        code: 'M5', name: 'Undangan Digital', star: false,
         desc: 'Undangan pernikahan & acara lengkap fitur kekinian.',
         bullets: ['Countdown + RSVP WA', 'Amplop digital QRIS', 'Nama tamu via ?to='],
     },
@@ -76,7 +76,7 @@ const ENGINES = [
         bullets: ['Unlimited link', 'Gaya tombol custom', 'Ikon sosmed lengkap'],
     },
     {
-        code: 'M7', name: 'Menu F&B', star: true,
+        code: 'M7', name: 'Menu F&B', star: false,
         desc: 'Menu resto/kafe digital + order via WA.',
         bullets: ['Kategori & badge menu', 'Template pesan WA otomatis', 'Jam buka & lokasi'],
     },
@@ -530,16 +530,19 @@ export default function Landing() {
                         </div>
                     </section>
 
-                    {/* ============================ 8 · UNDANGAN HIGHLIGHT === */}
+                    {/* ============================ 8 · LANDING PAGE HIGHLIGHT === */}
                     <section className="mx-auto max-w-6xl px-6 py-24">
                         <div className="grid items-center gap-10 rounded-2xl border border-[#222] bg-[#111] p-8 lg:grid-cols-2 lg:p-12">
                             <div>
                                 <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-medium text-amber-400"><Star className="h-3 w-3 fill-amber-500 text-amber-500" /> engine paling laris</span>
                                 <h2 className="mt-5 text-3xl font-bold tracking-tight text-white">
-                                    Undangan digital yang biasa dijual 150-500rb? Sekarang kamu bisa bikin sendiri.
+                                    Landing Page yang fokus closing, jadi dalam hitungan menit, bukan minggu.
                                 </h2>
+                                <p className="mt-6 text-lg leading-relaxed text-[#A1A1AA]">
+                                    Engine paling banyak dipakai. Cocok buat jualan produk, promo event, kumpulin leads, atau launching apapun. Isi brief singkat, dan prompt-nya langsung menata hero, benefit, testimoni, FAQ, sampai CTA yang siap bikin orang beli.
+                                </p>
                                 <p className="mt-6 rounded-lg border border-[#222] bg-[#0A0A0A]/50 p-4 text-sm text-[#A1A1AA]">
-                                    Bahkan bisa jadi ladang cuan, bikinin undangan orang, tarif kamu yang tentuin.
+                                    Satu halaman yang jelas alurnya, dari perhatian sampai tombol beli, tanpa perlu mikirin struktur atau copywriting sendiri.
                                 </p>
                                 <a href="#harga" className="mt-6 inline-block rounded-lg bg-emerald-400 px-6 py-3 text-sm font-semibold text-black transition-colors hover:bg-emerald-300">
                                     Lihat Harga
@@ -547,8 +550,8 @@ export default function Landing() {
                             </div>
                             <ul className="grid gap-3 sm:grid-cols-2">
                                 {[
-                                    'Countdown acara otomatis', 'RSVP langsung ke WA', 'Amplop digital (rekening + QRIS)',
-                                    'Galeri & love story timeline', 'Nama tamu personal via ?to=nama', 'Nuansa: islami, adat, modern, rustic, elegan',
+                                    'Hero + headline persuasif', 'Grid benefit / keunggulan', 'Bagian testimoni & social proof',
+                                    'FAQ singkat penjawab keraguan', 'CTA WhatsApp / form / link bayar', 'Copywriting siap tayang, tinggal edit',
                                 ].map((b) => (
                                     <li key={b} className="flex items-start gap-2.5 rounded-lg border border-[#222] bg-[#111] p-4 text-sm text-[#EDEDED]"><Check /> {b}</li>
                                 ))}

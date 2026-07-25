@@ -169,6 +169,7 @@ export const ENGINES = [
         label: 'sebuah landing page',
         icon: Rocket,
         accent: 'emerald',
+        star: true,
         tagline: 'Jualan produk, kumpulin leads, atau promo event, satu halaman yang fokus closing.',
         sections: [
             'Hero: headline persuasif + subheadline + CTA utama',
@@ -240,6 +241,7 @@ export const ENGINES = [
         label: 'sebuah company profile',
         icon: Building2,
         accent: 'indigo',
+        star: true,
         tagline: 'Bikin usaha kelihatan kredibel & profesional.',
         sections: [
             'Hero: nama perusahaan + tagline',
@@ -317,7 +319,6 @@ export const ENGINES = [
         label: 'sebuah undangan digital',
         icon: HeartHandshake,
         accent: 'rose',
-        star: true,
         tagline: 'Undangan pernikahan & acara lengkap fitur kekinian.',
         sections: [
             'Cover pembuka + nama tamu personal (via parameter ?to=nama)',
@@ -392,7 +393,6 @@ export const ENGINES = [
         label: 'sebuah menu digital untuk resto/kafe',
         icon: UtensilsCrossed,
         accent: 'amber',
-        star: true,
         tagline: 'Menu resto/kafe digital + order via WA.',
         sections: [
             'Hero: nama tempat + jam buka + lokasi',
