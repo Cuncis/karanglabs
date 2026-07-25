@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsureAdmin;
 use App\Http\Middleware\EnsureStudioAccess;
 use App\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Foundation\Application;
@@ -24,6 +25,12 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'studio.access' => EnsureStudioAccess::class,
+            'admin' => EnsureAdmin::class,
+        ]);
+
+        // Midtrans posts its payment notification server-to-server (no CSRF token).
+        $middleware->validateCsrfTokens(except: [
+            'midtrans/notification',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

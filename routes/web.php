@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Admin\OrderController;
+use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\DorkHunterController;
 use App\Http\Controllers\GenerateChangelogController;
 use App\Http\Controllers\GenerateDynamicToolController;
@@ -9,20 +11,29 @@ use App\Http\Controllers\GeneratePlanController;
 use App\Http\Controllers\GenerateQuestionsController;
 use App\Http\Controllers\GenerateSocializerController;
 use App\Http\Controllers\GenerateWhispererController;
+use App\Http\Controllers\MidtransNotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ShortenHrMessageController;
 use App\Http\Controllers\StudioController;
 use App\Http\Controllers\TerminalSnippetController;
 use App\Models\ToolHistory;
 use App\Models\User;
+use App\Services\MidtransService;
 use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/', function () {
-    return Inertia::render('Landing');
+Route::get('/', function (MidtransService $midtrans) {
+    return Inertia::render('Landing', [
+        'midtransClientKey' => config('services.midtrans.client_key'),
+        'snapUrl' => $midtrans->snapJsUrl(),
+    ]);
 })->name('landing');
+
+// Public payment endpoints (Midtrans).
+Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
+Route::post('/midtrans/notification', [MidtransNotificationController::class, 'handle'])->name('midtrans.notification');
 
 Route::get('/ai-tools', function () {
     return Inertia::render('Welcome', [
@@ -96,6 +107,12 @@ Route::middleware('auth')->group(function () {
         Route::post('/studio/projects', [StudioController::class, 'store'])->name('studio.projects.store');
         Route::delete('/studio/projects/{project}', [StudioController::class, 'destroy'])->name('studio.projects.destroy');
         Route::get('/studio/{engine}', [StudioController::class, 'engine'])->name('studio.engine');
+    });
+
+    // Admin (owner only, gated by ADMIN_EMAILS).
+    Route::middleware('admin')->prefix('admin')->group(function () {
+        Route::get('/orders', [OrderController::class, 'index'])->name('admin.orders');
+        Route::post('/orders/{order}/resend', [OrderController::class, 'resend'])->name('admin.orders.resend');
     });
 
     Route::get('/dork-hunter', [DorkHunterController::class, 'index'])->name('dork-hunter.index');

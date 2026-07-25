@@ -25,4 +25,34 @@ return [
         'jasa' => 'Halaman Jasa',
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Purchasable Plans
+    |--------------------------------------------------------------------------
+    |
+    | Amounts are in whole Rupiah. A successful payment for any plan provisions
+    | Studio access for the buyer's email.
+    |
+    */
+
+    'plans' => [
+        'early-access' => ['name' => 'Karanglabs Studio - Early Access', 'amount' => 99000],
+        'reseller' => ['name' => 'Karanglabs Studio - Lisensi Reseller', 'amount' => 390000],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Admin Emails
+    |--------------------------------------------------------------------------
+    |
+    | Comma-separated list of emails allowed into the admin area (order list,
+    | resend credentials). Set ADMIN_EMAILS in your .env.
+    |
+    */
+
+    'admin_emails' => array_values(array_filter(array_map(
+        'trim',
+        explode(',', (string) env('ADMIN_EMAILS', ''))
+    ))),
+
 ];

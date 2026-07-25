@@ -1,0 +1,36 @@
+<?php
+
+namespace Database\Factories;
+
+use App\Models\Order;
+use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
+
+/**
+ * @extends Factory<Order>
+ */
+class OrderFactory extends Factory
+{
+    /**
+     * @return array<string, mixed>
+     */
+    public function definition(): array
+    {
+        return [
+            'order_id' => 'KL-'.strtoupper(Str::random(10)),
+            'email' => fake()->unique()->safeEmail(),
+            'name' => fake()->name(),
+            'plan' => 'early-access',
+            'amount' => 99000,
+            'status' => 'pending',
+        ];
+    }
+
+    public function paid(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'status' => 'paid',
+            'paid_at' => now(),
+        ]);
+    }
+}

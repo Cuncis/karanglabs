@@ -234,13 +234,66 @@ function useCountdown(days = 5) {
 
 /* ----------------------------------------------------------------- page --- */
 
+const CHECKOUT_PLANS = {
+    'early-access': { title: 'Early Access', price: 'Rp 99.000' },
+    reseller: { title: 'Lisensi Reseller', price: 'Rp 390.000' },
+};
+
 export default function Landing() {
-    const { auth } = usePage().props;
+    const { auth, midtransClientKey, snapUrl } = usePage().props;
     const [menuOpen, setMenuOpen] = useState(false);
     const [openFaq, setOpenFaq] = useState(0);
     const typed = useTypewriter(PROMPT_TEXT);
     const [copied, setCopied] = useState(false);
     const countdown = useCountdown(5);
+
+    const [checkout, setCheckout] = useState(null);
+    const [form, setForm] = useState({ name: '', email: '' });
+    const [paying, setPaying] = useState(false);
+    const [checkoutError, setCheckoutError] = useState('');
+    const [paidDone, setPaidDone] = useState(false);
+
+    // Load Midtrans Snap.js once (only if configured).
+    useEffect(() => {
+        if (!snapUrl || !midtransClientKey || document.getElementById('midtrans-snap')) {
+            return;
+        }
+        const script = document.createElement('script');
+        script.id = 'midtrans-snap';
+        script.src = snapUrl;
+        script.setAttribute('data-client-key', midtransClientKey);
+        document.body.appendChild(script);
+    }, [snapUrl, midtransClientKey]);
+
+    const openCheckout = (plan) => {
+        setForm({ name: '', email: '' });
+        setCheckoutError('');
+        setPaidDone(false);
+        setCheckout(plan);
+    };
+
+    const submitCheckout = async (e) => {
+        e.preventDefault();
+        setPaying(true);
+        setCheckoutError('');
+        try {
+            const { data } = await window.axios.post('/checkout', { ...form, plan: checkout });
+            if (!window.snap) {
+                setCheckoutError('Sistem pembayaran belum siap. Muat ulang halaman lalu coba lagi.');
+                setPaying(false);
+                return;
+            }
+            window.snap.pay(data.token, {
+                onSuccess: () => { setPaidDone(true); setPaying(false); },
+                onPending: () => { setPaidDone(true); setPaying(false); },
+                onError: () => { setCheckoutError('Pembayaran gagal diproses. Coba lagi.'); setPaying(false); },
+                onClose: () => { setPaying(false); },
+            });
+        } catch (err) {
+            setCheckoutError(err?.response?.data?.message || 'Terjadi kesalahan. Coba lagi sebentar lagi.');
+            setPaying(false);
+        }
+    };
 
     const copyPrompt = () => {
         navigator.clipboard?.writeText(PROMPT_TEXT);
@@ -341,9 +394,9 @@ export default function Landing() {
                                 </p>
 
                                 <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                                    <a href="#harga" className="rounded-lg bg-emerald-400 px-6 py-3 text-center text-sm font-semibold text-black transition-colors hover:bg-emerald-300">
+                                    <button type="button" onClick={() => openCheckout('early-access')} className="rounded-lg bg-emerald-400 px-6 py-3 text-center text-sm font-semibold text-black transition-colors hover:bg-emerald-300">
                                         Ambil Early Access, Rp 99.000
-                                    </a>
+                                    </button>
                                     <a href="#cara-kerja" className="rounded-lg border border-[#333] px-6 py-3 text-center text-sm font-medium text-[#EDEDED] transition-colors hover:border-[#555] hover:bg-[#111]">
                                         Lihat Cara Kerjanya
                                     </a>
@@ -733,9 +786,9 @@ export default function Landing() {
                                             <li key={f} className="flex items-start gap-2.5"><Check /> {f}</li>
                                         ))}
                                     </ul>
-                                    <a href="#harga" className="mt-7 block rounded-lg bg-emerald-400 py-3 text-center text-sm font-semibold text-black transition-colors hover:bg-emerald-300">
+                                    <button type="button" onClick={() => openCheckout('early-access')} className="mt-7 block w-full rounded-lg bg-emerald-400 py-3 text-center text-sm font-semibold text-black transition-colors hover:bg-emerald-300">
                                         Klaim Early Access Sekarang
-                                    </a>
+                                    </button>
                                     <p className="mt-3 text-center text-xs text-[#666]">Transfer · QRIS · OVO · Gopay · Dana</p>
                                     <div className="mt-6 border-t border-[#222] pt-5">
                                         <div className="flex items-center justify-between text-xs text-[#A1A1AA]">
@@ -770,9 +823,9 @@ export default function Landing() {
                                             <li key={f} className="flex items-start gap-2.5"><Check /> {f}</li>
                                         ))}
                                     </ul>
-                                    <a href="#harga" className="mt-7 block rounded-lg border border-[#333] py-3 text-center text-sm font-semibold text-white transition-colors hover:border-[#555] hover:bg-[#161616]">
+                                    <button type="button" onClick={() => openCheckout('reseller')} className="mt-7 block w-full rounded-lg border border-[#333] py-3 text-center text-sm font-semibold text-white transition-colors hover:border-[#555] hover:bg-[#161616]">
                                         Ambil Lisensi Reseller
-                                    </a>
+                                    </button>
                                     <p className="mt-3 text-center text-xs text-[#666]">Cocok untuk yang mau punya produk digital sendiri</p>
                                 </div>
                             </div>
@@ -813,9 +866,9 @@ export default function Landing() {
                             <p className="relative mx-auto mt-5 max-w-2xl text-lg text-[#A1A1AA]">
                                 Ambil early access sebelum kuota batch 1 habis, begitu penuh, harga naik dan gak turun lagi.
                             </p>
-                            <a href="#harga" className="relative mt-9 inline-block rounded-lg bg-emerald-400 px-8 py-4 text-base font-semibold text-black transition-colors hover:bg-emerald-300">
+                            <button type="button" onClick={() => openCheckout('early-access')} className="relative mt-9 inline-block rounded-lg bg-emerald-400 px-8 py-4 text-base font-semibold text-black transition-colors hover:bg-emerald-300">
                                 Bayar Rp 99.000, Akses Selamanya
-                            </a>
+                            </button>
                             <p className="relative mt-4 text-xs text-[#666]">Akses instan setelah pembayaran</p>
                         </div>
                     </section>
@@ -856,6 +909,74 @@ export default function Landing() {
                         </div>
                     </footer>
                 </main>
+
+                {/* ============================== CHECKOUT MODAL === */}
+                {checkout && (
+                    <div className="fixed inset-0 z-[60] flex items-center justify-center px-4">
+                        <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => (paying ? null : setCheckout(null))} />
+                        <div className="relative w-full max-w-md rounded-2xl border border-[#222] bg-[#111] p-6 sm:p-8">
+                            <button type="button" onClick={() => setCheckout(null)} className="absolute right-4 top-4 text-[#888] transition-colors hover:text-white" aria-label="Tutup">✕</button>
+
+                            {paidDone ? (
+                                <div className="py-6 text-center">
+                                    <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-400/10 text-2xl">✓</div>
+                                    <h3 className="text-xl font-bold text-white">Pembayaran diterima!</h3>
+                                    <p className="mt-3 text-sm leading-relaxed text-[#A1A1AA]">
+                                        Begitu pembayaran terkonfirmasi, email berisi <span className="text-white">email &amp; password login</span> otomatis dikirim ke <span className="text-white">{form.email}</span>. Cek inbox (dan folder spam) kamu ya.
+                                    </p>
+                                    <button type="button" onClick={() => setCheckout(null)} className="mt-6 w-full rounded-lg bg-emerald-400 py-2.5 text-sm font-semibold text-black transition-colors hover:bg-emerald-300">
+                                        Selesai
+                                    </button>
+                                </div>
+                            ) : (
+                                <>
+                                    <span className="inline-block rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-xs font-medium text-emerald-300">
+                                        {CHECKOUT_PLANS[checkout]?.title} · {CHECKOUT_PLANS[checkout]?.price}
+                                    </span>
+                                    <h3 className="mt-4 text-xl font-bold text-white">Checkout</h3>
+                                    <p className="mt-1.5 text-sm text-[#A1A1AA]">
+                                        Isi email kamu. Setelah bayar, akun &amp; password login dikirim otomatis ke email ini.
+                                    </p>
+
+                                    <form onSubmit={submitCheckout} className="mt-6 space-y-4">
+                                        <label className="block">
+                                            <span className="mb-1.5 block text-sm font-medium text-[#D4D4D8]">Nama</span>
+                                            <input
+                                                type="text"
+                                                value={form.name}
+                                                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                                                placeholder="Nama kamu"
+                                                className="w-full rounded-lg border border-[#222] bg-[#0D0D0D] px-3 py-2 text-sm text-[#EDEDED] placeholder-[#555] focus:border-emerald-400/50 focus:outline-none focus:ring-1 focus:ring-emerald-400/30"
+                                            />
+                                        </label>
+                                        <label className="block">
+                                            <span className="mb-1.5 block text-sm font-medium text-[#D4D4D8]">Email <span className="text-emerald-400">*</span></span>
+                                            <input
+                                                type="email"
+                                                required
+                                                value={form.email}
+                                                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                                                placeholder="email@kamu.com"
+                                                className="w-full rounded-lg border border-[#222] bg-[#0D0D0D] px-3 py-2 text-sm text-[#EDEDED] placeholder-[#555] focus:border-emerald-400/50 focus:outline-none focus:ring-1 focus:ring-emerald-400/30"
+                                            />
+                                        </label>
+
+                                        {checkoutError && <p className="text-sm text-red-400">{checkoutError}</p>}
+
+                                        <button
+                                            type="submit"
+                                            disabled={paying}
+                                            className="w-full rounded-lg bg-emerald-400 py-3 text-sm font-semibold text-black transition-colors hover:bg-emerald-300 disabled:cursor-not-allowed disabled:opacity-60"
+                                        >
+                                            {paying ? 'Memproses...' : `Bayar ${CHECKOUT_PLANS[checkout]?.price}`}
+                                        </button>
+                                        <p className="text-center text-xs text-[#666]">Transfer · QRIS · OVO · Gopay · Dana · Kartu</p>
+                                    </form>
+                                </>
+                            )}
+                        </div>
+                    </div>
+                )}
             </div>
         </>
     );
