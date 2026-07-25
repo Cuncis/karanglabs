@@ -1,7 +1,7 @@
 import { Link, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import {
-    LayoutDashboard, BookOpen, Puzzle, User, LogOut, Menu, X, ArrowLeft, Sun, Moon,
+    LayoutDashboard, BookOpen, Puzzle, User, LogOut, Menu, X, ArrowLeft, Sun, Moon, Star,
 } from 'lucide-react';
 import { ENGINES, ACCENT } from '@/studioEngines';
 
@@ -93,7 +93,7 @@ export default function StudioLayout({ children }) {
                                 accent={engine.accent}
                             >
                                 {engine.name}
-                                {engine.star && <span className="ml-1 text-amber-400">★</span>}
+                                {engine.star && <Star className="ml-1 inline h-3 w-3 fill-amber-500 text-amber-500" />}
                             </NavItem>
                         ))}
                     </div>

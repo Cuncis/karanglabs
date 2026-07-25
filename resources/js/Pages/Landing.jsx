@@ -1,5 +1,6 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { Star } from 'lucide-react';
 
 const LOGO = 'https://cdn.libradigital.id/logo-01%20(1)%20(1).png';
 
@@ -321,7 +322,7 @@ export default function Landing() {
 
                     {/* ========================================== 2 · HERO === */}
                     <section className="relative overflow-hidden border-b border-[#141414]">
-                        <div className="pointer-events-none absolute -top-40 left-1/2 h-[500px] w-[800px] -translate-x-1/2 rounded-full bg-emerald-500/10 blur-[120px]" />
+                        <div className="pointer-events-none absolute -top-40 left-1/2 h-[500px] w-[800px] -translate-x-1/2 rounded-full bg-white/[0.03] blur-[120px]" />
                         <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-6 py-20 lg:grid-cols-2 lg:py-28">
                             <div>
                                 <span className="inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-xs font-medium tracking-wide text-emerald-300">
@@ -490,8 +491,8 @@ export default function Landing() {
                                 <div key={row.label}>
                                     <p className="mb-3 font-mono text-xs text-[#666]">{row.label}</p>
                                     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-                                        {row.items.map((grad, i) => (
-                                            <div key={i} className={`aspect-[4/3] rounded-lg border border-[#222] bg-gradient-to-br ${grad}`} />
+                                        {row.items.map((_, i) => (
+                                            <div key={i} className="aspect-[4/3] rounded-lg border border-[#222] bg-[#141414]" />
                                         ))}
                                     </div>
                                 </div>
@@ -514,7 +515,7 @@ export default function Landing() {
                                     <div key={e.code} className="flex flex-col rounded-xl border border-[#222] bg-[#111] p-5 transition-colors hover:border-[#3a3a3a]">
                                         <div className="flex items-center justify-between">
                                             <span className="font-mono text-xs text-emerald-400">{e.code}</span>
-                                            {e.star && <span className="text-xs text-amber-400">★ laris</span>}
+                                            {e.star && <span className="flex items-center gap-1 text-xs text-amber-500"><Star className="h-3 w-3 fill-amber-500 text-amber-500" /> laris</span>}
                                         </div>
                                         <h3 className="mt-2 text-base font-semibold text-white">{e.name}</h3>
                                         <p className="mt-2 text-sm leading-relaxed text-[#888]">{e.desc}</p>
@@ -531,9 +532,9 @@ export default function Landing() {
 
                     {/* ============================ 8 · UNDANGAN HIGHLIGHT === */}
                     <section className="mx-auto max-w-6xl px-6 py-24">
-                        <div className="grid items-center gap-10 rounded-2xl border border-[#222] bg-gradient-to-br from-rose-500/10 via-[#111] to-[#0D0D0D] p-8 lg:grid-cols-2 lg:p-12">
+                        <div className="grid items-center gap-10 rounded-2xl border border-[#222] bg-[#111] p-8 lg:grid-cols-2 lg:p-12">
                             <div>
-                                <span className="inline-block rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1 text-xs font-medium text-amber-300">★ engine paling laris</span>
+                                <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-medium text-amber-400"><Star className="h-3 w-3 fill-amber-500 text-amber-500" /> engine paling laris</span>
                                 <h2 className="mt-5 text-3xl font-bold tracking-tight text-white">
                                     Undangan digital yang biasa dijual 150-500rb? Sekarang kamu bisa bikin sendiri.
                                 </h2>
@@ -668,7 +669,9 @@ export default function Landing() {
                         <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                             {TESTIMONIALS.map((t) => (
                                 <figure key={t.name} className="flex flex-col rounded-xl border border-[#222] bg-[#111] p-6">
-                                    <div className="mb-3 text-amber-400">★★★★★</div>
+                                    <div className="mb-3 flex gap-0.5 text-amber-500">
+                                        {Array.from({ length: 5 }).map((_, i) => <Star key={i} className="h-3.5 w-3.5 fill-amber-500 text-amber-500" />)}
+                                    </div>
                                     <blockquote className="flex-1 text-sm leading-relaxed text-[#EDEDED]">"{t.quote}"</blockquote>
                                     <figcaption className="mt-4 border-t border-[#222] pt-4 text-sm">
                                         <span className="font-semibold text-white">{t.name}</span>
@@ -703,7 +706,7 @@ export default function Landing() {
 
                             <div className="mt-14 grid items-start gap-6 lg:grid-cols-2">
                                 {/* CARD 1 */}
-                                <div className="relative rounded-2xl border border-emerald-400/40 bg-[#111] p-8 shadow-[0_0_50px_-12px_rgba(52,211,153,0.25)]">
+                                <div className="relative rounded-2xl border border-emerald-400/40 bg-[#111] p-8">
                                     <span className="absolute -top-3 left-8 rounded-full bg-emerald-400 px-3 py-1 text-xs font-bold text-black">HEMAT 80%</span>
                                     <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-emerald-400">Karanglabs · Early Access</div>
                                     <div className="mt-4 flex items-end gap-3">
@@ -716,7 +719,7 @@ export default function Landing() {
                                     </p>
                                     <ul className="mt-6 space-y-3 text-sm text-[#EDEDED]">
                                         {[
-                                            '8 engine generator (Landing Page / Toko Online / Company Profile / Portfolio / Undangan ★ / Link-in-Bio / Menu F&B ★ / Jasa)',
+                                            '8 engine generator (Landing Page / Toko Online / Company Profile / Portfolio / Undangan / Link-in-Bio / Menu F&B / Jasa)',
                                             'Panduan lengkap: deploy gratis → beli domain → connect domain',
                                             'Add-on: SMTP/form kontak · WA float · Analytics · Pixel · SEO · Maps',
                                             'Kompatibel semua AI (ChatGPT · Claude · Gemini · v0 · Lovable)',
@@ -800,7 +803,7 @@ export default function Landing() {
                     {/* =============================== 17 · CTA PENUTUP === */}
                     <section className="border-t border-[#141414] bg-[#0D0D0D]">
                         <div className="relative mx-auto max-w-4xl overflow-hidden px-6 py-28 text-center">
-                            <div className="pointer-events-none absolute left-1/2 top-1/2 h-[400px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-emerald-500/10 blur-[120px]" />
+                            <div className="pointer-events-none absolute left-1/2 top-1/2 h-[400px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/[0.03] blur-[120px]" />
                             <h2 className="relative text-4xl font-bold tracking-tight text-white sm:text-5xl">
                                 Berhenti bayar mahal. Website-mu bisa online hari ini.
                             </h2>

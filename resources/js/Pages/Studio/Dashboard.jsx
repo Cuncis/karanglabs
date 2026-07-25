@@ -1,5 +1,5 @@
 import { Head, Link, usePage } from '@inertiajs/react';
-import { Sparkles, FolderOpen, Layers, ArrowRight } from 'lucide-react';
+import { Sparkles, FolderOpen, Layers, ArrowRight, Star } from 'lucide-react';
 import StudioLayout from '@/Layouts/StudioLayout';
 import { ENGINES, ACCENT } from '@/studioEngines';
 
@@ -65,7 +65,7 @@ export default function Dashboard() {
                             </div>
                             <h3 className="mt-4 flex items-center gap-1.5 text-base font-semibold text-[#18181B] dark:text-white">
                                 {engine.name}
-                                {engine.star && <span className="text-amber-400">★</span>}
+                                {engine.star && <Star className="h-3.5 w-3.5 fill-amber-500 text-amber-500" />}
                             </h3>
                             <p className="mt-1.5 flex-1 text-sm leading-relaxed text-[#71717A] dark:text-[#888]">{engine.tagline}</p>
                             <span className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-emerald-600 dark:text-emerald-400 opacity-0 transition-opacity group-hover:opacity-100">

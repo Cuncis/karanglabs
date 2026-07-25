@@ -1,26 +1,24 @@
 import {
     Rocket, ShoppingBag, Building2, UserRound, HeartHandshake,
     Link2, UtensilsCrossed, Briefcase,
+    MessageCircle, ClipboardList, CreditCard,
+    Minimize2, Gem, PartyPopper, Flame, Leaf, MoonStar, Flower2, Moon,
+    FileCode, Files, Component, Code,
+    Store, Layers, Landmark, Sparkles, Square, Frame, Droplet, Pill,
 } from 'lucide-react';
 
 /* --------------------------------------------------------------- options --- */
 
-const STYLE_OPTIONS = [
-    'Minimalis Modern', 'Elegan / Luxury', 'Playful / Ceria', 'Bold / Premium',
-    'Rustic / Earthy', 'Islami', 'Korean / Soft', 'Dark Mode',
-];
-
-const NUANSA_OPTIONS = ['Islami', 'Adat / Tradisional', 'Modern', 'Rustic', 'Elegan / Luxury'];
+export const MULTI_FILE_OUTPUT = 'HTML + Tailwind CSS (multi-halaman, file terpisah)';
 
 const OUTPUT_OPTIONS = [
     'HTML + Tailwind CSS (satu file)',
+    MULTI_FILE_OUTPUT,
     'React + Tailwind (komponen)',
     'HTML + CSS biasa (tanpa framework)',
 ];
 
 const CTA_OPTIONS = ['Tombol WhatsApp', 'Form / Kumpulkan Lead', 'Link Pembayaran'];
-
-const BUTTON_STYLES = ['Rounded solid', 'Outline', 'Glass / blur', 'Pill'];
 
 /* --------------------------------------------------------------- helpers --- */
 
@@ -66,6 +64,8 @@ function block(title, rows) {
 export function buildPrompt(engine, values) {
     const v = values || {};
     const brand = v.brand || v.name || v.hosts || 'brand ini';
+    const pages = items(v.pages);
+    const format = v.output || (pages.length ? MULTI_FILE_OUTPUT : OUTPUT_OPTIONS[0]);
 
     const parts = [
         `Kamu adalah web designer & front-end developer senior. Buatkan ${engine.label} untuk "${brand}".`,
@@ -77,26 +77,89 @@ export function buildPrompt(engine, values) {
             '- Mobile-first, responsive, aksesibel, dan loading cepat',
         ]),
         block('STRUKTUR HALAMAN', engine.sections.map((s, i) => `${i + 1}. ${s}`)),
+        pages.length ? block('HALAMAN & NAVIGASI', [
+            '- Website ini MULTI-HALAMAN (bukan satu halaman).',
+            '- Buat halaman berikut, masing-masing sebagai file HTML terpisah yang saling terhubung:',
+            ...pages.map((p) => `   • ${p}`),
+            '- Pakai navbar/menu yang sama di semua halaman, lengkap dengan penanda halaman yang sedang aktif.',
+            '- Struktur section di atas diterapkan pada halaman yang relevan (umumnya halaman utama/Beranda).',
+        ]) : null,
         block('DETAIL KONTEN', engine.details(v)),
         block('CTA & KONVERSI', engine.cta ? engine.cta(v) : []),
         block('OUTPUT', [
-            line('Format', v.output || OUTPUT_OPTIONS[0]),
+            line('Format', format),
             '- Kode bersih & rapi, siap langsung deploy (Netlify / Vercel / GitHub Pages)',
             '- Tanpa dependency berbayar; pakai placeholder gambar bila belum ada aset',
             '- Beri komentar penanda di tiap section agar gampang diedit ulang',
         ]),
     ];
 
-    return parts.filter(Boolean).join('\n\n');
+    // Strip em/en dashes from the final prompt so the output never looks AI-generated.
+    return parts.filter(Boolean).join('\n\n').replace(/[—–]/g, '-');
 }
 
 /* --------------------------------------------------------------- engines --- */
 
-const brandField = { name: 'brand', label: 'Nama Brand / Usaha', type: 'text', placeholder: 'Kopi Senja', required: true };
-const styleField = { name: 'style', label: 'Gaya Visual', type: 'select', options: STYLE_OPTIONS };
-const colorsField = { name: 'colors', label: 'Palet Warna', type: 'text', placeholder: 'Cokelat hangat + krem' };
-const outputField = { name: 'output', label: 'Format Output', type: 'select', options: OUTPUT_OPTIONS };
+const brandField = (placeholder) => ({ name: 'brand', label: 'Nama Brand / Usaha', type: 'text', placeholder, required: true });
+const styleField = {
+    name: 'style', label: 'Gaya Visual', type: 'choice', columns: 4, options: [
+        { value: 'Minimalis Modern', label: 'Minimalis', icon: Minimize2 },
+        { value: 'Elegan / Luxury', label: 'Elegan', icon: Gem },
+        { value: 'Playful / Ceria', label: 'Playful', icon: PartyPopper },
+        { value: 'Bold / Premium', label: 'Bold', icon: Flame },
+        { value: 'Rustic / Earthy', label: 'Rustic', icon: Leaf },
+        { value: 'Islami', label: 'Islami', icon: MoonStar },
+        { value: 'Korean / Soft', label: 'Korean', icon: Flower2 },
+        { value: 'Dark Mode', label: 'Dark', icon: Moon },
+    ],
+};
+const colorsField = (placeholder = 'mis. cokelat hangat + krem') => ({ name: 'colors', label: 'Palet Warna', type: 'color', placeholder, hint: 'Tulis bebas, atau klik ikon palet untuk pilih kode warna sendiri' });
+const outputField = {
+    name: 'output', label: 'Format Output', type: 'choice', options: [
+        { value: 'HTML + Tailwind CSS (satu file)', label: 'HTML 1 file', icon: FileCode },
+        { value: MULTI_FILE_OUTPUT, label: 'Multi-halaman', icon: Files },
+        { value: 'React + Tailwind (komponen)', label: 'React', icon: Component },
+        { value: 'HTML + CSS biasa (tanpa framework)', label: 'HTML/CSS', icon: Code },
+    ],
+};
 const waField = { name: 'whatsapp', label: 'Nomor WhatsApp', type: 'text', placeholder: '628123456789' };
+const pagesField = (placeholder = 'Beranda, Tentang, Layanan, Kontak') => ({ name: 'pages', label: 'Halaman yang dibutuhkan', type: 'tags', placeholder, hint: 'kosongkan untuk satu halaman; isi (pisah koma) untuk website multi-halaman' });
+
+/* Icon-tile pickers for the per-engine selects. */
+const ctaChoiceField = {
+    name: 'ctaType', label: 'Jenis CTA', type: 'choice', options: [
+        { value: 'Tombol WhatsApp', label: 'WhatsApp', icon: MessageCircle },
+        { value: 'Form / Kumpulkan Lead', label: 'Form / Lead', icon: ClipboardList },
+        { value: 'Link Pembayaran', label: 'Link Bayar', icon: CreditCard },
+    ],
+};
+
+const orderChoiceField = {
+    name: 'orderMethod', label: 'Metode Order', type: 'choice', options: [
+        { value: 'Order via WhatsApp', label: 'WhatsApp', icon: MessageCircle },
+        { value: 'Order via Marketplace', label: 'Marketplace', icon: Store },
+        { value: 'Keduanya', label: 'Keduanya', icon: Layers },
+    ],
+};
+
+const nuansaChoiceField = {
+    name: 'nuansa', label: 'Nuansa', type: 'choice', columns: 4, options: [
+        { value: 'Islami', label: 'Islami', icon: MoonStar },
+        { value: 'Adat / Tradisional', label: 'Adat', icon: Landmark },
+        { value: 'Modern', label: 'Modern', icon: Sparkles },
+        { value: 'Rustic', label: 'Rustic', icon: Leaf },
+        { value: 'Elegan / Luxury', label: 'Elegan', icon: Gem },
+    ],
+};
+
+const buttonStyleChoiceField = {
+    name: 'buttonStyle', label: 'Gaya Tombol', type: 'choice', columns: 4, options: [
+        { value: 'Rounded solid', label: 'Rounded', icon: Square },
+        { value: 'Outline', label: 'Outline', icon: Frame },
+        { value: 'Glass / blur', label: 'Glass', icon: Droplet },
+        { value: 'Pill', label: 'Pill', icon: Pill },
+    ],
+};
 
 export const ENGINES = [
     {
@@ -116,13 +179,13 @@ export const ENGINES = [
             'CTA penutup + footer',
         ],
         fields: [
-            brandField,
-            { name: 'offer', label: 'Produk / Penawaran Utama', type: 'textarea', placeholder: 'Apa yang dijual? Apa promonya?', required: true },
-            { name: 'audience', label: 'Target Audiens', type: 'text', placeholder: 'Pemilik UMKM, umur 25-40' },
-            { name: 'benefits', label: 'Keunggulan Utama', type: 'tags', placeholder: 'Cepat, murah, garansi', hint: 'pisahkan dengan koma' },
-            { name: 'ctaType', label: 'Jenis CTA', type: 'select', options: CTA_OPTIONS },
+            brandField('Kelas Online Jago Jualan'),
+            { name: 'offer', label: 'Produk / Penawaran Utama', type: 'textarea', placeholder: 'Kelas online 4 sesi: dari nol sampai laris jualan di marketplace & sosmed. Termasuk template konten + grup mentoring. Diskon 50% untuk 100 pendaftar pertama.', required: true },
+            { name: 'audience', label: 'Target Audiens', type: 'text', placeholder: 'Pemula & pemilik UMKM yang mau mulai jualan online' },
+            { name: 'benefits', label: 'Keunggulan Utama', type: 'tags', placeholder: 'Materi terstruktur, Mentor berpengalaman, Sertifikat, Akses grup selamanya', hint: 'pisahkan dengan koma' },
+            ctaChoiceField,
             waField,
-            styleField, colorsField, outputField,
+            styleField, colorsField('Ungu + putih, modern & energik'), outputField,
         ],
         details: (v) => [
             line('Produk / penawaran', v.offer),
@@ -151,13 +214,13 @@ export const ENGINES = [
             'Kontak + footer',
         ],
         fields: [
-            brandField,
-            { name: 'products', label: 'Daftar Produk', type: 'lines', placeholder: 'Kopi Latte | 25.000 | Minuman\nCroissant | 18.000 | Snack', hint: 'satu produk per baris, format: Nama | Harga | Kategori', required: true },
-            { name: 'categories', label: 'Kategori', type: 'tags', placeholder: 'Minuman, Snack, Merchandise' },
-            { name: 'orderMethod', label: 'Metode Order', type: 'select', options: ['Order via WhatsApp', 'Order via Marketplace', 'Keduanya'] },
+            brandField('Kopi Nusantara Store'),
+            { name: 'products', label: 'Daftar Produk', type: 'lines', placeholder: 'Kopi Gayo 200g | 65.000 | Biji Kopi\nKopi Toraja 200g | 72.000 | Biji Kopi\nV60 Dripper | 95.000 | Alat Seduh', hint: 'satu produk per baris, format: Nama | Harga | Kategori', required: true },
+            { name: 'categories', label: 'Kategori', type: 'tags', placeholder: 'Biji Kopi, Alat Seduh, Merchandise' },
+            orderChoiceField,
             waField,
-            { name: 'marketplace', label: 'Link Marketplace (opsional)', type: 'text', placeholder: 'https://tokopedia.com/...' },
-            styleField, colorsField, outputField,
+            { name: 'marketplace', label: 'Link Marketplace (opsional)', type: 'text', placeholder: 'https://tokopedia.com/kopinusantara' },
+            styleField, colorsField('Cokelat tua + krem, hangat & natural'), outputField,
         ],
         details: (v) => [
             subList('Produk (Nama | Harga | Kategori)', v.products),
@@ -187,14 +250,15 @@ export const ENGINES = [
             'Kontak + Google Maps + footer',
         ],
         fields: [
-            brandField,
-            { name: 'about', label: 'Tentang Perusahaan', type: 'textarea', placeholder: 'Ceritakan usaha kamu singkat', required: true },
-            { name: 'vision', label: 'Visi & Misi', type: 'textarea', placeholder: 'Visi... Misi...' },
-            { name: 'services', label: 'Layanan / Produk', type: 'tags', placeholder: 'Konsultasi, Instalasi, Maintenance' },
-            { name: 'clients', label: 'Klien / Partner', type: 'text', placeholder: 'Nama klien atau partner terkenal' },
-            { name: 'address', label: 'Alamat', type: 'text', placeholder: 'Jl. Merdeka No. 1, Jakarta' },
-            { name: 'maps', label: 'Link / Embed Google Maps', type: 'text', placeholder: 'https://maps.google.com/...' },
-            styleField, colorsField, outputField,
+            brandField('Nusantara Digital Agency'),
+            { name: 'about', label: 'Tentang Perusahaan', type: 'textarea', placeholder: 'Agensi digital yang bantu bisnis tumbuh lewat website, branding, dan pemasaran online sejak 2018. Sudah menangani 120+ klien dari berbagai industri.', required: true },
+            { name: 'vision', label: 'Visi & Misi', type: 'textarea', placeholder: 'Visi: jadi partner digital terpercaya UMKM Indonesia.\nMisi: menghadirkan solusi digital berkualitas dengan harga terjangkau.' },
+            { name: 'services', label: 'Layanan / Produk', type: 'tags', placeholder: 'Pembuatan Website, Branding & Logo, Digital Marketing, Fotografi Produk' },
+            { name: 'clients', label: 'Klien / Partner', type: 'text', placeholder: 'Kopi Nusantara, Batik Sekar, Klinik Sehat Bersama' },
+            { name: 'address', label: 'Alamat', type: 'text', placeholder: 'Jl. Diponegoro No. 45, Bandung' },
+            { name: 'maps', label: 'Link / Embed Google Maps', type: 'text', placeholder: 'https://maps.google.com/?q=Jl.+Diponegoro+45+Bandung' },
+            pagesField('Beranda, Tentang, Layanan, Portofolio, Kontak'),
+            styleField, colorsField('Biru navy + putih, profesional & bersih'), outputField,
         ],
         details: (v) => [
             line('Tentang', v.about),
@@ -226,12 +290,13 @@ export const ENGINES = [
         ],
         fields: [
             { name: 'name', label: 'Nama Lengkap', type: 'text', placeholder: 'Andi Pratama', required: true },
-            { name: 'role', label: 'Peran / Profesi', type: 'text', placeholder: 'UI/UX Designer' },
-            { name: 'skills', label: 'Skill & Keahlian', type: 'tags', placeholder: 'Figma, React, Copywriting' },
-            { name: 'experience', label: 'Pengalaman', type: 'textarea', placeholder: 'Ringkas pengalaman & pencapaianmu' },
-            { name: 'projects', label: 'Karya / Proyek', type: 'lines', placeholder: 'Redesign aplikasi X\nBranding kafe Y', hint: 'satu karya per baris' },
-            { name: 'cvLink', label: 'Link Download CV', type: 'text', placeholder: 'https://.../cv.pdf' },
-            styleField, colorsField, outputField,
+            { name: 'role', label: 'Peran / Profesi', type: 'text', placeholder: 'UI/UX Designer & Front-End Developer' },
+            { name: 'skills', label: 'Skill & Keahlian', type: 'tags', placeholder: 'Figma, Tailwind CSS, React, Prototyping, Copywriting' },
+            { name: 'experience', label: 'Pengalaman', type: 'textarea', placeholder: '3 tahun jadi product designer di startup fintech. Pernah menangani redesign aplikasi dengan 500rb+ pengguna aktif.' },
+            { name: 'projects', label: 'Karya / Proyek', type: 'lines', placeholder: 'Redesign aplikasi mobile banking\nWebsite company profile untuk agensi\nDesign system untuk startup SaaS', hint: 'satu karya per baris' },
+            { name: 'cvLink', label: 'Link Download CV', type: 'text', placeholder: 'https://drive.google.com/file/cv-andi-pratama' },
+            pagesField('Beranda, Karya, Tentang, Kontak'),
+            styleField, colorsField('Hitam + aksen kuning, bold & personal'), outputField,
         ],
         details: (v) => [
             line('Nama', v.name),
@@ -266,13 +331,13 @@ export const ENGINES = [
         ],
         fields: [
             { name: 'hosts', label: 'Nama Mempelai / Tuan Rumah', type: 'text', placeholder: 'Rani & Doni', required: true },
-            { name: 'eventDate', label: 'Tanggal & Waktu Acara', type: 'text', placeholder: 'Sabtu, 12 Desember 2026 · 10.00 WIB' },
-            { name: 'venue', label: 'Lokasi / Venue', type: 'textarea', placeholder: 'Gedung Serbaguna, alamat lengkap' },
-            { name: 'nuansa', label: 'Nuansa', type: 'select', options: NUANSA_OPTIONS },
+            { name: 'eventDate', label: 'Tanggal & Waktu Acara', type: 'text', placeholder: 'Sabtu, 12 Desember 2026, pukul 10.00 WIB' },
+            { name: 'venue', label: 'Lokasi / Venue', type: 'textarea', placeholder: 'Gedung Graha Wangsa\nJl. Ahmad Yani No. 10, Bandar Lampung' },
+            nuansaChoiceField,
             { name: 'rsvpWa', label: 'Nomor WhatsApp RSVP', type: 'text', placeholder: '628123456789' },
-            { name: 'bank', label: 'Amplop Digital (rekening + QRIS)', type: 'textarea', placeholder: 'BCA 1234567890 a.n. ...\nQRIS: link/gambar' },
-            { name: 'features', label: 'Fitur Tambahan', type: 'tags', placeholder: 'Musik latar, galeri, guest book' },
-            colorsField, outputField,
+            { name: 'bank', label: 'Amplop Digital (rekening + QRIS)', type: 'textarea', placeholder: 'BCA 1234567890 a.n. Doni Saputra\nQRIS: (upload gambar QR kamu)' },
+            { name: 'features', label: 'Fitur Tambahan', type: 'tags', placeholder: 'Musik latar, Galeri foto, Buku tamu, Live streaming' },
+            colorsField('Sage green + cream, elegan & lembut'), outputField,
         ],
         details: (v) => [
             line('Mempelai / tuan rumah', v.hosts),
@@ -303,11 +368,11 @@ export const ENGINES = [
         ],
         fields: [
             { name: 'name', label: 'Nama / Handle', type: 'text', placeholder: '@kopisenja', required: true },
-            { name: 'bio', label: 'Bio Singkat', type: 'textarea', placeholder: 'Kedai kopi & roastery di Bandung' },
-            { name: 'links', label: 'Daftar Link', type: 'lines', placeholder: 'Menu | https://...\nOrder GoFood | https://...', hint: 'satu link per baris, format: Label | URL', required: true },
-            { name: 'socials', label: 'Sosial Media', type: 'tags', placeholder: 'Instagram, TikTok, YouTube' },
-            { name: 'buttonStyle', label: 'Gaya Tombol', type: 'select', options: BUTTON_STYLES },
-            styleField, colorsField, outputField,
+            { name: 'bio', label: 'Bio Singkat', type: 'textarea', placeholder: 'Kedai kopi & roastery di Bandung. Buka tiap hari 08.00-22.00.' },
+            { name: 'links', label: 'Daftar Link', type: 'lines', placeholder: 'Menu & Order | https://gofood.co.id/kopisenja\nReservasi Tempat | https://wa.me/628123456789\nInstagram | https://instagram.com/kopisenja', hint: 'satu link per baris, format: Label | URL', required: true },
+            { name: 'socials', label: 'Sosial Media', type: 'tags', placeholder: 'Instagram, TikTok, WhatsApp' },
+            buttonStyleChoiceField,
+            styleField, colorsField('Cokelat susu + krem, cozy'), outputField,
         ],
         details: (v) => [
             line('Nama / handle', v.name),
@@ -337,12 +402,12 @@ export const ENGINES = [
             'Jam buka & lokasi + Google Maps',
         ],
         fields: [
-            brandField,
-            { name: 'menu', label: 'Daftar Menu', type: 'lines', placeholder: 'Nasi Goreng | 22.000 | Makanan\nEs Kopi Susu | 18.000 | Minuman', hint: 'satu menu per baris, format: Nama | Harga | Kategori', required: true },
-            { name: 'hours', label: 'Jam Buka', type: 'text', placeholder: 'Setiap hari 08.00-22.00' },
-            { name: 'location', label: 'Lokasi', type: 'textarea', placeholder: 'Alamat + link Google Maps' },
+            brandField('Kedai Kopi Senja'),
+            { name: 'menu', label: 'Daftar Menu', type: 'lines', placeholder: 'Es Kopi Susu | 18.000 | Minuman\nAmericano | 20.000 | Minuman\nNasi Goreng Spesial | 25.000 | Makanan\nCroissant Cokelat | 22.000 | Snack', hint: 'satu menu per baris, format: Nama | Harga | Kategori', required: true },
+            { name: 'hours', label: 'Jam Buka', type: 'text', placeholder: 'Setiap hari, 08.00 - 22.00' },
+            { name: 'location', label: 'Lokasi', type: 'textarea', placeholder: 'Jl. Braga No. 88, Bandung\nhttps://maps.google.com/?q=Braga+88+Bandung' },
             waField,
-            styleField, colorsField, outputField,
+            styleField, colorsField('Cokelat hangat + krem, cozy & homey'), outputField,
         ],
         details: (v) => [
             subList('Menu (Nama | Harga | Kategori)', v.menu),
@@ -371,13 +436,14 @@ export const ENGINES = [
             'Booking via WhatsApp / form + footer',
         ],
         fields: [
-            brandField,
-            { name: 'service', label: 'Deskripsi Jasa', type: 'textarea', placeholder: 'Jasa apa yang ditawarkan?', required: true },
-            { name: 'packages', label: 'Paket Harga (maks 3)', type: 'lines', placeholder: 'Basic | 500.000 | 1 revisi, 3 hari\nPro | 1.000.000 | 3 revisi, 2 hari', hint: 'satu paket per baris, format: Nama | Harga | Fitur' },
-            { name: 'process', label: 'Proses Kerja', type: 'textarea', placeholder: 'Langkah 1... 2... 3...' },
-            { name: 'testimonials', label: 'Testimoni', type: 'textarea', placeholder: 'Kutipan singkat dari klien' },
+            brandField('Atemoto Photography'),
+            { name: 'service', label: 'Deskripsi Jasa', type: 'textarea', placeholder: 'Jasa foto prewedding & wedding dengan konsep candid natural. Sudah dipercaya 200+ pasangan sejak 2019.', required: true },
+            { name: 'packages', label: 'Paket Harga (maks 3)', type: 'lines', placeholder: 'Basic | 2.500.000 | 3 jam, 100 foto edit, 1 fotografer\nPremium | 4.500.000 | 6 jam, 250 foto, 2 fotografer + album\nAll-in | 7.500.000 | Full day, unlimited foto, video sinematik', hint: 'satu paket per baris, format: Nama | Harga | Fitur' },
+            { name: 'process', label: 'Proses Kerja', type: 'textarea', placeholder: '1. Konsultasi konsep\n2. Booking tanggal & DP\n3. Sesi pemotretan\n4. Editing 7-14 hari\n5. Serah terima hasil' },
+            { name: 'testimonials', label: 'Testimoni', type: 'textarea', placeholder: 'Hasilnya natural banget, fotografernya sabar dan ramah! - Rani & Doni' },
             { name: 'bookingWa', label: 'Nomor WhatsApp Booking', type: 'text', placeholder: '628123456789' },
-            styleField, colorsField, outputField,
+            pagesField('Beranda, Layanan, Paket Harga, Kontak'),
+            styleField, colorsField('Krem + cokelat muda, soft & romantis'), outputField,
         ],
         details: (v) => [
             line('Deskripsi jasa', v.service),
@@ -397,15 +463,23 @@ export function findEngine(slug) {
 }
 
 /**
- * Tailwind classes per accent, enumerated so the JIT compiler keeps them.
+ * A single restrained brand accent, reused for every engine — no neon rainbow.
+ * Icons stay calm; emerald is only a subtle tint on a muted surface.
  */
+const ACCENT_STYLE = {
+    text: 'text-emerald-600 dark:text-emerald-400',
+    bg: 'bg-[#F1F1F2] dark:bg-[#161616]',
+    dot: 'bg-emerald-500',
+    ring: 'group-hover:bg-[#E8E8EB] dark:group-hover:bg-[#1c1c1c]',
+};
+
 export const ACCENT = {
-    emerald: { text: 'text-emerald-400', bg: 'bg-emerald-400/10', dot: 'bg-emerald-400', ring: 'group-hover:bg-emerald-400/20' },
-    sky: { text: 'text-sky-400', bg: 'bg-sky-400/10', dot: 'bg-sky-400', ring: 'group-hover:bg-sky-400/20' },
-    indigo: { text: 'text-indigo-400', bg: 'bg-indigo-400/10', dot: 'bg-indigo-400', ring: 'group-hover:bg-indigo-400/20' },
-    violet: { text: 'text-violet-400', bg: 'bg-violet-400/10', dot: 'bg-violet-400', ring: 'group-hover:bg-violet-400/20' },
-    rose: { text: 'text-rose-400', bg: 'bg-rose-400/10', dot: 'bg-rose-400', ring: 'group-hover:bg-rose-400/20' },
-    fuchsia: { text: 'text-fuchsia-400', bg: 'bg-fuchsia-400/10', dot: 'bg-fuchsia-400', ring: 'group-hover:bg-fuchsia-400/20' },
-    amber: { text: 'text-amber-400', bg: 'bg-amber-400/10', dot: 'bg-amber-400', ring: 'group-hover:bg-amber-400/20' },
-    teal: { text: 'text-teal-400', bg: 'bg-teal-400/10', dot: 'bg-teal-400', ring: 'group-hover:bg-teal-400/20' },
+    emerald: ACCENT_STYLE,
+    sky: ACCENT_STYLE,
+    indigo: ACCENT_STYLE,
+    violet: ACCENT_STYLE,
+    rose: ACCENT_STYLE,
+    fuchsia: ACCENT_STYLE,
+    amber: ACCENT_STYLE,
+    teal: ACCENT_STYLE,
 };
