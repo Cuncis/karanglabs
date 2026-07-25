@@ -85,4 +85,62 @@ class RunDorkJobTest extends TestCase
 
         Http::assertNotSent(fn ($request) => str_contains($request->url(), 'api.telegram.org'));
     }
+
+    public function test_every_query_line_is_searched_and_merged_into_one_dork(): void
+    {
+        // Each keyword line returns a distinct result keyed off the query.
+        Http::fake(function ($request) {
+            if (str_contains($request->url(), 'api.telegram.org')) {
+                return Http::response(['ok' => true]);
+            }
+
+            parse_str((string) parse_url($request->url(), PHP_URL_QUERY), $params);
+            $query = $params['q'] ?? '';
+
+            return Http::response([
+                'web' => [
+                    'results' => [[
+                        'url' => 'https://hit.test/'.md5($query),
+                        'title' => $query,
+                        'description' => 'desc',
+                    ]],
+                ],
+            ]);
+        });
+
+        $dork = Dork::factory()->create(['query' => "alpha\nbeta\ngamma"]);
+
+        (new RunDorkJob($dork))->handle(app(BraveSearchService::class), app(TelegramService::class));
+
+        // Three lines => three distinct results, all under the one dork.
+        $this->assertSame(3, $dork->results()->count());
+
+        // A single Telegram notification is sent for the whole run.
+        $telegramCalls = collect(Http::recorded())
+            ->filter(fn ($pair) => str_contains($pair[0]->url(), 'api.telegram.org'));
+        $this->assertCount(1, $telegramCalls);
+    }
+
+    public function test_a_duplicate_url_across_lines_is_stored_once(): void
+    {
+        // Every line returns the same URL.
+        Http::fake([
+            'api.search.brave.com/*' => Http::response([
+                'web' => [
+                    'results' => [[
+                        'url' => 'https://same.test/page',
+                        'title' => 'Same',
+                        'description' => 'desc',
+                    ]],
+                ],
+            ]),
+            'api.telegram.org/*' => Http::response(['ok' => true]),
+        ]);
+
+        $dork = Dork::factory()->create(['query' => "alpha\nbeta"]);
+
+        (new RunDorkJob($dork))->handle(app(BraveSearchService::class), app(TelegramService::class));
+
+        $this->assertSame(1, $dork->results()->count());
+    }
 }

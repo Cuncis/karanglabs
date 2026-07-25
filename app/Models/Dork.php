@@ -26,4 +26,28 @@ class Dork extends Model
     {
         return $this->hasMany(DorkResult::class);
     }
+
+    /**
+     * Split a raw query into its individual, trimmed keyword lines.
+     *
+     * @return array<int, string>
+     */
+    public static function splitQuery(?string $query): array
+    {
+        return collect(preg_split('/\r\n|\r|\n/', (string) $query))
+            ->map(fn (string $line): string => trim($line))
+            ->filter()
+            ->values()
+            ->all();
+    }
+
+    /**
+     * This dork's individual keyword lines (each searched separately).
+     *
+     * @return array<int, string>
+     */
+    public function queryLines(): array
+    {
+        return static::splitQuery($this->query);
+    }
 }

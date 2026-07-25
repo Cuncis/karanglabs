@@ -14,9 +14,13 @@ use Inertia\Response;
 class DorkHunterController extends Controller
 {
     /**
-     * Maximum number of active dorks allowed to stay within the Brave free tier.
+     * Maximum number of keyword lines allowed across all active dorks.
+     *
+     * Each line is one Brave query per run. Running every 2 hours means
+     * 12 runs/day * 30 days = 360 runs/month, so 5 lines keeps usage at
+     * 5 * 360 = 1800 queries/month, within the 2000/month free tier.
      */
-    private const MAX_ACTIVE_DORKS = 5;
+    private const MAX_ACTIVE_QUERIES = 5;
 
     public function index(): Response
     {
@@ -33,8 +37,8 @@ class DorkHunterController extends Controller
         return Inertia::render('DorkHunter', [
             'dorks' => $dorks,
             'results' => $results,
-            'activeCount' => $dorks->where('is_active', true)->count(),
-            'maxActive' => self::MAX_ACTIVE_DORKS,
+            'activeCount' => $this->activeQueryCount(),
+            'maxActive' => self::MAX_ACTIVE_QUERIES,
         ]);
     }
 
@@ -49,7 +53,7 @@ class DorkHunterController extends Controller
         $isActive = $validated['is_active'] ?? true;
 
         if ($isActive) {
-            $this->guardActiveLimit();
+            $this->guardQueryLimit(count(Dork::splitQuery($validated['query'])));
         }
 
         Dork::create([
@@ -71,8 +75,8 @@ class DorkHunterController extends Controller
 
         $isActive = $validated['is_active'] ?? $dork->is_active;
 
-        if ($isActive && ! $dork->is_active) {
-            $this->guardActiveLimit();
+        if ($isActive) {
+            $this->guardQueryLimit(count(Dork::splitQuery($validated['query'])), $dork->id);
         }
 
         $dork->update([
@@ -99,17 +103,28 @@ class DorkHunterController extends Controller
     }
 
     /**
-     * Prevent activating more dorks than the Brave free tier can sustain.
+     * Total number of keyword lines across every active dork.
+     */
+    private function activeQueryCount(?int $ignoreDorkId = null): int
+    {
+        return Dork::where('is_active', true)
+            ->when($ignoreDorkId, fn ($query) => $query->where('id', '!=', $ignoreDorkId))
+            ->get()
+            ->sum(fn (Dork $dork): int => count($dork->queryLines()));
+    }
+
+    /**
+     * Prevent activating more keyword lines than the Brave free tier can sustain.
      *
      * @throws ValidationException
      */
-    private function guardActiveLimit(): void
+    private function guardQueryLimit(int $incomingLines, ?int $ignoreDorkId = null): void
     {
-        $activeCount = Dork::where('is_active', true)->count();
+        $existing = $this->activeQueryCount($ignoreDorkId);
 
-        if ($activeCount >= self::MAX_ACTIVE_DORKS) {
+        if ($existing + $incomingLines > self::MAX_ACTIVE_QUERIES) {
             throw ValidationException::withMessages([
-                'query' => 'You can only keep '.self::MAX_ACTIVE_DORKS.' dorks active at once (Brave free tier limit).',
+                'query' => 'Active dorks can use at most '.self::MAX_ACTIVE_QUERIES." search lines in total (Brave free tier limit). You already have {$existing} active, and this dork adds {$incomingLines}.",
             ]);
         }
     }

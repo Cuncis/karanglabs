@@ -55,9 +55,10 @@ class DorkHunterTest extends TestCase
             ->assertSessionHasErrors('query');
     }
 
-    public function test_cannot_activate_more_than_five_dorks(): void
+    public function test_cannot_activate_more_than_five_query_lines_total(): void
     {
         $user = User::factory()->create();
+        // Five single-line active dorks already use the whole quota.
         Dork::factory()->count(5)->create(['is_active' => true]);
 
         $this->actingAs($user)
@@ -68,6 +69,29 @@ class DorkHunterTest extends TestCase
             ->assertSessionHasErrors('query');
 
         $this->assertDatabaseCount('dorks', 5);
+    }
+
+    public function test_a_multi_line_dork_counts_each_line_toward_the_limit(): void
+    {
+        $user = User::factory()->create();
+
+        // Six lines in a single dork exceeds the five-line total.
+        $this->actingAs($user)
+            ->post(route('dork-hunter.store'), [
+                'query' => "one\ntwo\nthree\nfour\nfive\nsix",
+                'is_active' => true,
+            ])
+            ->assertSessionHasErrors('query');
+
+        // Exactly five lines is allowed.
+        $this->actingAs($user)
+            ->post(route('dork-hunter.store'), [
+                'query' => "one\ntwo\nthree\nfour\nfive",
+                'is_active' => true,
+            ])
+            ->assertSessionDoesntHaveErrors('query');
+
+        $this->assertDatabaseCount('dorks', 1);
     }
 
     public function test_an_inactive_dork_can_be_created_beyond_the_limit(): void

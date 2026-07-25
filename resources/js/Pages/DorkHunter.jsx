@@ -111,7 +111,7 @@ export default function DorkHunter({ auth, dorks, results, activeCount, maxActiv
                     show={showAbout}
                     onClose={() => setShowAbout(false)}
                     title="Dork Hunter"
-                    description="Add up to 5 active search dorks (e.g. site:*.id inurl:admin). Every 2 hours the scheduler runs each one through the Brave Search API, filters out URLs you've already seen using an MD5 hash, and sends any brand-new hits to your Telegram bot. Use 'Run now' to fire a dork immediately instead of waiting for the next cycle."
+                    description="Each dork holds up to 5 keyword lines (e.g. site:remoteok.com laravel php apply). Every 2 hours the scheduler searches each line through the Brave Search API, merges the results, filters out URLs you've already seen using an MD5 hash, and sends a single Telegram alert whenever any line turns up a brand-new hit. You can keep 5 search lines active in total across your dorks. Use 'Run now' to fire a dork immediately instead of waiting for the next cycle."
                     category="Code & Data Lifesavers"
                 />
 
@@ -122,7 +122,7 @@ export default function DorkHunter({ auth, dorks, results, activeCount, maxActiv
                             <div className="flex items-center justify-between mb-5">
                                 <h3 className="text-lg font-semibold text-gray-200">Add a dork</h3>
                                 <span className={`text-xs font-semibold px-3 py-1 rounded-full ${activeCount >= maxActive ? 'bg-red-500/10 text-red-400 border border-red-500/30' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'}`}>
-                                    {activeCount} / {maxActive} active
+                                    {activeCount} / {maxActive} active queries
                                 </span>
                             </div>
                             <div className="space-y-5">
@@ -141,15 +141,18 @@ export default function DorkHunter({ auth, dorks, results, activeCount, maxActiv
 
                                 <div>
                                     <label className="block text-sm font-medium text-gray-300 mb-2">
-                                        Search Dork <span className="text-red-400">*</span>
+                                        Search Dorks <span className="text-red-400">*</span>
                                     </label>
                                     <textarea
                                         required
                                         value={data.query}
                                         onChange={(e) => setData('query', e.target.value)}
-                                        placeholder='site:*.id inurl:admin intitle:"login"'
-                                        className="w-full h-24 font-mono text-sm bg-gray-950 border border-gray-700 rounded-xl p-4 text-gray-300 placeholder-gray-600 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-all custom-scrollbar"
+                                        placeholder={'site:remoteok.com "laravel" "php" "apply"\nsite:indeed.com "wordpress developer" "remote"'}
+                                        className="w-full h-32 font-mono text-sm bg-gray-950 border border-gray-700 rounded-xl p-4 text-gray-300 placeholder-gray-600 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-all custom-scrollbar"
                                     />
+                                    <p className="mt-2 text-xs text-gray-500">
+                                        One keyword per line (up to {maxActive} lines total across active dorks). Every line is searched separately and merged into this dork — a single Telegram alert fires when any line finds something new.
+                                    </p>
                                     {errors.query && <p className="mt-1 text-sm text-red-500">{errors.query}</p>}
                                 </div>
 
@@ -192,7 +195,7 @@ export default function DorkHunter({ auth, dorks, results, activeCount, maxActiv
                                                         {dork.label || 'Untitled dork'}
                                                     </span>
                                                     <span className="text-xs text-gray-600 shrink-0">
-                                                        {dork.results_count} hit{dork.results_count === 1 ? '' : 's'}
+                                                        {dork.query.split('\n').map((l) => l.trim()).filter(Boolean).length} quer{dork.query.split('\n').map((l) => l.trim()).filter(Boolean).length === 1 ? 'y' : 'ies'} · {dork.results_count} hit{dork.results_count === 1 ? '' : 's'}
                                                     </span>
                                                 </div>
                                                 <code className="block text-xs font-mono text-rose-300/80 bg-gray-950 rounded-lg px-3 py-2 break-all">
