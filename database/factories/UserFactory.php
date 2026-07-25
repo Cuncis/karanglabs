@@ -42,4 +42,15 @@ class UserFactory extends Factory
             'email_verified_at' => null,
         ]);
     }
+
+    /**
+     * Indicate that the user has purchased and been granted Studio access.
+     */
+    public function withStudioAccess(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'has_studio_access' => true,
+            'studio_access_granted_at' => now(),
+        ]);
+    }
 }

@@ -11,6 +11,7 @@ use App\Http\Controllers\GenerateSocializerController;
 use App\Http\Controllers\GenerateWhispererController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ShortenHrMessageController;
+use App\Http\Controllers\StudioController;
 use App\Http\Controllers\TerminalSnippetController;
 use App\Models\ToolHistory;
 use App\Models\User;
@@ -20,6 +21,10 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', function () {
+    return Inertia::render('Landing');
+})->name('landing');
+
+Route::get('/ai-tools', function () {
     return Inertia::render('Welcome', [
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
@@ -80,6 +85,18 @@ Route::middleware('auth')->group(function () {
             'history' => $history,
         ]);
     })->name('dynamic-tool');
+
+    // Karanglabs Studio — the member product (gated by purchase).
+    Route::get('/studio/locked', [StudioController::class, 'locked'])->name('studio.locked');
+
+    Route::middleware('studio.access')->group(function () {
+        Route::get('/studio', [StudioController::class, 'index'])->name('studio.index');
+        Route::get('/studio/guides', [StudioController::class, 'guides'])->name('studio.guides');
+        Route::get('/studio/addons', [StudioController::class, 'addons'])->name('studio.addons');
+        Route::post('/studio/projects', [StudioController::class, 'store'])->name('studio.projects.store');
+        Route::delete('/studio/projects/{project}', [StudioController::class, 'destroy'])->name('studio.projects.destroy');
+        Route::get('/studio/{engine}', [StudioController::class, 'engine'])->name('studio.engine');
+    });
 
     Route::get('/dork-hunter', [DorkHunterController::class, 'index'])->name('dork-hunter.index');
     Route::post('/dork-hunter', [DorkHunterController::class, 'store'])->name('dork-hunter.store');

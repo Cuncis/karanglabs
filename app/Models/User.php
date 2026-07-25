@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['name', 'email', 'password', 'job_background'])]
+#[Fillable(['name', 'email', 'password', 'job_background', 'has_studio_access', 'studio_access_granted_at'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -27,11 +27,26 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'has_studio_access' => 'boolean',
+            'studio_access_granted_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Whether the user has purchased and been granted Studio access.
+     */
+    public function hasStudioAccess(): bool
+    {
+        return (bool) $this->has_studio_access;
     }
 
     public function terminalSnippets()
     {
         return $this->hasMany(TerminalSnippet::class);
+    }
+
+    public function studioProjects()
+    {
+        return $this->hasMany(StudioProject::class);
     }
 }
