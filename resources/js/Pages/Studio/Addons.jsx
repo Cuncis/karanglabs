@@ -17,21 +17,21 @@ export default function Addons() {
             <Head title="Add-ons Studio" />
 
             <div className="mb-10">
-                <span className="text-xs font-medium uppercase tracking-[0.2em] text-emerald-400">Add-ons</span>
-                <h1 className="mt-3 text-3xl font-bold tracking-tight text-white">Fitur tambahan untuk website-mu.</h1>
-                <p className="mt-3 max-w-2xl text-[#A1A1AA]">
+                <span className="text-xs font-medium uppercase tracking-[0.2em] text-emerald-600 dark:text-emerald-400">Add-ons</span>
+                <h1 className="mt-3 text-3xl font-bold tracking-tight text-[#18181B] dark:text-white">Fitur tambahan untuk website-mu.</h1>
+                <p className="mt-3 max-w-2xl text-[#52525B] dark:text-[#A1A1AA]">
                     Semua add-on ini bisa kamu minta langsung ke AI saat generate, cukup sebutkan di brief atau tambahkan di chat lanjutan. Gratis, tanpa biaya bulanan.
                 </p>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
                 {ADDONS.map((a) => (
-                    <div key={a.title} className="rounded-xl border border-[#222] bg-[#111] p-6">
+                    <div key={a.title} className="rounded-xl border border-[#E4E4E7] dark:border-[#222] bg-white dark:bg-[#111] p-6">
                         <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-400/10">
-                            <a.icon className="h-5 w-5 text-emerald-400" />
+                            <a.icon className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
                         </div>
-                        <h2 className="mt-4 text-base font-semibold text-white">{a.title}</h2>
-                        <p className="mt-2 text-sm leading-relaxed text-[#888]">{a.body}</p>
+                        <h2 className="mt-4 text-base font-semibold text-[#18181B] dark:text-white">{a.title}</h2>
+                        <p className="mt-2 text-sm leading-relaxed text-[#71717A] dark:text-[#888]">{a.body}</p>
                     </div>
                 ))}
             </div>

@@ -9,20 +9,20 @@ export default function Locked() {
     return (
         <>
             <Head title="Studio Terkunci" />
-            <div className="flex min-h-screen items-center justify-center bg-[#0A0A0A] px-6 font-sans text-[#EDEDED] antialiased">
+            <div className="flex min-h-screen items-center justify-center bg-[#F4F4F5] dark:bg-[#0A0A0A] px-6 font-sans text-[#27272A] dark:text-[#EDEDED] antialiased">
                 <div className="w-full max-w-md text-center">
                     <div className="mb-6 flex items-center justify-center gap-2.5">
                         <img src={LOGO} alt="Karanglabs" className="h-9 w-9 rounded-md object-contain" />
-                        <span className="text-lg font-bold text-white">Karanglabs <span className="text-emerald-400">Studio</span></span>
+                        <span className="text-lg font-bold text-[#18181B] dark:text-white">Karanglabs <span className="text-emerald-600 dark:text-emerald-400">Studio</span></span>
                     </div>
 
-                    <div className="rounded-2xl border border-[#222] bg-[#111] p-8">
-                        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#1A1A1A]">
-                            <Lock className="h-7 w-7 text-emerald-400" />
+                    <div className="rounded-2xl border border-[#E4E4E7] dark:border-[#222] bg-white dark:bg-[#111] p-8">
+                        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#E8E8EB] dark:bg-[#1A1A1A]">
+                            <Lock className="h-7 w-7 text-emerald-600 dark:text-emerald-400" />
                         </div>
-                        <h1 className="mt-6 text-2xl font-bold text-white">Studio masih terkunci</h1>
-                        <p className="mt-3 text-sm leading-relaxed text-[#A1A1AA]">
-                            Akun <span className="font-medium text-white">{auth?.user?.email}</span> belum punya akses Studio.
+                        <h1 className="mt-6 text-2xl font-bold text-[#18181B] dark:text-white">Studio masih terkunci</h1>
+                        <p className="mt-3 text-sm leading-relaxed text-[#52525B] dark:text-[#A1A1AA]">
+                            Akun <span className="font-medium text-[#18181B] dark:text-white">{auth?.user?.email}</span> belum punya akses Studio.
                             Ambil early access untuk membuka 8 engine generator website, panduan lengkap, dan update selamanya.
                         </p>
 
@@ -33,17 +33,17 @@ export default function Locked() {
                             Ambil Early Access, Rp 99.000 <ArrowRight className="h-4 w-4" />
                         </a>
 
-                        <p className="mt-4 text-xs text-[#666]">
+                        <p className="mt-4 text-xs text-[#8A8A93] dark:text-[#666]">
                             Sudah bayar tapi belum bisa masuk? Akses diaktifkan manual oleh tim kami setelah pembayaran terverifikasi, hubungi kami dengan email di atas.
                         </p>
                     </div>
 
                     <div className="mt-6 flex items-center justify-center gap-4 text-sm">
-                        <Link href={route('home')} className="inline-flex items-center gap-1.5 text-[#A1A1AA] transition-colors hover:text-white">
+                        <Link href={route('home')} className="inline-flex items-center gap-1.5 text-[#52525B] dark:text-[#A1A1AA] transition-colors hover:text-[#18181B] dark:hover:text-white">
                             <LayoutGrid className="h-4 w-4" /> AI Tools Directory
                         </Link>
-                        <span className="text-[#333]">·</span>
-                        <Link href={route('logout')} method="post" as="button" className="text-[#A1A1AA] transition-colors hover:text-white">
+                        <span className="text-[#C4C4C8] dark:text-[#333]">·</span>
+                        <Link href={route('logout')} method="post" as="button" className="text-[#52525B] dark:text-[#A1A1AA] transition-colors hover:text-[#18181B] dark:hover:text-white">
                             Log out
                         </Link>
                     </div>
