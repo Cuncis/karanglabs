@@ -340,13 +340,9 @@ export default function Landing() {
                         </nav>
 
                         <div className="hidden items-center gap-3 md:flex">
-                            {auth?.user ? (
+                            {auth?.user && (
                                 <Link href={route('studio.index')} className="rounded-md px-4 py-2 text-sm font-medium text-[#A1A1AA] transition-colors hover:text-white">
                                     Buka Studio
-                                </Link>
-                            ) : (
-                                <Link href={route('login')} className="rounded-md px-4 py-2 text-sm font-medium text-[#A1A1AA] transition-colors hover:text-white">
-                                    Log in
                                 </Link>
                             )}
                             <a href="#harga" className="rounded-md bg-emerald-400 px-4 py-2 text-sm font-semibold text-black transition-colors hover:bg-emerald-300">
@@ -400,9 +396,9 @@ export default function Landing() {
                                 </p>
 
                                 <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                                    <button type="button" onClick={() => openCheckout('early-access')} className="rounded-lg bg-emerald-400 px-6 py-3 text-center text-sm font-semibold text-black transition-colors hover:bg-emerald-300">
+                                    <a href="#harga" className="rounded-lg bg-emerald-400 px-6 py-3 text-center text-sm font-semibold text-black transition-colors hover:bg-emerald-300">
                                         Ambil Early Access, Rp 99.000
-                                    </button>
+                                    </a>
                                     <a href="#cara-kerja" className="rounded-lg border border-[#333] px-6 py-3 text-center text-sm font-medium text-[#EDEDED] transition-colors hover:border-[#555] hover:bg-[#111]">
                                         Lihat Cara Kerjanya
                                     </a>

@@ -52,8 +52,6 @@ export default function CheckoutSuccess() {
                     Kembali ke Beranda <ArrowRight className="h-4 w-4" />
                 </button>
             </div>
-
-            <p className="mt-6 text-xs text-[#555]">Sudah punya akun? <a href="/login" className="text-emerald-400 hover:text-emerald-300">Login ke Studio</a></p>
         </div>
     );
 }
