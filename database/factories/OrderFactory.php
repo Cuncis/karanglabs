@@ -20,6 +20,7 @@ class OrderFactory extends Factory
             'order_id' => 'KL-'.strtoupper(Str::random(10)),
             'email' => fake()->unique()->safeEmail(),
             'name' => fake()->name(),
+            'phone' => fake()->numerify('08##########'),
             'plan' => 'early-access',
             'amount' => 99000,
             'status' => 'pending',

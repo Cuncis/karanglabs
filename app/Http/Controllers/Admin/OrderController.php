@@ -23,7 +23,7 @@ class OrderController extends Controller
     {
         return Inertia::render('Admin/Orders', [
             'orders' => Order::latest()->limit(200)->get([
-                'id', 'order_id', 'name', 'email', 'plan', 'amount', 'status', 'paid_at', 'created_at',
+                'id', 'order_id', 'name', 'email', 'phone', 'plan', 'amount', 'status', 'paid_at', 'created_at',
             ]),
             'stats' => [
                 'total' => Order::count(),

@@ -37,6 +37,7 @@ Route::get('/', function (MidtransService $midtrans) {
 // Public payment endpoints (Midtrans).
 Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
 Route::post('/checkout/finalize', [CheckoutController::class, 'finalize'])->name('checkout.finalize');
+Route::get('/checkout/success', [CheckoutController::class, 'success'])->name('checkout.success');
 Route::post('/midtrans/notification', [MidtransNotificationController::class, 'handle'])->name('midtrans.notification');
 
 // Whitelabel download — protected by a signed token + license-key validation.

@@ -248,10 +248,9 @@ export default function Landing() {
     const countdown = useCountdown(5);
 
     const [checkout, setCheckout] = useState(null);
-    const [form, setForm] = useState({ name: '', email: '' });
+    const [form, setForm] = useState({ name: '', email: '', phone: '' });
     const [paying, setPaying] = useState(false);
     const [checkoutError, setCheckoutError] = useState('');
-    const [paidDone, setPaidDone] = useState(false);
 
     // Load Midtrans Snap.js once (only if configured).
     useEffect(() => {
@@ -266,9 +265,8 @@ export default function Landing() {
     }, [snapUrl, midtransClientKey]);
 
     const openCheckout = (plan) => {
-        setForm({ name: '', email: '' });
+        setForm({ name: '', email: '', phone: '' });
         setCheckoutError('');
-        setPaidDone(false);
         setCheckout(plan);
     };
 
@@ -283,10 +281,17 @@ export default function Landing() {
                 setPaying(false);
                 return;
             }
-            const finalize = () => window.axios.post('/checkout/finalize', { order_id: data.order_id }).catch(() => {});
+            const finalizeAndRedirect = async () => {
+                try {
+                    await window.axios.post('/checkout/finalize', { order_id: data.order_id });
+                } catch (e) {
+                    // Provisioning also runs via webhook, so a failed finalize is non-fatal.
+                }
+                window.location.assign('/checkout/success?order=' + encodeURIComponent(data.order_id));
+            };
             window.snap.pay(data.token, {
-                onSuccess: () => { finalize(); setPaidDone(true); setPaying(false); },
-                onPending: () => { finalize(); setPaidDone(true); setPaying(false); },
+                onSuccess: finalizeAndRedirect,
+                onPending: finalizeAndRedirect,
                 onError: () => { setCheckoutError('Pembayaran gagal diproses. Coba lagi.'); setPaying(false); },
                 onClose: () => { setPaying(false); },
             });
@@ -920,19 +925,7 @@ export default function Landing() {
                         <div className="relative w-full max-w-md rounded-2xl border border-[#222] bg-[#111] p-6 sm:p-8">
                             <button type="button" onClick={() => setCheckout(null)} className="absolute right-4 top-4 text-[#888] transition-colors hover:text-white" aria-label="Tutup">✕</button>
 
-                            {paidDone ? (
-                                <div className="py-6 text-center">
-                                    <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-400/10 text-2xl">✓</div>
-                                    <h3 className="text-xl font-bold text-white">Pembayaran diterima!</h3>
-                                    <p className="mt-3 text-sm leading-relaxed text-[#A1A1AA]">
-                                        Begitu pembayaran terkonfirmasi, email berisi <span className="text-white">email &amp; password login</span> otomatis dikirim ke <span className="text-white">{form.email}</span>. Cek inbox (dan folder spam) kamu ya.
-                                    </p>
-                                    <button type="button" onClick={() => setCheckout(null)} className="mt-6 w-full rounded-lg bg-emerald-400 py-2.5 text-sm font-semibold text-black transition-colors hover:bg-emerald-300">
-                                        Selesai
-                                    </button>
-                                </div>
-                            ) : (
-                                <>
+                            <div>
                                     <span className="inline-block rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-xs font-medium text-emerald-300">
                                         {CHECKOUT_PLANS[checkout]?.title} · {CHECKOUT_PLANS[checkout]?.price}
                                     </span>
@@ -949,6 +942,17 @@ export default function Landing() {
                                                 value={form.name}
                                                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                                                 placeholder="Nama kamu"
+                                                className="w-full rounded-lg border border-[#222] bg-[#0D0D0D] px-3 py-2 text-sm text-[#EDEDED] placeholder-[#555] focus:border-emerald-400/50 focus:outline-none focus:ring-1 focus:ring-emerald-400/30"
+                                            />
+                                        </label>
+                                        <label className="block">
+                                            <span className="mb-1.5 block text-sm font-medium text-[#D4D4D8]">Nomor HP</span>
+                                            <input
+                                                type="tel"
+                                                inputMode="numeric"
+                                                value={form.phone}
+                                                onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                                                placeholder="0812xxxxxxxx"
                                                 className="w-full rounded-lg border border-[#222] bg-[#0D0D0D] px-3 py-2 text-sm text-[#EDEDED] placeholder-[#555] focus:border-emerald-400/50 focus:outline-none focus:ring-1 focus:ring-emerald-400/30"
                                             />
                                         </label>
@@ -975,8 +979,7 @@ export default function Landing() {
                                         </button>
                                         <p className="text-center text-xs text-[#666]">Transfer · QRIS · OVO · Gopay · Dana · Kartu</p>
                                     </form>
-                                </>
-                            )}
+                            </div>
                         </div>
                     </div>
                 )}

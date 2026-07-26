@@ -34,10 +34,11 @@ class MidtransService
                     'price' => $order->amount,
                     'quantity' => 1,
                 ]],
-                'customer_details' => [
+                'customer_details' => array_filter([
                     'first_name' => $order->name ?: 'Pelanggan',
                     'email' => $order->email,
-                ],
+                    'phone' => $order->phone,
+                ]),
             ]);
 
         if (! $response->successful() || ! $response->json('token')) {

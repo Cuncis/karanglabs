@@ -34,11 +34,14 @@ class CheckoutTest extends TestCase
         $this->postJson(route('checkout.store'), [
             'email' => 'buyer@example.com',
             'name' => 'Buyer',
+            'phone' => '081234567890',
             'plan' => 'early-access',
         ])->assertOk()->assertJson(['token' => 'snap-token-123']);
 
         $this->assertDatabaseHas('orders', [
             'email' => 'buyer@example.com',
+            'name' => 'Buyer',
+            'phone' => '081234567890',
             'plan' => 'early-access',
             'amount' => 99000,
             'status' => 'pending',
@@ -117,5 +120,25 @@ class CheckoutTest extends TestCase
     {
         $this->postJson(route('checkout.finalize'), ['order_id' => 'KL-DOESNOTEXIST'])
             ->assertStatus(404);
+    }
+
+    public function test_the_success_page_renders_with_the_order_email(): void
+    {
+        $order = Order::factory()->paid()->create(['email' => 'done@buyer.com']);
+
+        $this->get(route('checkout.success', ['order' => $order->order_id]))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('CheckoutSuccess')
+                ->where('email', 'done@buyer.com'));
+    }
+
+    public function test_the_success_page_renders_without_a_known_order(): void
+    {
+        $this->get(route('checkout.success', ['order' => 'KL-NOPE']))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('CheckoutSuccess')
+                ->where('email', null));
     }
 }

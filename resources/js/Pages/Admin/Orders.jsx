@@ -101,6 +101,7 @@ export default function Orders() {
                                 <td className="px-5 py-4">
                                     <div className="font-medium text-[#18181B] dark:text-white">{o.name || '-'}</div>
                                     <div className="text-xs text-[#9CA3AF] dark:text-[#666]">{o.email}</div>
+                                    {o.phone && <div className="text-xs text-[#9CA3AF] dark:text-[#666]">{o.phone}</div>}
                                 </td>
                                 <td className="px-5 py-4 text-[#52525B] dark:text-[#A1A1AA]">{o.plan}</td>
                                 <td className="px-5 py-4 text-[#27272A] dark:text-[#EDEDED]">{rupiah(o.amount)}</td>

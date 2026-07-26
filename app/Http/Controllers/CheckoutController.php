@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Inertia\Inertia;
+use Inertia\Response;
 use Throwable;
 
 class CheckoutController extends Controller
@@ -32,6 +34,7 @@ class CheckoutController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => ['nullable', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255'],
+            'phone' => ['nullable', 'string', 'max:32'],
             'plan' => ['required', 'string', Rule::in(array_keys($plans))],
         ]);
 
@@ -49,6 +52,7 @@ class CheckoutController extends Controller
             'order_id' => 'KL-'.strtoupper(Str::random(12)),
             'email' => $validated['email'],
             'name' => $validated['name'] ?? null,
+            'phone' => $validated['phone'] ?? null,
             'plan' => $validated['plan'],
             'amount' => $plan['amount'],
             'status' => 'pending',
@@ -101,5 +105,20 @@ class CheckoutController extends Controller
         }
 
         return response()->json(['status' => $transactionStatus ?? 'pending']);
+    }
+
+    /**
+     * Full-page confirmation shown after a successful payment. We look the
+     * email up server-side from the order reference so no personal data ever
+     * rides in the URL.
+     */
+    public function success(Request $request): Response
+    {
+        $order = Order::where('order_id', $request->query('order'))->first();
+
+        return Inertia::render('CheckoutSuccess', [
+            'email' => $order?->email,
+            'planTitle' => $order ? config("studio.plans.{$order->plan}.name") : null,
+        ]);
     }
 }

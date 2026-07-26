@@ -16,6 +16,7 @@ class Order extends Model
         'order_id',
         'email',
         'name',
+        'phone',
         'plan',
         'amount',
         'status',
