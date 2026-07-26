@@ -1,6 +1,6 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
-import { Users as UsersIcon, ShieldCheck, KeyRound, UserRound, Check, Download } from 'lucide-react';
+import { Users as UsersIcon, ShieldCheck, KeyRound, UserRound, Check, Download, Trash2, AlertTriangle } from 'lucide-react';
 import StudioLayout from '@/Layouts/StudioLayout';
 
 function formatDate(value) {
@@ -36,6 +36,8 @@ export default function Users() {
     const { users, roles, stats, auth, hasPackage } = usePage().props;
     const [savedId, setSavedId] = useState(null);
     const [savingId, setSavingId] = useState(null);
+    const [confirming, setConfirming] = useState(null);
+    const [deleting, setDeleting] = useState(false);
 
     const changeRole = (user, role) => {
         if (role === user.role) return;
@@ -47,6 +49,16 @@ export default function Users() {
                 setTimeout(() => setSavedId(null), 2500);
             },
             onFinish: () => setSavingId(null),
+        });
+    };
+
+    const deleteUser = () => {
+        if (!confirming) return;
+        setDeleting(true);
+        router.delete(route('admin.users.destroy', { user: confirming.id }), {
+            preserveScroll: true,
+            onSuccess: () => setConfirming(null),
+            onFinish: () => setDeleting(false),
         });
     };
 
@@ -83,11 +95,13 @@ export default function Users() {
                             <th className="px-5 py-3 font-medium">License</th>
                             <th className="px-5 py-3 font-medium">Bergabung</th>
                             <th className="px-5 py-3 font-medium">Ubah level</th>
+                            <th className="px-5 py-3 text-right font-medium">Aksi</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-[#EBEBEE] dark:divide-[#1a1a1a]">
                         {users.map((u) => {
                             const isSelf = u.id === auth?.user?.id;
+                            const isProtected = isSelf || u.is_email_admin;
                             return (
                                 <tr key={u.id} className="transition-colors hover:bg-[#EFEFF1] dark:hover:bg-[#161616]">
                                     <td className="px-5 py-4">
@@ -119,12 +133,63 @@ export default function Users() {
                                             </div>
                                         )}
                                     </td>
+                                    <td className="px-5 py-4 text-right">
+                                        {isProtected ? (
+                                            <span className="text-xs text-[#B4B4BB] dark:text-[#555]">-</span>
+                                        ) : (
+                                            <button
+                                                type="button"
+                                                onClick={() => setConfirming(u)}
+                                                className="inline-flex items-center gap-1.5 rounded-md border border-red-300/60 dark:border-red-500/30 px-3 py-1.5 text-xs font-medium text-red-600 dark:text-red-400 transition-colors hover:bg-red-50 dark:hover:bg-red-500/10"
+                                                title="Hapus user"
+                                            >
+                                                <Trash2 className="h-3.5 w-3.5" /> Hapus
+                                            </button>
+                                        )}
+                                    </td>
                                 </tr>
                             );
                         })}
                     </tbody>
                 </table>
             </div>
+
+            {confirming && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => !deleting && setConfirming(null)} />
+                    <div className="relative w-full max-w-md rounded-2xl border border-[#E4E4E7] dark:border-[#222] bg-white dark:bg-[#111] p-6 shadow-xl">
+                        <div className="flex items-start gap-4">
+                            <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-red-100 dark:bg-red-500/15">
+                                <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400" />
+                            </div>
+                            <div className="min-w-0">
+                                <h3 className="text-lg font-semibold text-[#18181B] dark:text-white">Hapus user?</h3>
+                                <p className="mt-1 text-sm text-[#52525B] dark:text-[#A1A1AA]">
+                                    Akun <span className="font-medium text-[#18181B] dark:text-white">{confirming.name}</span> ({confirming.email}) akan dihapus permanen beserta akses Studio-nya. Tindakan ini tidak bisa dibatalkan.
+                                </p>
+                            </div>
+                        </div>
+                        <div className="mt-6 flex justify-end gap-3">
+                            <button
+                                type="button"
+                                onClick={() => setConfirming(null)}
+                                disabled={deleting}
+                                className="rounded-lg border border-[#E4E4E7] dark:border-[#333] px-4 py-2 text-sm font-medium text-[#52525B] dark:text-[#A1A1AA] transition-colors hover:bg-[#EFEFF1] dark:hover:bg-[#1A1A1A] disabled:opacity-50"
+                            >
+                                Batal
+                            </button>
+                            <button
+                                type="button"
+                                onClick={deleteUser}
+                                disabled={deleting}
+                                className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-red-700 disabled:opacity-50"
+                            >
+                                <Trash2 className="h-4 w-4" /> {deleting ? 'Menghapus...' : 'Hapus permanen'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </StudioLayout>
     );
 }

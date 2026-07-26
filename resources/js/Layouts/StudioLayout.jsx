@@ -28,7 +28,7 @@ export default function StudioLayout({ children }) {
     const currentUrl = usePage().url;
     const [open, setOpen] = useState(false);
     const [theme, setTheme] = useState(
-        () => (typeof document !== 'undefined' && !document.documentElement.classList.contains('dark')) ? 'light' : 'dark',
+        () => (typeof document !== 'undefined' && document.documentElement.classList.contains('dark')) ? 'dark' : 'light',
     );
 
     const toggleTheme = () => {

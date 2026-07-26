@@ -72,6 +72,54 @@ class AdminUsersTest extends TestCase
             ->assertSessionHasErrors('role');
     }
 
+    public function test_an_admin_can_delete_a_user(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $member = User::factory()->create();
+
+        $this->actingAs($admin)
+            ->delete(route('admin.users.destroy', $member))
+            ->assertRedirect();
+
+        $this->assertNull($member->fresh());
+    }
+
+    public function test_an_admin_cannot_delete_themselves(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        $this->actingAs($admin)
+            ->delete(route('admin.users.destroy', $admin))
+            ->assertForbidden();
+
+        $this->assertNotNull($admin->fresh());
+    }
+
+    public function test_the_primary_admin_email_cannot_be_deleted(): void
+    {
+        config(['studio.admin_emails' => ['owner@example.com']]);
+        $admin = User::factory()->admin()->create();
+        $owner = User::factory()->create(['email' => 'owner@example.com']);
+
+        $this->actingAs($admin)
+            ->delete(route('admin.users.destroy', $owner))
+            ->assertForbidden();
+
+        $this->assertNotNull($owner->fresh());
+    }
+
+    public function test_a_non_admin_cannot_delete_a_user(): void
+    {
+        $member = User::factory()->create();
+        $victim = User::factory()->create();
+
+        $this->actingAs($member)
+            ->delete(route('admin.users.destroy', $victim))
+            ->assertForbidden();
+
+        $this->assertNotNull($victim->fresh());
+    }
+
     public function test_an_admin_can_download_the_whitelabel_package(): void
     {
         config(['studio.reseller.download_url' => 'https://files.example.com/whitelabel.zip']);

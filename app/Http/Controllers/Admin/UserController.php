@@ -65,4 +65,19 @@ class UserController extends Controller
 
         return back()->with('success', "Role {$user->email} diperbarui jadi {$validated['role']}.");
     }
+
+    /**
+     * Permanently remove a user. Only admins can do this, and never to
+     * themselves or the primary admin configured via ADMIN_EMAILS.
+     */
+    public function destroy(Request $request, User $user): RedirectResponse
+    {
+        abort_if($user->id === $request->user()->id, 403, 'Kamu tidak bisa menghapus akun sendiri.');
+        abort_if(in_array($user->email, config('studio.admin_emails', []), true), 403, 'Admin utama tidak bisa dihapus.');
+
+        $email = $user->email;
+        $user->delete();
+
+        return back()->with('success', "User {$email} dihapus.");
+    }
 }

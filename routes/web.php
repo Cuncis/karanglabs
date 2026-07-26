@@ -62,7 +62,6 @@ Route::get('/ai-tools', function (Request $request) {
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::get('/planner', function () {
         return Inertia::render('Planner');
@@ -131,6 +130,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/orders/{order}/resend', [OrderController::class, 'resend'])->name('admin.orders.resend');
         Route::get('/users', [UserController::class, 'index'])->name('admin.users');
         Route::patch('/users/{user}/role', [UserController::class, 'updateRole'])->name('admin.users.role');
+        Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('admin.users.destroy');
         Route::get('/whitelabel/download', WhitelabelController::class)->name('admin.whitelabel.download');
     });
 

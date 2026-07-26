@@ -4,14 +4,14 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        {{-- Apply the saved Studio theme before paint to avoid a flash (defaults to dark). --}}
+        {{-- Apply the saved Studio theme before paint to avoid a flash (defaults to light). --}}
         <script>
             (function () {
                 try {
                     var t = localStorage.getItem('studioTheme');
-                    if (t === 'light') { document.documentElement.classList.remove('dark'); }
-                    else { document.documentElement.classList.add('dark'); }
-                } catch (e) { document.documentElement.classList.add('dark'); }
+                    if (t === 'dark') { document.documentElement.classList.add('dark'); }
+                    else { document.documentElement.classList.remove('dark'); }
+                } catch (e) { document.documentElement.classList.remove('dark'); }
             })();
         </script>
 
