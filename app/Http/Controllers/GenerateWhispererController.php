@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Http\Client\ConnectionException;
 
 class GenerateWhispererController extends Controller
 {
@@ -12,13 +12,13 @@ class GenerateWhispererController extends Controller
     {
         $validated = $request->validate([
             'prompt' => 'required|string',
-            'type' => 'required|string|in:regex,query,schema'
+            'type' => 'required|string|in:regex,query,schema',
         ]);
 
-        $userPrompt = "Task Type: " . $validated['type'] . "\n";
-        $userPrompt .= "Description: " . $validated['prompt'] . "\n";
+        $userPrompt = 'Task Type: '.$validated['type']."\n";
+        $userPrompt .= 'Description: '.$validated['prompt']."\n";
 
-        $systemPrompt = <<<EOT
+        $systemPrompt = <<<'EOT'
 You are an expert senior developer specializing in Regular Expressions, Database Queries (SQL, Laravel Eloquent, MongoDB, etc), and Data Schemas.
 The user will provide a "Task Type" (regex, query, or schema) and a plain English description of what they need.
 Your job is to generate the precise code and explain it.
@@ -29,7 +29,11 @@ Return your response as a JSON object with exactly these keys:
 - "explanation": A concise, step-by-step explanation of how the code works. Use markdown for formatting.
 - "test_cases": A markdown formatted string showing examples of what matches/works and what doesn't, or example input/output data.
 
-Return ONLY valid JSON. No markdown fences, no preamble, no explanation outside the JSON object. Ensure all newlines inside strings are properly escaped as \\n.
+CRITICAL RULES:
+1. NEVER use the "—" (em dash) symbol, as it strongly implies AI generation. Use commas, hyphens (-), or separate sentences instead.
+2. NEVER use raw emoji characters anywhere in the output.
+
+Return ONLY valid JSON. No markdown fences, no preamble, no explanation outside the JSON object. Ensure all newlines inside strings are properly escaped as \n.
 EOT;
 
         try {
@@ -45,8 +49,8 @@ EOT;
                 'max_tokens' => 4096,
                 'system' => $systemPrompt,
                 'messages' => [
-                    ['role' => 'user', 'content' => $userPrompt]
-                ]
+                    ['role' => 'user', 'content' => $userPrompt],
+                ],
             ]);
         } catch (ConnectionException $e) {
             return response()->json([
@@ -79,8 +83,9 @@ EOT;
 
         $json = json_decode($content, true);
 
-        if (!$json && json_last_error() !== JSON_ERROR_NONE) {
+        if (! $json && json_last_error() !== JSON_ERROR_NONE) {
             $error_msg = json_last_error_msg();
+
             return response()->json(['error' => 'Invalid JSON from AI. ('.$error_msg.')', 'raw' => $content], 500);
         }
 

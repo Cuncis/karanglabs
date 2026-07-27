@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Http\Client\ConnectionException;
 
 class GenerateSocializerController extends Controller
 {
@@ -14,14 +14,14 @@ class GenerateSocializerController extends Controller
             'content' => 'required|string|max:5000',
         ]);
 
-        $prompt = "Source Content: " . $validated['content'] . "\n";
+        $prompt = 'Source Content: '.$validated['content']."\n";
 
-        $systemPrompt = <<<EOT
+        $systemPrompt = <<<'EOT'
 You are an expert Social Media Manager and Content Creator. The user will provide a paragraph or rough draft of content. Your job is to convert and repurpose this content into 6 distinct styles tailored for different platforms: Instagram, Twitter/X, Facebook, YouTube (Shorts/Community), TikTok, and LinkedIn.
 
 CRITICAL RULES:
 1. Make it sound extremely natural and human-written. Do NOT sound like an AI.
-2. Minimize the use of raw emojis. Use them sparingly and only where a real human would.
+2. NEVER use raw emoji characters anywhere in the output.
 3. NEVER use the "—" (em dash) symbol, as it strongly implies AI generation. Use normal commas or separate sentences.
 4. Include appropriate hashtags for each platform at the end of the post.
 5. Adapt the tone correctly:
@@ -35,7 +35,7 @@ CRITICAL RULES:
 Return your response as a JSON object with exactly these keys: "instagram", "twitter", "facebook", "youtube", "tiktok", "linkedin".
 Each key should contain a string which is the fully formatted post for that platform.
 
-Return ONLY valid JSON. No markdown fences, no preamble, no explanation outside the JSON object. Ensure all newlines inside strings are properly escaped as \\n.
+Return ONLY valid JSON. No markdown fences, no preamble, no explanation outside the JSON object. Ensure all newlines inside strings are properly escaped as \n.
 EOT;
 
         try {
@@ -51,8 +51,8 @@ EOT;
                 'max_tokens' => 4096,
                 'system' => $systemPrompt,
                 'messages' => [
-                    ['role' => 'user', 'content' => $prompt]
-                ]
+                    ['role' => 'user', 'content' => $prompt],
+                ],
             ]);
         } catch (ConnectionException $e) {
             return response()->json([
@@ -85,8 +85,9 @@ EOT;
 
         $json = json_decode($content, true);
 
-        if (!$json && json_last_error() !== JSON_ERROR_NONE) {
+        if (! $json && json_last_error() !== JSON_ERROR_NONE) {
             $error_msg = json_last_error_msg();
+
             return response()->json(['error' => 'Invalid JSON from AI. ('.$error_msg.')', 'raw' => $content], 500);
         }
 

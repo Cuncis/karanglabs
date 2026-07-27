@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Http\Client\ConnectionException;
 
 class GeneratePlanController extends Controller
 {
@@ -17,30 +17,34 @@ class GeneratePlanController extends Controller
             'answers' => 'nullable|array',
         ]);
 
-        $prompt = "User Idea: " . $validated['idea'] . "\n\n";
-        $prompt .= "Tech Preference: " . $validated['tech_preference'] . "\n";
-        if (!empty($validated['tech_stack'])) {
-            $prompt .= "Tech Stack: " . $validated['tech_stack'] . "\n";
+        $prompt = 'User Idea: '.$validated['idea']."\n\n";
+        $prompt .= 'Tech Preference: '.$validated['tech_preference']."\n";
+        if (! empty($validated['tech_stack'])) {
+            $prompt .= 'Tech Stack: '.$validated['tech_stack']."\n";
         }
-        if (!empty($validated['answers'])) {
+        if (! empty($validated['answers'])) {
             $prompt .= "Answers to Clarifying Questions:\n";
             foreach ($validated['answers'] as $index => $answer) {
-                $prompt .= "- Q" . ($index + 1) . ": " . $answer . "\n";
+                $prompt .= '- Q'.($index + 1).': '.$answer."\n";
             }
         }
 
-        $systemPrompt = <<<EOT
+        $systemPrompt = <<<'EOT'
 You are an expert product manager and software architect. The user has described a software project idea and answered some clarifying questions. Your job is to turn their input into a structured product plan.
 
 Return your response as a JSON object with exactly these four keys:
 - "summary": A 2-3 sentence plain-language summary of the project and its core value.
-- "feature_map": A markdown string listing features grouped by phase. Format: ## Phase 1\\n- Feature name: description\\n## Phase 2\\n...
+- "feature_map": A markdown string listing features grouped by phase. Format: ## Phase 1\n- Feature name: description\n## Phase 2\n...
 - "prd": A full Product Requirements Document in markdown. Include: Executive Summary, Product Overview table, Target Users, Goals & KPIs table, Feature Breakdown (each feature with sub-features, user stories, acceptance criteria), Technical Requirements, Out of Scope, Risks & Mitigations table, Timeline Summary.
 - "ai_prompt": A ready-to-paste prompt the user can give to Claude Code or another AI coding tool to start building the app. It should include the tech stack, all core features with acceptance criteria, folder structure guidance, and the instruction to "build this step by step starting with the data model and authentication."
 
-Return ONLY valid JSON. No markdown fences, no preamble, no explanation outside the JSON object. Ensure all newlines inside strings are properly escaped as \\n. Do not include literal newlines or control characters inside JSON strings.
+Return ONLY valid JSON. No markdown fences, no preamble, no explanation outside the JSON object. Ensure all newlines inside strings are properly escaped as \n. Do not include literal newlines or control characters inside JSON strings.
 
 IMPORTANT: When recommending a tech stack or writing the AI prompt, you MUST use the latest technologies, specifically Laravel 13 and PHP 8.4. Be concise where possible to avoid truncation.
+
+CRITICAL RULES:
+1. NEVER use the "—" (em dash) symbol, as it strongly implies AI generation. Use commas, hyphens (-), or separate sentences instead.
+2. NEVER use raw emoji characters anywhere in the output.
 EOT;
 
         try {
@@ -56,8 +60,8 @@ EOT;
                 'max_tokens' => 8192,
                 'system' => $systemPrompt,
                 'messages' => [
-                    ['role' => 'user', 'content' => $prompt]
-                ]
+                    ['role' => 'user', 'content' => $prompt],
+                ],
             ]);
         } catch (ConnectionException $e) {
             return response()->json([
@@ -92,13 +96,13 @@ EOT;
         $json = json_decode($content, true);
 
         // If standard decode fails, try appending missing quotes/braces
-        if (!$json && json_last_error() !== JSON_ERROR_NONE) {
+        if (! $json && json_last_error() !== JSON_ERROR_NONE) {
             $fallbacks = [
-                $content . '"}',
-                $content . '}',
-                $content . '"]}',
-                $content . ']',
-                rtrim($content, '\\') . '"}',
+                $content.'"}',
+                $content.'}',
+                $content.'"]}',
+                $content.']',
+                rtrim($content, '\\').'"}',
             ];
 
             foreach ($fallbacks as $fallback) {
@@ -108,7 +112,7 @@ EOT;
                 }
             }
 
-            if (!$json) {
+            if (! $json) {
                 $error_msg = json_last_error_msg();
 
                 return response()->json(['error' => 'Invalid JSON from AI. ('.$error_msg.')', 'raw' => $content], 500);

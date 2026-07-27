@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Http\Client\ConnectionException;
 
 class GenerateMicroCopyController extends Controller
 {
@@ -12,15 +12,15 @@ class GenerateMicroCopyController extends Controller
     {
         $validated = $request->validate([
             'component_name' => 'required|string',
-            'context' => 'nullable|string'
+            'context' => 'nullable|string',
         ]);
 
-        $prompt = "Component/Screen Name: " . $validated['component_name'] . "\n";
-        if (!empty($validated['context'])) {
-            $prompt .= "Additional Context: " . $validated['context'] . "\n";
+        $prompt = 'Component/Screen Name: '.$validated['component_name']."\n";
+        if (! empty($validated['context'])) {
+            $prompt .= 'Additional Context: '.$validated['context']."\n";
         }
 
-        $systemPrompt = <<<EOT
+        $systemPrompt = <<<'EOT'
 You are an expert UX Writer and Micro-Copy Specialist. The user will provide a UI component name or screen description (e.g., "Empty Shopping Cart" or "Reset Password Form") and possibly some context. Your job is to generate perfect micro-copy for this UI in three different tones.
 
 Return your response as a JSON object with exactly these keys: "professional", "playful", and "direct".
@@ -33,7 +33,11 @@ Each of these keys must contain an object with exactly these keys (you can leave
 - "error_message": A generic error message for this context.
 - "placeholder": An example placeholder for an input field (if applicable).
 
-Return ONLY valid JSON. No markdown fences, no preamble, no explanation outside the JSON object. Ensure all newlines inside strings are properly escaped as \\n.
+CRITICAL RULES:
+1. NEVER use the "—" (em dash) symbol, as it strongly implies AI generation. Use commas, hyphens (-), or separate sentences instead.
+2. NEVER use raw emoji characters anywhere in the output.
+
+Return ONLY valid JSON. No markdown fences, no preamble, no explanation outside the JSON object. Ensure all newlines inside strings are properly escaped as \n.
 EOT;
 
         try {
@@ -49,8 +53,8 @@ EOT;
                 'max_tokens' => 4096,
                 'system' => $systemPrompt,
                 'messages' => [
-                    ['role' => 'user', 'content' => $prompt]
-                ]
+                    ['role' => 'user', 'content' => $prompt],
+                ],
             ]);
         } catch (ConnectionException $e) {
             return response()->json([
@@ -83,8 +87,9 @@ EOT;
 
         $json = json_decode($content, true);
 
-        if (!$json && json_last_error() !== JSON_ERROR_NONE) {
+        if (! $json && json_last_error() !== JSON_ERROR_NONE) {
             $error_msg = json_last_error_msg();
+
             return response()->json(['error' => 'Invalid JSON from AI. ('.$error_msg.')', 'raw' => $content], 500);
         }
 

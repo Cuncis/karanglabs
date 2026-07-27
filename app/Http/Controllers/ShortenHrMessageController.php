@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Http\Client\ConnectionException;
 
 class ShortenHrMessageController extends Controller
 {
@@ -14,17 +14,18 @@ class ShortenHrMessageController extends Controller
             'message' => 'required|string|max:4000',
         ]);
 
-        $prompt = "Original Message:\n" . $validated['message'];
+        $prompt = "Original Message:\n".$validated['message'];
 
-        $systemPrompt = <<<EOT
+        $systemPrompt = <<<'EOT'
 You are an expert Career Coach. The user will provide a draft HR / hiring manager email.
 Your task is to rewrite it to be significantly shorter, punchier, and more concise.
 
 CRITICAL RULES:
 1. Make it sound extremely natural and human-written.
 2. NEVER use the "—" (em dash) symbol.
-3. Keep the core value proposition but remove fluff. 
-4. Return ONLY the shortened message text. Do NOT wrap it in JSON. Do NOT include markdown quotes. Just the raw text.
+3. NEVER use raw emoji characters anywhere in the output.
+4. Keep the core value proposition but remove fluff.
+5. Return ONLY the shortened message text. Do NOT wrap it in JSON. Do NOT include markdown quotes. Just the raw text.
 EOT;
 
         try {
@@ -40,8 +41,8 @@ EOT;
                 'max_tokens' => 2048,
                 'system' => $systemPrompt,
                 'messages' => [
-                    ['role' => 'user', 'content' => $prompt]
-                ]
+                    ['role' => 'user', 'content' => $prompt],
+                ],
             ]);
         } catch (ConnectionException $e) {
             return response()->json([

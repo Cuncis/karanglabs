@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Http\Client\ConnectionException;
 
 class GenerateChangelogController extends Controller
 {
@@ -12,22 +12,26 @@ class GenerateChangelogController extends Controller
     {
         $validated = $request->validate([
             'commits' => 'required|string',
-            'audience' => 'required|string|in:technical,users,mixed'
+            'audience' => 'required|string|in:technical,users,mixed',
         ]);
 
-        $userPrompt = "Target Audience: " . $validated['audience'] . "\n";
-        $userPrompt .= "Raw Notes / Commits:\n" . $validated['commits'] . "\n";
+        $userPrompt = 'Target Audience: '.$validated['audience']."\n";
+        $userPrompt .= "Raw Notes / Commits:\n".$validated['commits']."\n";
 
-        $systemPrompt = <<<EOT
+        $systemPrompt = <<<'EOT'
 You are an expert Developer Advocate and Technical Writer.
 The user will provide messy technical notes, git commit messages, or a list of tasks they finished. They will also specify the target audience (technical, users, or mixed).
 Your job is to translate these raw technical notes into a polished, user-facing changelog and a promotional social media post (like a Tweet or LinkedIn post).
 
 Return your response as a JSON object with exactly these keys:
-- "changelog": A markdown formatted changelog. It should have an exciting release title, and categorize the updates (e.g., ✨ New Features, 🐛 Bug Fixes, 🛠 Under the Hood) based on the notes. Tailor the language to the requested target audience.
-- "tweet": A promotional, engaging social media post (around 200-280 characters) summarizing the update, using appropriate emojis and 2-3 relevant hashtags. Make it sound exciting!
+- "changelog": A markdown formatted changelog. It should have an exciting release title, and categorize the updates (e.g., New Features, Bug Fixes, Under the Hood) based on the notes. Tailor the language to the requested target audience.
+- "tweet": A promotional, engaging social media post (around 200-280 characters) summarizing the update, with 2-3 relevant hashtags. Make it sound exciting!
 
-Return ONLY valid JSON. No markdown fences, no preamble, no explanation outside the JSON object. Ensure all newlines inside strings are properly escaped as \\n.
+CRITICAL RULES:
+1. NEVER use the "—" (em dash) symbol, as it strongly implies AI generation. Use commas, hyphens (-), or separate sentences instead.
+2. NEVER use raw emoji characters anywhere in the output. Keep formatting to plain text and markdown headings only.
+
+Return ONLY valid JSON. No markdown fences, no preamble, no explanation outside the JSON object. Ensure all newlines inside strings are properly escaped as \n.
 EOT;
 
         try {
@@ -43,8 +47,8 @@ EOT;
                 'max_tokens' => 4096,
                 'system' => $systemPrompt,
                 'messages' => [
-                    ['role' => 'user', 'content' => $userPrompt]
-                ]
+                    ['role' => 'user', 'content' => $userPrompt],
+                ],
             ]);
         } catch (ConnectionException $e) {
             return response()->json([
@@ -77,8 +81,9 @@ EOT;
 
         $json = json_decode($content, true);
 
-        if (!$json && json_last_error() !== JSON_ERROR_NONE) {
+        if (! $json && json_last_error() !== JSON_ERROR_NONE) {
             $error_msg = json_last_error_msg();
+
             return response()->json(['error' => 'Invalid JSON from AI. ('.$error_msg.')', 'raw' => $content], 500);
         }
 

@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Http\Client\ConnectionException;
 
 class GenerateQuestionsController extends Controller
 {
@@ -14,7 +14,7 @@ class GenerateQuestionsController extends Controller
             'idea' => 'required|string|min:5',
         ]);
 
-        $systemPrompt = <<<EOT
+        $systemPrompt = <<<'EOT'
 You are an expert product manager. The user has described a software project idea. Generate exactly 5 clarifying questions that will help you deeply understand their requirements and build a better product plan.
 
 Return your response as a JSON object with exactly one key:
@@ -35,6 +35,10 @@ Guidelines for questions:
 
 Make the options highly specific and relevant to the project idea described. Do NOT use generic options.
 
+CRITICAL RULES:
+1. NEVER use the "—" (em dash) symbol, as it strongly implies AI generation. Use commas, hyphens (-), or separate sentences instead.
+2. NEVER use raw emoji characters anywhere in the output.
+
 Return ONLY valid JSON. No markdown fences, no preamble.
 EOT;
 
@@ -50,8 +54,8 @@ EOT;
                 'max_tokens' => 1024,
                 'system' => $systemPrompt,
                 'messages' => [
-                    ['role' => 'user', 'content' => 'Project idea: ' . $validated['idea']]
-                ]
+                    ['role' => 'user', 'content' => 'Project idea: '.$validated['idea']],
+                ],
             ]);
         } catch (ConnectionException $e) {
             return response()->json([
@@ -82,7 +86,7 @@ EOT;
 
         $json = json_decode($content, true);
 
-        if (!$json || !isset($json['questions'])) {
+        if (! $json || ! isset($json['questions'])) {
             return response()->json(['error' => 'Invalid response from AI.'], 500);
         }
 

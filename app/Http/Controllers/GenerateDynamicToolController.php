@@ -2,19 +2,20 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ToolHistory;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Http\Client\ConnectionException;
 
 class GenerateDynamicToolController extends Controller
 {
     public function __invoke(Request $request, $slug)
     {
         $tools = config('karangtools');
-        if (!isset($tools[$slug])) {
+        if (! isset($tools[$slug])) {
             return response()->json(['error' => 'Tool not found.'], 404);
         }
-        
+
         $tool = $tools[$slug];
 
         // Gather all inputs from request based on config
@@ -27,18 +28,20 @@ class GenerateDynamicToolController extends Controller
                 $inputData[$input['name']] = $request->input($input['name']);
             }
         }
-        
+
         $validated = $request->validate($rules);
 
-        $userPrompt = "";
+        $userPrompt = '';
         foreach ($tool['inputs'] as $input) {
             $val = $validated[$input['name']] ?? '';
             if ($val !== '') {
-                $userPrompt .= $input['label'] . ":\n" . $val . "\n\n";
+                $userPrompt .= $input['label'].":\n".$val."\n\n";
             }
         }
 
-        $systemPrompt = $tool['system_prompt'] . "\n\nReturn ONLY valid JSON with exactly these keys: " . implode(', ', array_column($tool['outputs'], 'key')) . ". No markdown fences, no preamble. Ensure all newlines inside strings are escaped.";
+        $systemPrompt = $tool['system_prompt']
+            ."\n\nCRITICAL RULES:\n1. NEVER use the \"—\" (em dash) symbol, as it strongly implies AI generation. Use commas, hyphens (-), or separate sentences instead.\n2. NEVER use raw emoji characters anywhere in the output. Keep formatting to plain text and markdown headings only."
+            ."\n\nReturn ONLY valid JSON with exactly these keys: ".implode(', ', array_column($tool['outputs'], 'key')).'. No markdown fences, no preamble. Ensure all newlines inside strings are escaped.';
 
         try {
             $response = Http::withHeaders([
@@ -53,8 +56,8 @@ class GenerateDynamicToolController extends Controller
                 'max_tokens' => 4096,
                 'system' => $systemPrompt,
                 'messages' => [
-                    ['role' => 'user', 'content' => $userPrompt]
-                ]
+                    ['role' => 'user', 'content' => $userPrompt],
+                ],
             ]);
         } catch (ConnectionException $e) {
             return response()->json([
@@ -87,12 +90,13 @@ class GenerateDynamicToolController extends Controller
 
         $json = json_decode($content, true);
 
-        if (!$json && json_last_error() !== JSON_ERROR_NONE) {
+        if (! $json && json_last_error() !== JSON_ERROR_NONE) {
             $error_msg = json_last_error_msg();
+
             return response()->json(['error' => 'Invalid JSON from AI. ('.$error_msg.')', 'raw' => $content], 500);
         }
 
-        \App\Models\ToolHistory::create([
+        ToolHistory::create([
             'user_id' => $request->user()->id,
             'tool_slug' => $slug,
             'inputs' => $validated,

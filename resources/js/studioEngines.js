@@ -100,6 +100,7 @@ export function buildPrompt(engine, values) {
     const brand = v.brand || v.name || v.hosts || 'brand ini';
     const pages = items(v.pages);
     const format = v.output || (pages.length ? MULTI_FILE_OUTPUT : OUTPUT_OPTIONS[0]);
+    const isMultiPage = pages.length > 0 || format === MULTI_FILE_OUTPUT;
 
     const parts = [
         `Kamu adalah web designer & front-end developer senior. Buatkan ${engine.label} untuk "${brand}".`,
@@ -111,13 +112,20 @@ export function buildPrompt(engine, values) {
             '- Mobile-first, responsive, aksesibel, dan loading cepat',
         ]),
         block('STRUKTUR HALAMAN', engine.sections.map((s, i) => `${i + 1}. ${s}`)),
-        pages.length ? block('HALAMAN & NAVIGASI', [
+        isMultiPage ? block('HALAMAN & NAVIGASI', [
             '- Website ini MULTI-HALAMAN (bukan satu halaman).',
-            '- Buat halaman berikut, masing-masing sebagai file HTML terpisah yang saling terhubung:',
+            pages.length
+                ? '- Buat halaman berikut, masing-masing sebagai file HTML terpisah yang saling terhubung:'
+                : '- Pecah jadi beberapa halaman terpisah sesuai section pada STRUKTUR HALAMAN di atas (mis. Beranda, Tentang, Kontak, dst), masing-masing sebagai file HTML terpisah yang saling terhubung.',
             ...pages.map((p) => `   • ${p}`),
             '- Pakai navbar/menu yang sama di semua halaman, lengkap dengan penanda halaman yang sedang aktif.',
+            '- Tiap item nav adalah link (href) ke file halaman lain yang sesuai, BUKAN anchor scroll dalam satu halaman.',
             '- Struktur section di atas diterapkan pada halaman yang relevan (umumnya halaman utama/Beranda).',
-        ]) : null,
+        ]) : block('NAVIGASI', [
+            '- Website ini SATU HALAMAN (single-page). Buat navbar sticky di header berisi link ke tiap section utama.',
+            '- Tiap item nav pakai anchor scroll ke id section terkait (contoh: #harga, #faq, #testimoni), sesuaikan nama anchor dengan section pada STRUKTUR HALAMAN di atas.',
+            '- Saat item nav diklik, halaman scroll smooth ke section tersebut (bukan reload atau pindah halaman).',
+        ]),
         block('DETAIL KONTEN', engine.details(v)),
         block('CTA & KONVERSI', engine.cta ? engine.cta(v) : []),
         block('ADD-ON', addonInstructions(v.addons)),
@@ -126,6 +134,10 @@ export function buildPrompt(engine, values) {
             '- Kode bersih & rapi, siap langsung deploy (Netlify / Vercel / GitHub Pages)',
             '- Tanpa dependency berbayar; pakai placeholder gambar bila belum ada aset',
             '- Beri komentar penanda di tiap section agar gampang diedit ulang',
+        ]),
+        block('ATURAN PENTING', [
+            '- Jangan gunakan tanda em dash (garis pisah panjang) di manapun; pakai tanda hubung biasa (-), koma, atau kalimat terpisah, supaya hasilnya tidak terlihat seperti tulisan AI.',
+            '- Untuk semua ikon (sosial media, fitur, checklist, dll), gunakan SVG inline (mis. Heroicons/Lucide/Feather) - jangan pakai emoji atau karakter ikon mentah.',
         ]),
     ];
 

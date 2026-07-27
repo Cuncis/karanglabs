@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Http\Client\ConnectionException;
 
 class GenerateJobSeekerController extends Controller
 {
@@ -20,31 +21,31 @@ class GenerateJobSeekerController extends Controller
         // Save profile to user model
         if ($user = $request->user()) {
             $user->name = $validated['name'];
-            
+
             // Only update email if it doesn't conflict
             if ($user->email !== $validated['email']) {
-                $exists = \App\Models\User::where('email', $validated['email'])->exists();
-                if (!$exists) {
+                $exists = User::where('email', $validated['email'])->exists();
+                if (! $exists) {
                     $user->email = $validated['email'];
                 }
             }
-            
+
             $user->job_background = $validated['background'];
             $user->save();
         }
 
-        $userContext = "Name: " . $validated['name'] . "\n";
-        $userContext .= "Email: " . $validated['email'] . "\n";
-        $userContext .= "Personal Background / Experience: \n" . $validated['background'] . "\n\n";
+        $userContext = 'Name: '.$validated['name']."\n";
+        $userContext .= 'Email: '.$validated['email']."\n";
+        $userContext .= "Personal Background / Experience: \n".$validated['background']."\n\n";
 
         $jobContextStr = "Target Job Context:\n";
-        if (!empty($validated['job_context'])) {
-            $jobContextStr .= $validated['job_context'] . "\n";
+        if (! empty($validated['job_context'])) {
+            $jobContextStr .= $validated['job_context']."\n";
         }
 
-        $prompt = $userContext . $jobContextStr;
+        $prompt = $userContext.$jobContextStr;
 
-        $systemPrompt = <<<EOT
+        $systemPrompt = <<<'EOT'
 You are an expert Career Coach and Professional Resume Writer. The user will provide their personal background, skills, and work experience, along with details about a specific target company and role. Your job is to convert their raw background information into two perfect formats to help them land their dream job, precisely aligned with the target role context if provided:
 1. A highly professional, impactful Resume summary and bullet points.
 2. A compelling, personalized email message (cover letter style) meant to be sent directly to HR or a hiring manager.
@@ -52,16 +53,17 @@ You are an expert Career Coach and Professional Resume Writer. The user will pro
 CRITICAL RULES:
 1. Make it sound extremely natural and human-written. Do NOT sound like an AI.
 2. NEVER use the "—" (em dash) symbol, as it strongly implies AI generation. Use normal commas, hyphens (-), or separate sentences.
-3. Structure the Resume to highlight key achievements, metrics, and core skills that match the target role's requirements.
-4. Structure the Message to be polite, confident, engaging, and directly showing value without sounding desperate. Tailor it to the company context.
-5. Do not use robotic buzzwords where simpler language works better.
-6. Fill only what the user has. Do not invent experience they do not have, but frame what they do have in the best possible light for the target role.
-7. KEEP IT CONCISE. Do not make the resume or message too long. Only include the most important, high-impact information. Avoid fluff and keep the HR message short and punchy.
+3. NEVER use raw emoji characters anywhere in the output.
+4. Structure the Resume to highlight key achievements, metrics, and core skills that match the target role's requirements.
+5. Structure the Message to be polite, confident, engaging, and directly showing value without sounding desperate. Tailor it to the company context.
+6. Do not use robotic buzzwords where simpler language works better.
+7. Fill only what the user has. Do not invent experience they do not have, but frame what they do have in the best possible light for the target role.
+8. KEEP IT CONCISE. Do not make the resume or message too long. Only include the most important, high-impact information. Avoid fluff and keep the HR message short and punchy.
 
 Return your response as a JSON object with exactly these keys: "resume", "message".
-Each key should contain a string which is the fully formatted content. Use line breaks (\\n) for formatting.
+Each key should contain a string which is the fully formatted content. Use line breaks (\n) for formatting.
 
-Return ONLY valid JSON. No markdown fences, no preamble, no explanation outside the JSON object. Ensure all newlines inside strings are properly escaped as \\n.
+Return ONLY valid JSON. No markdown fences, no preamble, no explanation outside the JSON object. Ensure all newlines inside strings are properly escaped as \n.
 EOT;
 
         try {
@@ -77,8 +79,8 @@ EOT;
                 'max_tokens' => 4096,
                 'system' => $systemPrompt,
                 'messages' => [
-                    ['role' => 'user', 'content' => $prompt]
-                ]
+                    ['role' => 'user', 'content' => $prompt],
+                ],
             ]);
         } catch (ConnectionException $e) {
             return response()->json([
@@ -111,8 +113,9 @@ EOT;
 
         $json = json_decode($content, true);
 
-        if (!$json && json_last_error() !== JSON_ERROR_NONE) {
+        if (! $json && json_last_error() !== JSON_ERROR_NONE) {
             $error_msg = json_last_error_msg();
+
             return response()->json(['error' => 'Invalid JSON from AI. ('.$error_msg.')', 'raw' => $content], 500);
         }
 
