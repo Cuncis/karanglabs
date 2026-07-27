@@ -19,12 +19,12 @@ const STEPS = [
     },
     {
         n: '02', icon: Server, title: 'Deploy gratis',
-        body: 'Simpan hasil AI sebagai file, lalu upload ke Netlify atau Vercel. Website kamu langsung online dengan alamat gratis.',
+        body: 'Zip hasil AI-nya, login ke vercel.com/drop, lalu drag & drop. Website kamu langsung live.',
         detail: [
-            'Simpan kode dari AI sebagai file bernama index.html (atau minta AI mengirim file lengkapnya).',
-            'Buka app.netlify.com/drop atau vercel.com di browser.',
-            'Drag & drop file atau folder website ke area upload.',
-            'Tunggu beberapa detik. Website kamu langsung online dengan alamat gratis, contoh: namamu.netlify.app.',
+            'Simpan semua file dari AI ke satu folder, lalu kompres jadi satu file .zip (kalau cuma satu file index.html, tidak perlu di-zip).',
+            'Buka vercel.com/drop di browser, lalu login dulu (bisa pakai akun GitHub, GitLab, atau email).',
+            'Drag & drop file .zip (atau file index.html) kamu ke area upload.',
+            'Tunggu beberapa detik. Website kamu langsung live dengan alamat gratis, contoh: namamu.vercel.app.',
             'Klik link yang muncul untuk mengecek hasilnya di HP dan laptop.',
         ],
     },
