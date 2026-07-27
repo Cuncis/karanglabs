@@ -533,6 +533,22 @@ export function findEngine(slug) {
 }
 
 /**
+ * A lean, JSON-serializable description of an engine's fields (no React icon
+ * components), sent to the backend so it can ask the AI for a random brief
+ * that matches each field's shape.
+ */
+export function fieldSchema(engine) {
+    return engine.fields.map((f) => ({
+        name: f.name,
+        type: f.type,
+        label: f.label,
+        hint: f.hint,
+        placeholder: f.placeholder,
+        options: f.options?.map((opt) => (typeof opt === 'string' ? opt : { value: opt.value, key: opt.key, label: opt.label })),
+    }));
+}
+
+/**
  * A single restrained brand accent, reused for every engine (no neon rainbow).
  * Icons stay calm; emerald is only a subtle tint on a muted surface.
  */

@@ -12,6 +12,7 @@ use App\Http\Controllers\GenerateMicroCopyController;
 use App\Http\Controllers\GeneratePlanController;
 use App\Http\Controllers\GenerateQuestionsController;
 use App\Http\Controllers\GenerateSocializerController;
+use App\Http\Controllers\GenerateStudioBriefController;
 use App\Http\Controllers\GenerateWhispererController;
 use App\Http\Controllers\MidtransNotificationController;
 use App\Http\Controllers\ProfileController;
@@ -122,6 +123,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/studio/license/download', [StudioController::class, 'download'])->name('studio.license.download');
         Route::post('/studio/projects', [StudioController::class, 'store'])->name('studio.projects.store');
         Route::delete('/studio/projects/{project}', [StudioController::class, 'destroy'])->name('studio.projects.destroy');
+        Route::post('/studio/{engine}/random-brief', GenerateStudioBriefController::class)
+            ->middleware('throttle:studio-random-brief')
+            ->name('studio.random-brief');
         Route::get('/studio/{engine}', [StudioController::class, 'engine'])->name('studio.engine');
     });
 

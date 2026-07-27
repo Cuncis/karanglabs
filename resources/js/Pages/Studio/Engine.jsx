@@ -1,8 +1,12 @@
 import { Head, useForm, usePage, router } from '@inertiajs/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Copy, Check, Save, Trash2, Wand2, Palette, X as XIcon, Star, Plus } from 'lucide-react';
+import axios from 'axios';
+import { Copy, Check, Save, Trash2, Wand2, Palette, X as XIcon, Star, Plus, Shuffle, Clock } from 'lucide-react';
 import StudioLayout from '@/Layouts/StudioLayout';
-import { findEngine, buildPrompt, ACCENT, MULTI_FILE_OUTPUT } from '@/studioEngines';
+import { findEngine, buildPrompt, fieldSchema, ACCENT, MULTI_FILE_OUTPUT } from '@/studioEngines';
+
+// Matches the `studio-random-brief` rate limiter in AppServiceProvider (1 per 2 min/user).
+const RANDOM_BRIEF_COOLDOWN_SECONDS = 120;
 
 const INPUT_BASE = 'w-full rounded-lg border border-[#E4E4E7] dark:border-[#222] bg-[#FAFAFA] dark:bg-[#0D0D0D] px-3 py-2 text-sm text-[#27272A] dark:text-[#EDEDED] placeholder-[#9CA3AF] dark:placeholder-[#555] focus:border-emerald-400/50 focus:outline-none focus:ring-1 focus:ring-emerald-400/30';
 
@@ -363,6 +367,72 @@ export default function Engine() {
 
     const form = useForm({});
 
+    // Random brief (AI-filled demo brief), rate-limited server-side to one
+    // generation per user every 2 minutes so it doesn't burn the Claude budget.
+    const [randomLoading, setRandomLoading] = useState(false);
+    const [randomError, setRandomError] = useState(null);
+    const [cooldownUntil, setCooldownUntil] = useState(0);
+    const [cooldownLeft, setCooldownLeft] = useState(0);
+
+    useEffect(() => {
+        if (!cooldownUntil) {
+            setCooldownLeft(0);
+            return;
+        }
+
+        const tick = () => {
+            const left = Math.max(0, Math.ceil((cooldownUntil - Date.now()) / 1000));
+            setCooldownLeft(left);
+            if (left <= 0) {
+                setCooldownUntil(0);
+            }
+        };
+
+        tick();
+        const id = setInterval(tick, 1000);
+
+        return () => clearInterval(id);
+    }, [cooldownUntil]);
+
+    const generateRandomBrief = async () => {
+        if (randomLoading || cooldownLeft > 0) {
+            return;
+        }
+
+        setRandomLoading(true);
+        setRandomError(null);
+
+        try {
+            const { data } = await axios.post(route('studio.random-brief', { engine: engine.slug }), {
+                fields: fieldSchema(engine),
+            });
+
+            setValues((prev) => {
+                const next = { ...prev };
+                engine.fields.forEach((field) => {
+                    if (field.type !== 'addons' && data[field.name] !== undefined) {
+                        next[field.name] = String(data[field.name]);
+                    }
+                });
+
+                return next;
+            });
+            setCooldownUntil(Date.now() + RANDOM_BRIEF_COOLDOWN_SECONDS * 1000);
+        } catch (err) {
+            if (err.response?.status === 429) {
+                const retryAfter = Number(err.response.headers?.['retry-after']) || RANDOM_BRIEF_COOLDOWN_SECONDS;
+                setCooldownUntil(Date.now() + retryAfter * 1000);
+                setRandomError('Tunggu sebentar sebelum generate lagi.');
+            } else {
+                setRandomError(err.response?.data?.error || 'Gagal generate brief acak.');
+            }
+        } finally {
+            setRandomLoading(false);
+        }
+    };
+
+    const cooldownLabel = cooldownLeft > 0 ? `${Math.floor(cooldownLeft / 60)}:${String(cooldownLeft % 60).padStart(2, '0')}` : null;
+
     const save = () => {
         const title = values.brand || values.name || values.hosts || engine.name;
         router.post(route('studio.projects.store'), {
@@ -381,17 +451,40 @@ export default function Engine() {
         <StudioLayout>
             <Head title={`${engine.name} Studio`} />
 
-            <div className="mb-8 flex items-center gap-4">
-                <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${accent.bg}`}>
-                    <engine.icon className={`h-6 w-6 ${accent.text}`} />
-                </div>
-                <div>
-                    <div className="flex items-center gap-2">
-                        <h1 className="text-2xl font-bold tracking-tight text-[#18181B] dark:text-white">{engine.name}</h1>
-                        <span className="font-mono text-xs text-[#9CA3AF] dark:text-[#555]">{engine.code}</span>
-                        {engine.star && <Star className="h-4 w-4 fill-amber-500 text-amber-500" />}
+            <div className="mb-8 flex items-start justify-between gap-4">
+                <div className="flex items-center gap-4">
+                    <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${accent.bg}`}>
+                        <engine.icon className={`h-6 w-6 ${accent.text}`} />
                     </div>
-                    <p className="text-sm text-[#71717A] dark:text-[#888]">{engine.tagline}</p>
+                    <div>
+                        <div className="flex items-center gap-2">
+                            <h1 className="text-2xl font-bold tracking-tight text-[#18181B] dark:text-white">{engine.name}</h1>
+                            <span className="font-mono text-xs text-[#9CA3AF] dark:text-[#555]">{engine.code}</span>
+                            {engine.star && <Star className="h-4 w-4 fill-amber-500 text-amber-500" />}
+                        </div>
+                        <p className="text-sm text-[#71717A] dark:text-[#888]">{engine.tagline}</p>
+                    </div>
+                </div>
+
+                <div className="flex shrink-0 flex-col items-end gap-1.5">
+                    <button
+                        type="button"
+                        onClick={generateRandomBrief}
+                        disabled={randomLoading || cooldownLeft > 0}
+                        title="Isi form dengan brief acak hasil AI"
+                        className="inline-flex items-center gap-1.5 rounded-md border border-[#D4D4D8] dark:border-[#333] px-3 py-1.5 text-xs font-medium text-[#27272A] dark:text-[#EDEDED] transition-colors hover:border-[#A1A1AA] dark:hover:border-[#555] hover:bg-[#EFEFF1] dark:hover:bg-[#161616] disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                        {randomLoading ? (
+                            <>
+                                <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-t-transparent" /> Generating...
+                            </>
+                        ) : cooldownLabel ? (
+                            <><Clock className="h-3.5 w-3.5" /> Tunggu {cooldownLabel}</>
+                        ) : (
+                            <><Shuffle className="h-3.5 w-3.5" /> Isi Acak (AI)</>
+                        )}
+                    </button>
+                    {randomError && <span className="max-w-[220px] text-right text-xs text-red-500">{randomError}</span>}
                 </div>
             </div>
 
