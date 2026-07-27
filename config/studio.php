@@ -36,8 +36,8 @@ return [
     */
 
     'plans' => [
-        'early-access' => ['name' => 'Karanglabs Studio - Early Access', 'amount' => 99000],
-        'reseller' => ['name' => 'Karanglabs Studio - Lisensi Reseller', 'amount' => 390000],
+        'early-access' => ['name' => 'Karanglabs Studio - Early Access', 'amount' => (int) env('PLAN_EARLY_ACCESS_AMOUNT', 99000)],
+        'reseller' => ['name' => 'Karanglabs Studio - Lisensi Reseller', 'amount' => (int) env('PLAN_RESELLER_AMOUNT', 390000)],
     ],
 
     /*
