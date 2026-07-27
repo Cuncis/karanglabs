@@ -1,6 +1,7 @@
 import { Head } from '@inertiajs/react';
 import { Mail, MessageCircle, BarChart3, Target, Search, MapPin } from 'lucide-react';
 import StudioLayout from '@/Layouts/StudioLayout';
+import VideoTutorialButton from '@/Components/VideoTutorialButton';
 
 const ADDONS = [
     { icon: Mail, title: 'Form Kontak / SMTP', body: 'Terima pesan pengunjung langsung ke email kamu. Minta AI menambahkan form + integrasi layanan gratis (Formspree / Web3Forms).' },
@@ -16,12 +17,15 @@ export default function Addons() {
         <StudioLayout>
             <Head title="Add-ons Studio" />
 
-            <div className="mb-10">
-                <span className="text-xs font-medium uppercase tracking-[0.2em] text-emerald-600 dark:text-emerald-400">Add-ons</span>
-                <h1 className="mt-3 text-3xl font-bold tracking-tight text-[#18181B] dark:text-white">Fitur tambahan untuk website-mu.</h1>
-                <p className="mt-3 max-w-2xl text-[#52525B] dark:text-[#A1A1AA]">
-                    Cukup centang add-on ini di bagian <span className="font-medium text-[#27272A] dark:text-white">Add-on (opsional)</span> pada form tiap engine, isi ID/endpoint kalau diminta, dan instruksinya otomatis ikut ke dalam prompt. Gratis, tanpa biaya bulanan.
-                </p>
+            <div className="mb-10 flex items-start justify-between gap-4">
+                <div>
+                    <span className="text-xs font-medium uppercase tracking-[0.2em] text-emerald-600 dark:text-emerald-400">Add-ons</span>
+                    <h1 className="mt-3 text-3xl font-bold tracking-tight text-[#18181B] dark:text-white">Fitur tambahan untuk website-mu.</h1>
+                    <p className="mt-3 max-w-2xl text-[#52525B] dark:text-[#A1A1AA]">
+                        Cukup centang add-on ini di bagian <span className="font-medium text-[#27272A] dark:text-white">Add-on (opsional)</span> pada form tiap engine, isi ID/endpoint kalau diminta, dan instruksinya otomatis ikut ke dalam prompt. Gratis, tanpa biaya bulanan.
+                    </p>
+                </div>
+                <VideoTutorialButton />
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">

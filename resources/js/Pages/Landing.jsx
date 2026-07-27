@@ -87,19 +87,37 @@ const ENGINES = [
     },
 ];
 
-const SHOWCASE = [
-    {
-        label: '/01 · landing page & toko online',
-        items: ['from-emerald-500/30 to-teal-500/10', 'from-indigo-500/30 to-purple-500/10', 'from-rose-500/30 to-orange-500/10', 'from-sky-500/30 to-cyan-500/10', 'from-amber-500/30 to-yellow-500/10', 'from-fuchsia-500/30 to-pink-500/10'],
-    },
-    {
-        label: '/02 · undangan digital & link-in-bio',
-        items: ['from-rose-500/30 to-pink-500/10', 'from-amber-500/30 to-orange-500/10', 'from-emerald-500/30 to-lime-500/10', 'from-violet-500/30 to-indigo-500/10', 'from-cyan-500/30 to-sky-500/10', 'from-fuchsia-500/30 to-rose-500/10'],
-    },
-    {
-        label: '/03 · company profile · portfolio · menu F&B',
-        items: ['from-slate-500/30 to-gray-500/10', 'from-teal-500/30 to-emerald-500/10', 'from-orange-500/30 to-red-500/10', 'from-blue-500/30 to-indigo-500/10', 'from-lime-500/30 to-green-500/10', 'from-purple-500/30 to-violet-500/10'],
-    },
+const RIMBA_KAYU_TILE = { image: 'https://cdn.libradigital.id/karanglabs/compro-rimba-kayu.png', alt: 'Company profile Rimba Kayu, hasil generate Karanglabs' };
+
+// Two independent marquee lines, 12 tiles each, scrolling opposite directions.
+const SHOWCASE_LINE_1 = [
+    RIMBA_KAYU_TILE,
+    'from-emerald-500/30 to-teal-500/10',
+    'from-indigo-500/30 to-purple-500/10',
+    'from-rose-500/30 to-orange-500/10',
+    'from-sky-500/30 to-cyan-500/10',
+    'from-amber-500/30 to-yellow-500/10',
+    'from-fuchsia-500/30 to-pink-500/10',
+    'from-teal-500/30 to-emerald-500/10',
+    'from-orange-500/30 to-red-500/10',
+    'from-blue-500/30 to-indigo-500/10',
+    'from-lime-500/30 to-green-500/10',
+    'from-purple-500/30 to-violet-500/10',
+];
+
+const SHOWCASE_LINE_2 = [
+    'from-violet-500/30 to-indigo-500/10',
+    'from-cyan-500/30 to-sky-500/10',
+    'from-fuchsia-500/30 to-rose-500/10',
+    'from-rose-500/30 to-pink-500/10',
+    'from-amber-500/30 to-orange-500/10',
+    'from-emerald-500/30 to-lime-500/10',
+    RIMBA_KAYU_TILE,
+    'from-slate-500/30 to-gray-500/10',
+    'from-teal-500/30 to-cyan-500/10',
+    'from-indigo-500/30 to-blue-500/10',
+    'from-pink-500/30 to-rose-500/10',
+    'from-green-500/30 to-emerald-500/10',
 ];
 
 const STEPS = [
@@ -187,6 +205,37 @@ function SectionLabel({ children }) {
         <span className="inline-block text-xs font-medium uppercase tracking-[0.2em] text-emerald-400">
             {children}
         </span>
+    );
+}
+
+/**
+ * An infinite horizontal marquee of square tiles. The track is the item list
+ * rendered twice back-to-back and animated from 0% to -50%, so the loop is
+ * seamless. Hovering pauses it (handy for actually looking at a tile).
+ */
+function MarqueeRow({ items, reverse = false, duration = 42 }) {
+    const track = [...items, ...items];
+
+    return (
+        <div className="group overflow-hidden">
+            <div
+                className={`flex w-max gap-4 group-hover:[animation-play-state:paused] ${reverse ? 'animate-marquee-reverse' : 'animate-marquee'}`}
+                style={{ animationDuration: `${duration}s` }}
+            >
+                {track.map((item, i) => (
+                    <div
+                        key={i}
+                        className="aspect-[1748/1240] h-40 flex-shrink-0 overflow-hidden rounded-xl border border-[#222] bg-[#141414] sm:h-48 lg:h-56"
+                    >
+                        {typeof item === 'object' && item?.image ? (
+                            <img src={item.image} alt={item.alt || ''} loading="lazy" className="h-full w-full object-cover" />
+                        ) : (
+                            <div className={`h-full w-full bg-gradient-to-br ${item}`} />
+                        )}
+                    </div>
+                ))}
+            </div>
+        </div>
     );
 }
 
@@ -537,21 +586,13 @@ export default function Landing() {
                     </section>
 
                     {/* ================================== 6 · SHOWCASE === */}
-                    <section id="showcase" className="mx-auto max-w-6xl px-6 py-24">
-                        <h2 className="max-w-3xl text-3xl font-bold tracking-tight text-white sm:text-4xl">
+                    <section id="showcase" className="py-24">
+                        <h2 className="mx-auto max-w-3xl px-6 text-3xl font-bold tracking-tight text-white sm:text-4xl">
                             Hasil real dari prompt Karanglabs, digenerate AI dalam hitungan menit.
                         </h2>
-                        <div className="mt-12 space-y-8">
-                            {SHOWCASE.map((row) => (
-                                <div key={row.label}>
-                                    <p className="mb-3 font-mono text-xs text-[#666]">{row.label}</p>
-                                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-                                        {row.items.map((_, i) => (
-                                            <div key={i} className="aspect-[4/3] rounded-lg border border-[#222] bg-[#141414]" />
-                                        ))}
-                                    </div>
-                                </div>
-                            ))}
+                        <div className="mt-12 space-y-6">
+                            <MarqueeRow items={SHOWCASE_LINE_1} duration={44} />
+                            <MarqueeRow items={SHOWCASE_LINE_2} reverse duration={38} />
                         </div>
                     </section>
 

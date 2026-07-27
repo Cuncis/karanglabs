@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import axios from 'axios';
 import { Copy, Check, Save, Trash2, Wand2, Palette, X as XIcon, Star, Plus, Shuffle, Clock } from 'lucide-react';
 import StudioLayout from '@/Layouts/StudioLayout';
+import VideoTutorialButton from '@/Components/VideoTutorialButton';
 import { findEngine, buildPrompt, fieldSchema, ACCENT, MULTI_FILE_OUTPUT } from '@/studioEngines';
 
 // Matches the `studio-random-brief` rate limiter in AppServiceProvider (1 per 2 min/user).
@@ -467,23 +468,26 @@ export default function Engine() {
                 </div>
 
                 <div className="flex shrink-0 flex-col items-end gap-1.5">
-                    <button
-                        type="button"
-                        onClick={generateRandomBrief}
-                        disabled={randomLoading || cooldownLeft > 0}
-                        title="Isi form dengan brief acak hasil AI"
-                        className="inline-flex items-center gap-1.5 rounded-md border border-[#D4D4D8] dark:border-[#333] px-3 py-1.5 text-xs font-medium text-[#27272A] dark:text-[#EDEDED] transition-colors hover:border-[#A1A1AA] dark:hover:border-[#555] hover:bg-[#EFEFF1] dark:hover:bg-[#161616] disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                        {randomLoading ? (
-                            <>
-                                <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-t-transparent" /> Generating...
-                            </>
-                        ) : cooldownLabel ? (
-                            <><Clock className="h-3.5 w-3.5" /> Tunggu {cooldownLabel}</>
-                        ) : (
-                            <><Shuffle className="h-3.5 w-3.5" /> Isi Acak (AI)</>
-                        )}
-                    </button>
+                    <div className="flex items-center gap-2">
+                        <button
+                            type="button"
+                            onClick={generateRandomBrief}
+                            disabled={randomLoading || cooldownLeft > 0}
+                            title="Isi form dengan brief acak hasil AI"
+                            className="inline-flex items-center gap-1.5 rounded-md border border-[#D4D4D8] dark:border-[#333] px-3 py-1.5 text-xs font-medium text-[#27272A] dark:text-[#EDEDED] transition-colors hover:border-[#A1A1AA] dark:hover:border-[#555] hover:bg-[#EFEFF1] dark:hover:bg-[#161616] disabled:cursor-not-allowed disabled:opacity-40"
+                        >
+                            {randomLoading ? (
+                                <>
+                                    <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-t-transparent" /> Generating...
+                                </>
+                            ) : cooldownLabel ? (
+                                <><Clock className="h-3.5 w-3.5" /> Tunggu {cooldownLabel}</>
+                            ) : (
+                                <><Shuffle className="h-3.5 w-3.5" /> Isi Acak (AI)</>
+                            )}
+                        </button>
+                        <VideoTutorialButton />
+                    </div>
                     {randomError && <span className="max-w-[220px] text-right text-xs text-red-500">{randomError}</span>}
                 </div>
             </div>

@@ -2,6 +2,7 @@ import { Head, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import { KeyRound, Copy, Check, Download, Upload, Palette, Repeat, Clock, ShieldCheck } from 'lucide-react';
 import StudioLayout from '@/Layouts/StudioLayout';
+import VideoTutorialButton from '@/Components/VideoTutorialButton';
 
 const STEPS = [
     { icon: Download, title: 'Download paket', body: 'Ambil file whitelabel lengkap (website + sistem login & dashboard member).' },
@@ -24,16 +25,19 @@ export default function License() {
         <StudioLayout>
             <Head title="Lisensi Reseller Studio" />
 
-            <div className="mb-10">
-                <span className="inline-flex items-center gap-1.5 text-xs font-medium uppercase tracking-[0.2em] text-emerald-600 dark:text-emerald-400">
-                    <KeyRound className="h-3.5 w-3.5" /> Lisensi Reseller
-                </span>
-                <h1 className="mt-3 text-3xl font-bold tracking-tight text-[#18181B] dark:text-white">Whitelabel &amp; hak jual kembali.</h1>
-                <p className="mt-3 max-w-2xl text-[#52525B] dark:text-[#A1A1AA]">
-                    {isAdmin && !licenseKey
-                        ? 'Kamu login sebagai admin. Kamu bisa mengelola dan mengunduh paket whitelabel di sini untuk keperluan testing atau distribusi.'
-                        : 'Kamu punya lisensi reseller. Rebrand paket ini, jual dengan hargamu sendiri, dan simpan 100% keuntungannya.'}
-                </p>
+            <div className="mb-10 flex items-start justify-between gap-4">
+                <div>
+                    <span className="inline-flex items-center gap-1.5 text-xs font-medium uppercase tracking-[0.2em] text-emerald-600 dark:text-emerald-400">
+                        <KeyRound className="h-3.5 w-3.5" /> Lisensi Reseller
+                    </span>
+                    <h1 className="mt-3 text-3xl font-bold tracking-tight text-[#18181B] dark:text-white">Whitelabel &amp; hak jual kembali.</h1>
+                    <p className="mt-3 max-w-2xl text-[#52525B] dark:text-[#A1A1AA]">
+                        {isAdmin && !licenseKey
+                            ? 'Kamu login sebagai admin. Kamu bisa mengelola dan mengunduh paket whitelabel di sini untuk keperluan testing atau distribusi.'
+                            : 'Kamu punya lisensi reseller. Rebrand paket ini, jual dengan hargamu sendiri, dan simpan 100% keuntungannya.'}
+                    </p>
+                </div>
+                <VideoTutorialButton />
             </div>
 
             {/* License key */}

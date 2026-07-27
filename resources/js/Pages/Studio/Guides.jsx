@@ -1,15 +1,14 @@
 import { Head } from '@inertiajs/react';
 import { useState } from 'react';
-import { Rocket, Globe, Link as LinkIcon, Server, Play, X, ArrowRight } from 'lucide-react';
+import { Rocket, Globe, Link as LinkIcon, Server, X, ArrowRight } from 'lucide-react';
 import StudioLayout from '@/Layouts/StudioLayout';
 import Modal from '@/Components/Modal';
+import VideoTutorialButton from '@/Components/VideoTutorialButton';
 
 const STEPS = [
     {
         n: '01', icon: Rocket, title: 'Paste prompt ke AI',
         body: 'Buka ChatGPT, Claude, atau Gemini. Paste prompt yang kamu generate di Studio. AI akan menghasilkan kode website lengkap.',
-        // Ganti null dengan URL embed video kamu (YouTube/Vimeo/MP4). Contoh: 'https://www.youtube.com/embed/xxxxxxx'
-        video: null,
         detail: [
             'Di Studio, pilih engine sesuai jenis website kamu, isi brief singkat, lalu klik tombol Copy pada kotak prompt.',
             'Buka salah satu AI: ChatGPT (chat.openai.com), Claude (claude.ai), atau Gemini (gemini.google.com). Versi gratisnya sudah cukup.',
@@ -21,7 +20,6 @@ const STEPS = [
     {
         n: '02', icon: Server, title: 'Deploy gratis',
         body: 'Simpan hasil AI sebagai file, lalu upload ke Netlify atau Vercel. Website kamu langsung online dengan alamat gratis.',
-        video: null,
         detail: [
             'Simpan kode dari AI sebagai file bernama index.html (atau minta AI mengirim file lengkapnya).',
             'Buka app.netlify.com/drop atau vercel.com di browser.',
@@ -33,7 +31,6 @@ const STEPS = [
     {
         n: '03', icon: Globe, title: 'Beli domain sendiri (opsional)',
         body: 'Mau alamat sendiri seperti tokokamu.com? Beli domain mulai ±15rb-150rb/tahun. Langkah ini opsional.',
-        video: null,
         detail: [
             'Pikirkan nama domain yang kamu mau, contoh: tokokamu.com atau namakamu.id.',
             'Buka penyedia domain seperti Niagahoster, Domainesia, atau Cloudflare.',
@@ -45,7 +42,6 @@ const STEPS = [
     {
         n: '04', icon: LinkIcon, title: 'Connect domain',
         body: 'Hubungkan domain yang kamu beli ke website di Netlify/Vercel lewat pengaturan DNS yang kami pandu.',
-        video: null,
         detail: [
             'Buka dashboard Netlify/Vercel kamu, masuk ke menu Domain settings.',
             'Klik "Add custom domain", lalu masukkan nama domain kamu.',
@@ -61,33 +57,6 @@ const ADDONS = [
     'Meta (Facebook) Pixel', 'SEO dasar', 'Google Maps embed',
 ];
 
-function VideoPlaceholder({ step }) {
-    // Kalau step.video diisi, tampilkan video embed. Kalau belum, tampilkan placeholder.
-    if (step.video) {
-        return (
-            <div className="aspect-video w-full overflow-hidden rounded-xl border border-[#E4E4E7] dark:border-[#222] bg-black">
-                <iframe
-                    src={step.video}
-                    title={step.title}
-                    className="h-full w-full"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                />
-            </div>
-        );
-    }
-
-    return (
-        <div className="flex aspect-video w-full flex-col items-center justify-center rounded-xl border border-dashed border-[#D4D4D8] dark:border-[#333] bg-[#FAFAFA] dark:bg-[#0D0D0D] text-center">
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-400/10">
-                <Play className="h-6 w-6 translate-x-0.5 text-emerald-600 dark:text-emerald-400" fill="currentColor" />
-            </div>
-            <p className="mt-4 text-sm font-medium text-[#52525B] dark:text-[#A1A1AA]">Video tutorial akan tampil di sini</p>
-            <p className="mt-1 text-xs text-[#9CA3AF] dark:text-[#555]">Ganti placeholder ini dengan video kamu</p>
-        </div>
-    );
-}
-
 export default function Guides() {
     const [active, setActive] = useState(null);
 
@@ -95,12 +64,15 @@ export default function Guides() {
         <StudioLayout>
             <Head title="Panduan Online Studio" />
 
-            <div className="mb-10">
-                <span className="text-xs font-medium uppercase tracking-[0.2em] text-emerald-600 dark:text-emerald-400">Panduan Online</span>
-                <h1 className="mt-3 text-3xl font-bold tracking-tight text-[#18181B] dark:text-white">Dari nol sampai website tayang.</h1>
-                <p className="mt-3 max-w-2xl text-[#52525B] dark:text-[#A1A1AA]">
-                    Empat langkah, bahasa awam. Klik tiap kartu untuk lihat panduan lengkap plus video tutorialnya.
-                </p>
+            <div className="mb-10 flex items-start justify-between gap-4">
+                <div>
+                    <span className="text-xs font-medium uppercase tracking-[0.2em] text-emerald-600 dark:text-emerald-400">Panduan Online</span>
+                    <h1 className="mt-3 text-3xl font-bold tracking-tight text-[#18181B] dark:text-white">Dari nol sampai website tayang.</h1>
+                    <p className="mt-3 max-w-2xl text-[#52525B] dark:text-[#A1A1AA]">
+                        Empat langkah, bahasa awam. Klik tiap kartu untuk lihat panduan lengkapnya.
+                    </p>
+                </div>
+                <VideoTutorialButton />
             </div>
 
             <div className="space-y-4">
@@ -153,10 +125,7 @@ export default function Guides() {
                         </button>
 
                         <div className="p-6 sm:p-8">
-                            {/* Video placeholder (ganti dengan video tutorial kamu) */}
-                            <VideoPlaceholder step={active} />
-
-                            <div className="mt-6 flex items-center gap-3">
+                            <div className="flex items-center gap-3">
                                 <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-emerald-400/10">
                                     <active.icon className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
                                 </div>

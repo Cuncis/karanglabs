@@ -1,6 +1,7 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import { Sparkles, FolderOpen, Layers, ArrowRight, Star } from 'lucide-react';
 import StudioLayout from '@/Layouts/StudioLayout';
+import VideoTutorialButton from '@/Components/VideoTutorialButton';
 import { ENGINES, ACCENT } from '@/studioEngines';
 
 function timeAgo(dateString) {
@@ -21,14 +22,17 @@ export default function Dashboard() {
         <StudioLayout>
             <Head title="Dashboard Studio" />
 
-            <div className="mb-10">
-                <span className="inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-300">
-                    <Sparkles className="h-3.5 w-3.5" /> Selamat datang, Member
-                </span>
-                <h1 className="mt-4 text-3xl font-bold tracking-tight text-[#18181B] dark:text-white">Halo, {firstName} 👋</h1>
-                <p className="mt-2 max-w-2xl text-[#52525B] dark:text-[#A1A1AA]">
-                    Pilih jenis website yang mau kamu buat, isi brief singkat, dan Studio akan meracik prompt siap-paste ke AI favoritmu.
-                </p>
+            <div className="mb-10 flex items-start justify-between gap-4">
+                <div>
+                    <span className="inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-300">
+                        <Sparkles className="h-3.5 w-3.5" /> Selamat datang, Member
+                    </span>
+                    <h1 className="mt-4 text-3xl font-bold tracking-tight text-[#18181B] dark:text-white">Halo, {firstName} 👋</h1>
+                    <p className="mt-2 max-w-2xl text-[#52525B] dark:text-[#A1A1AA]">
+                        Pilih jenis website yang mau kamu buat, isi brief singkat, dan Studio akan meracik prompt siap-paste ke AI favoritmu.
+                    </p>
+                </div>
+                <VideoTutorialButton />
             </div>
 
             {/* Stats */}
