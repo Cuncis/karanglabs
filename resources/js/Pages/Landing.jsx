@@ -947,9 +947,12 @@ export default function Landing() {
                             </div>
                             <div className="mt-12 flex flex-col gap-2 border-t border-[#222] pt-6 text-xs text-[#555] sm:flex-row sm:justify-between">
                                 <span>© 2026 Karanglabs · karanglabs.cloud · v1.0 · early access build</span>
-                                {auth?.isAdmin && (
-                                    <Link href={route('home')} className="transition-colors hover:text-white">AI Tools Directory →</Link>
-                                )}
+                                <div className="flex items-center gap-4">
+                                    <Link href={route('terms')} className="transition-colors hover:text-white">Syarat &amp; Kebijakan Refund</Link>
+                                    {auth?.isAdmin && (
+                                        <Link href={route('home')} className="transition-colors hover:text-white">AI Tools Directory →</Link>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     </footer>
@@ -1015,6 +1018,12 @@ export default function Landing() {
                                             {paying ? 'Memproses...' : `Bayar ${CHECKOUT_PLANS[checkout]?.price}`}
                                         </button>
                                         <p className="text-center text-xs text-[#666]">Transfer · QRIS · OVO · Gopay · Dana · Kartu</p>
+                                        <p className="text-center text-xs text-[#666]">
+                                            Dengan membayar, kamu menyetujui{' '}
+                                            <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-[#888] underline underline-offset-2 transition-colors hover:text-white">
+                                                Syarat &amp; Kebijakan Refund
+                                            </a>.
+                                        </p>
                                     </form>
                             </div>
                         </div>

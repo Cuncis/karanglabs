@@ -35,6 +35,11 @@ Route::get('/', function (MidtransService $midtrans) {
     ]);
 })->name('landing');
 
+// Terms of Service & Refund Policy (public — required for payment gateway).
+Route::get('/terms', function () {
+    return Inertia::render('Terms');
+})->name('terms');
+
 // Public payment endpoints (Midtrans).
 Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
 Route::post('/checkout/finalize', [CheckoutController::class, 'finalize'])->name('checkout.finalize');
