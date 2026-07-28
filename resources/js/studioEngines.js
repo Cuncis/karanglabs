@@ -129,10 +129,15 @@ export function buildPrompt(engine, values) {
         block('DETAIL KONTEN', engine.details(v)),
         block('CTA & KONVERSI', engine.cta ? engine.cta(v) : []),
         block('ADD-ON', addonInstructions(v.addons)),
+        block('GAMBAR', [
+            `- Gambar hero/banner utama: pakai foto asli dari Unsplash yang temanya nyambung dengan "${brand}" (${engine.label}${v.style ? `, gaya ${v.style}` : ''}), format URL https://images.unsplash.com/photo-[ID]?auto=format&fit=crop&w=1600&q=80 dengan ID foto yang benar-benar ada dan relevan.`,
+            '- Tambahkan atribut onerror di tag <img> gambar hero, isi dengan fallback ke URL placeholder (lihat poin berikutnya) supaya kalau link Unsplash gagal dimuat, tidak muncul gambar rusak/broken.',
+            '- Untuk semua gambar lain selain hero (galeri, produk, tim, testimoni, dsb), jangan cari foto asli satu-satu; cukup pakai placeholder dari https://placehold.co/{lebar}x{tinggi}/EEEEEE/999999?text={label singkat sesuai isi gambar}.',
+            '- Setiap tag <img> wajib punya src yang pasti valid (Unsplash dengan fallback, atau placehold.co); jangan pernah biarkan src kosong atau menunjuk ke URL yang belum tentu ada.',
+        ]),
         block('OUTPUT', [
             line('Format', format),
             '- Kode bersih & rapi, siap langsung deploy (Netlify / Vercel / GitHub Pages)',
-            '- Tanpa dependency berbayar; pakai placeholder gambar bila belum ada aset',
             '- Beri komentar penanda di tiap section agar gampang diedit ulang',
         ]),
         block('ATURAN PENTING', [
