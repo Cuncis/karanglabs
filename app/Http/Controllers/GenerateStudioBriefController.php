@@ -4,11 +4,40 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
 class GenerateStudioBriefController extends Controller
 {
+    /** @var array<int, string> */
+    private const CATEGORIES = [
+        'kuliner rumahan / catering', 'kedai kopi & minuman kekinian', 'fashion & aksesoris',
+        'kecantikan & skincare lokal', 'barbershop / salon pria', 'jasa renovasi & tukang',
+        'bengkel & servis motor/mobil', 'klinik & layanan kesehatan', 'kursus & bimbingan belajar',
+        'startup teknologi / SaaS', 'pertanian & agribisnis', 'event organizer & wedding',
+        'fotografi & videografi', 'travel & open trip wisata', 'gym & personal trainer',
+        'kerajinan tangan / handmade', 'ekspedisi & logistik', 'konsultan keuangan / investasi',
+        'firma hukum & konsultan', 'agen properti & real estate', 'pet shop & pet grooming',
+        'percetakan & merchandise custom', 'komunitas game & esports', 'studio musik & event hiburan',
+        'laundry kiloan', 'coworking space', 'toko oleh-oleh khas daerah', 'peternakan & budidaya ikan',
+        'jasa cleaning service', 'les privat musik/bahasa',
+    ];
+
+    /** @var array<int, string> */
+    private const CITIES = [
+        'Jakarta', 'Bandung', 'Surabaya', 'Yogyakarta', 'Semarang', 'Medan', 'Makassar',
+        'Denpasar', 'Malang', 'Palembang', 'Balikpapan', 'Pontianak', 'Manado', 'Solo',
+        'Bogor', 'Bekasi', 'Tangerang', 'Batam', 'Pekanbaru', 'Banjarmasin',
+    ];
+
+    /** @var array<int, string> */
+    private const VIBES = [
+        'modern minimalis', 'tradisional autentik', 'playful & colorful', 'elegan premium',
+        'ramah keluarga', 'edgy & bold', 'earthy natural', 'kekinian anak muda',
+        'profesional korporat', 'homey & cozy', 'industrial', 'girly & pastel',
+    ];
+
     public function __invoke(Request $request, string $engine)
     {
         abort_unless(array_key_exists($engine, config('studio.engines')), 404);
@@ -26,7 +55,16 @@ class GenerateStudioBriefController extends Controller
         $engineLabel = config('studio.engines')[$engine];
         $schema = json_encode($validated['fields'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
 
-        $userPrompt = "Engine: {$engineLabel}\n\nSkema field (JSON):\n{$schema}\n\nRandom seed: ".Str::random(8);
+        $category = Arr::random(self::CATEGORIES);
+        $city = Arr::random(self::CITIES);
+        $vibe = Arr::random(self::VIBES);
+
+        $userPrompt = "Engine: {$engineLabel}\n\nSkema field (JSON):\n{$schema}\n\n"
+            ."Batasan acak yang WAJIB dipakai untuk brief kali ini (jangan diganti dengan ide lain):\n"
+            ."- Kategori bisnis/topik: {$category}\n"
+            ."- Kota/daerah asal: {$city}\n"
+            ."- Vibe/gaya brand: {$vibe}\n\n"
+            .'Random seed: '.Str::random(8);
 
         $systemPrompt = <<<'EOT'
 You are a creative Indonesian copywriter demoing a random-brief generator for a website builder tool. Given a JSON schema describing form fields, invent a completely random, realistic, creative brief to fill those fields, as if a real (but different every time) Indonesian business or person requested this website.
@@ -41,10 +79,11 @@ Return your response as a JSON object whose keys are EXACTLY the "name" values f
 - "addons": always return an empty string.
 
 CRITICAL RULES:
-1. Be creative and random every time. Never reuse the same brand, business idea, or wording across generations; use the random seed as inspiration for variety.
-2. NEVER use the em dash symbol; use commas, hyphens (-), or separate sentences instead.
-3. NEVER use raw emoji characters anywhere in the output.
-4. Keep every value realistic, concise, and directly usable as-is (no placeholders like "[isi di sini]").
+1. Strictly follow the "Batasan acak" (category, city, vibe) given in the user message for this brief. Invent the actual brand name, product names, and copy yourself, they must fit those constraints but be a completely new idea you have not used before.
+2. Never reuse a brand name, business idea, or wording from a previous generation. Avoid generic/cliche Indonesian business-name patterns entirely (e.g. anything with "Nusantara", "Dapur ...", "Kedai ..." as a lazy default) unless the random category genuinely calls for it, and even then invent a distinctive, specific name, not a textbook example.
+3. NEVER use the em dash symbol; use commas, hyphens (-), or separate sentences instead.
+4. NEVER use raw emoji characters anywhere in the output.
+5. Keep every value realistic, concise, and directly usable as-is (no placeholders like "[isi di sini]").
 
 Return ONLY valid JSON. No markdown fences, no preamble, no explanation outside the JSON object.
 EOT;
