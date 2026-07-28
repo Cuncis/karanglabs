@@ -8,49 +8,104 @@ import VideoTutorialButton from '@/Components/VideoTutorialButton';
 const STEPS = [
     {
         n: '01', icon: Rocket, title: 'Paste prompt ke AI',
-        body: 'Buka ChatGPT, Claude, atau Gemini. Paste prompt yang kamu generate di Studio. AI akan menghasilkan kode website lengkap.',
+        body: 'Buka Claude, ChatGPT, atau Gemini. Paste prompt yang kamu generate di Studio. AI akan menghasilkan kode website lengkap.',
         detail: [
-            'Di Studio, pilih engine sesuai jenis website kamu, isi brief singkat, lalu klik tombol Copy pada kotak prompt.',
-            'Buka salah satu AI: ChatGPT (chat.openai.com), Claude (claude.ai), atau Gemini (gemini.google.com). Versi gratisnya sudah cukup.',
-            'Paste prompt ke kolom chat, lalu tekan Enter.',
-            'Tunggu AI selesai membuat kodenya. Kalau mau paling gampang di-deploy, tambahkan kalimat "buat dalam satu file HTML".',
-            'Salin seluruh kode hasil AI untuk dipakai di langkah berikutnya.',
+            'Di Studio, pilih engine sesuai jenis website kamu, isi brief singkat, lalu klik tombol **Copy** pada kotak prompt.',
+            'Buka salah satu AI: Claude, ChatGPT, atau Gemini. *Versi gratisnya sudah cukup, tidak perlu berlangganan.*',
+            'Paste prompt ke kolom chat, lalu tekan **Enter**.',
+            'Tunggu AI selesai membuat kodenya. Kalau mau paling gampang di-deploy, tambahkan kalimat **"buat dalam satu file HTML"**.',
+            '**Salin seluruh kode** hasil AI untuk dipakai di langkah berikutnya.',
         ],
     },
     {
         n: '02', icon: Server, title: 'Deploy gratis',
         body: 'Zip hasil AI-nya, login ke vercel.com/drop, lalu drag & drop. Website kamu langsung live.',
         detail: [
-            'Simpan semua file dari AI ke satu folder, lalu kompres jadi satu file .zip (kalau cuma satu file index.html, tidak perlu di-zip).',
-            'Buka vercel.com/drop di browser, lalu login dulu (bisa pakai akun GitHub, GitLab, atau email).',
-            'Drag & drop file .zip (atau file index.html) kamu ke area upload.',
-            'Tunggu beberapa detik. Website kamu langsung live dengan alamat gratis, contoh: namamu.vercel.app.',
-            'Klik link yang muncul untuk mengecek hasilnya di HP dan laptop.',
+            'Simpan semua file dari AI ke satu folder, lalu kompres jadi satu file **.zip** *(kalau cuma satu file index.html, tidak perlu di-zip)*.',
+            'Buka vercel.com/drop di browser, lalu **login dulu** *(bisa pakai akun GitHub, GitLab, atau email)*.',
+            '**Drag & drop** file .zip (atau file index.html) kamu ke area upload.',
+            'Tunggu beberapa detik, website kamu **langsung live** dengan alamat gratis, contoh: *namamu.vercel.app*.',
+            '**Klik link** yang muncul untuk mengecek hasilnya di HP dan laptop.',
         ],
     },
     {
         n: '03', icon: Globe, title: 'Beli domain sendiri (opsional)',
         body: 'Mau alamat sendiri seperti tokokamu.com? Beli domain mulai ±15rb-150rb/tahun. Langkah ini opsional.',
         detail: [
-            'Pikirkan nama domain yang kamu mau, contoh: tokokamu.com atau namakamu.id.',
+            'Pikirkan nama domain yang kamu mau, contoh: *tokokamu.com* atau *namakamu.id*.',
             'Buka penyedia domain seperti Niagahoster, Domainesia, atau Cloudflare.',
-            'Cek ketersediaan nama, lalu pilih ekstensi (.com, .id, .my.id) sesuai budget.',
-            'Selesaikan pembayaran (mulai ±15rb-150rb/tahun tergantung ekstensi).',
+            '**Cek ketersediaan nama**, lalu pilih ekstensi (.com, .id, .my.id) sesuai budget.',
+            'Selesaikan pembayaran *(mulai ±15rb-150rb/tahun tergantung ekstensi)*.',
             'Domain kamu siap dihubungkan ke website di langkah berikutnya.',
         ],
     },
     {
         n: '04', icon: LinkIcon, title: 'Connect domain',
-        body: 'Hubungkan domain yang kamu beli ke website di Netlify/Vercel lewat pengaturan DNS yang kami pandu.',
+        body: 'Hubungkan domain yang kamu beli ke website di Vercel/Netlify lewat pengaturan DNS yang kami pandu.',
         detail: [
-            'Buka dashboard Netlify/Vercel kamu, masuk ke menu Domain settings.',
-            'Klik "Add custom domain", lalu masukkan nama domain kamu.',
-            'Salin nilai DNS yang ditampilkan (biasanya berupa A record atau CNAME).',
-            'Buka panel pengaturan domain kamu, tambahkan record DNS sesuai instruksi tadi.',
-            'Tunggu beberapa menit (kadang sampai 1 jam) sampai domain kamu aktif. Selesai!',
+            'Buka dashboard Vercel/Netlify kamu, masuk ke menu **Domain settings**.',
+            'Klik **"Add custom domain"**, lalu masukkan nama domain kamu.',
+            '**Salin nilai DNS** yang ditampilkan *(biasanya berupa A record atau CNAME)*.',
+            'Buka panel pengaturan domain kamu, **tambahkan record DNS** sesuai instruksi tadi.',
+            'Tunggu beberapa menit *(kadang sampai 1 jam)* sampai domain kamu aktif. **Selesai!**',
         ],
     },
 ];
+
+// Claude listed first: it's the priority AI for this Studio's prompt style.
+const LINK_TERMS = [
+    { text: 'Claude', url: 'https://claude.ai/new' },
+    { text: 'ChatGPT', url: 'https://chatgpt.com/' },
+    { text: 'Gemini', url: 'https://gemini.google.com/app' },
+    { text: 'vercel.com/drop', url: 'https://vercel.com/drop' },
+    { text: 'Vercel', url: 'https://vercel.com/dashboard' },
+    { text: 'Netlify', url: 'https://app.netlify.com/' },
+];
+
+const LINK_TERM_PATTERN = LINK_TERMS.map((t) => t.text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
+const LINKIFY_URLS = Object.fromEntries(LINK_TERMS.map((t) => [t.text, t.url]));
+
+// Parses **bold** (key action, pay attention) and *italic* (side note/example) markers
+// in addition to auto-linking known AI/tool names, so step text can flag what matters.
+const RICH_TEXT_PATTERN = new RegExp(`(\\*\\*[^*]+\\*\\*|\\*[^*]+\\*|${LINK_TERM_PATTERN})`, 'g');
+
+function linkifyKnownTerms(text) {
+    return text.split(RICH_TEXT_PATTERN).filter((part) => part !== '').map((part, i) => {
+        if (part.startsWith('**') && part.endsWith('**')) {
+            return (
+                <strong key={`b-${i}`} className="font-semibold text-emerald-700 dark:text-emerald-400">
+                    {part.slice(2, -2)}
+                </strong>
+            );
+        }
+
+        if (part.startsWith('*') && part.endsWith('*')) {
+            return (
+                <em key={`i-${i}`} className="italic text-[#71717A] dark:text-[#888]">
+                    {part.slice(1, -1)}
+                </em>
+            );
+        }
+
+        const url = LINKIFY_URLS[part];
+        if (!url) {
+            return part;
+        }
+
+        return (
+            <a
+                key={`l-${i}`}
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-emerald-600 underline decoration-dotted underline-offset-2 hover:text-emerald-500 dark:text-emerald-400 dark:hover:text-emerald-300"
+                onClick={(e) => e.stopPropagation()}
+            >
+                {part}
+            </a>
+        );
+    });
+}
 
 const ADDONS = [
     'Form kontak / SMTP', 'Tombol WhatsApp mengambang', 'Google Analytics',
@@ -93,7 +148,7 @@ export default function Guides() {
                                 <span className="font-mono text-sm text-emerald-600/70 dark:text-emerald-400/70">{s.n}</span>
                                 <h2 className="text-lg font-semibold text-[#18181B] dark:text-white">{s.title}</h2>
                             </div>
-                            <p className="mt-1 text-sm leading-relaxed text-[#52525B] dark:text-[#A1A1AA]">{s.body}</p>
+                            <p className="mt-1 text-sm leading-relaxed text-[#52525B] dark:text-[#A1A1AA]">{linkifyKnownTerms(s.body)}</p>
                         </div>
                         <span className="hidden flex-shrink-0 items-center gap-1 text-sm font-medium text-emerald-600 dark:text-emerald-400 opacity-0 transition-opacity group-hover:opacity-100 sm:flex">
                             Lihat panduan <ArrowRight className="h-4 w-4" />
@@ -135,7 +190,7 @@ export default function Guides() {
                                 </div>
                             </div>
 
-                            <p className="mt-4 text-sm leading-relaxed text-[#52525B] dark:text-[#A1A1AA]">{active.body}</p>
+                            <p className="mt-4 text-sm leading-relaxed text-[#52525B] dark:text-[#A1A1AA]">{linkifyKnownTerms(active.body)}</p>
 
                             <ol className="mt-6 space-y-3">
                                 {active.detail.map((d, i) => (
@@ -143,7 +198,7 @@ export default function Guides() {
                                         <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-emerald-400 text-xs font-bold text-black">
                                             {i + 1}
                                         </span>
-                                        <span className="pt-0.5 text-sm leading-relaxed text-[#27272A] dark:text-[#EDEDED]">{d}</span>
+                                        <span className="pt-0.5 text-sm leading-relaxed text-[#27272A] dark:text-[#EDEDED]">{linkifyKnownTerms(d)}</span>
                                     </li>
                                 ))}
                             </ol>
