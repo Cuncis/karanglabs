@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
-use App\Services\MidtransService;
+use App\Services\MayarService;
 use App\Services\OrderFulfillmentService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -18,23 +18,25 @@ use Throwable;
 class CheckoutController extends Controller
 {
     public function __construct(
-        private MidtransService $midtrans,
+        private MayarService $mayar,
         private OrderFulfillmentService $fulfillment,
     ) {}
 
     /**
-     * Create an order and a Midtrans Snap token for the browser to pay with.
+     * Create an order and a Mayar invoice, returning the hosted payment link
+     * the browser redirects to.
      */
     public function store(Request $request): JsonResponse
     {
         $plans = config('studio.plans');
 
         // Validate manually so this JSON endpoint always returns JSON errors
-        // (the global handler only renders JSON for api/* paths).
+        // (the global handler only renders JSON for api/* paths). Mayar requires
+        // a mobile number on every invoice, so phone is mandatory here.
         $validator = Validator::make($request->all(), [
             'name' => ['nullable', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255'],
-            'phone' => ['nullable', 'string', 'max:32'],
+            'phone' => ['required', 'string', 'max:32'],
             'plan' => ['required', 'string', Rule::in(array_keys($plans))],
         ]);
 
@@ -52,33 +54,34 @@ class CheckoutController extends Controller
             'order_id' => 'KL-'.strtoupper(Str::random(12)),
             'email' => $validated['email'],
             'name' => $validated['name'] ?? null,
-            'phone' => $validated['phone'] ?? null,
+            'phone' => $validated['phone'],
             'plan' => $validated['plan'],
             'amount' => $plan['amount'],
             'status' => 'pending',
         ]);
 
         try {
-            $snap = $this->midtrans->createSnapTransaction($order);
+            $invoice = $this->mayar->createInvoice($order);
         } catch (Throwable $e) {
-            Log::error('Midtrans checkout failed', ['order' => $order->order_id, 'error' => $e->getMessage()]);
+            Log::error('Mayar checkout failed', ['order' => $order->order_id, 'error' => $e->getMessage()]);
 
             return response()->json([
                 'message' => 'Pembayaran belum bisa diproses. Coba lagi sebentar lagi.',
             ], 422);
         }
 
+        $order->forceFill(['gateway_ref' => $invoice['id']])->save();
+
         return response()->json([
-            'token' => $snap['token'],
+            'link' => $invoice['link'],
             'order_id' => $order->order_id,
         ]);
     }
 
     /**
-     * Confirm a payment straight after the Snap popup closes. We ask Midtrans
-     * for the transaction status server-side and fulfill it if paid — this is
-     * the reliable path when the async webhook can't reach the app (e.g. local
-     * dev), and a harmless no-op once the webhook has already fulfilled it.
+     * Confirm a payment on demand by asking Mayar for the invoice status
+     * server-side and fulfilling it if paid. Idempotent and safe to call
+     * alongside the webhook — a harmless no-op once already fulfilled.
      */
     public function finalize(Request $request): JsonResponse
     {
@@ -94,27 +97,28 @@ class CheckoutController extends Controller
             return response()->json(['status' => 'paid']);
         }
 
-        $status = $this->midtrans->transactionStatus($order->order_id);
-        $transactionStatus = $status['transaction_status'] ?? null;
-        $fraudStatus = $status['fraud_status'] ?? 'accept';
-
-        if (in_array($transactionStatus, ['capture', 'settlement'], true) && $fraudStatus === 'accept') {
+        if ($order->gateway_ref && $this->mayar->isPaidInvoice($order->gateway_ref)) {
             $this->fulfillment->fulfill($order);
 
             return response()->json(['status' => 'paid']);
         }
 
-        return response()->json(['status' => $transactionStatus ?? 'pending']);
+        return response()->json(['status' => 'pending']);
     }
 
     /**
-     * Full-page confirmation shown after a successful payment. We look the
-     * email up server-side from the order reference so no personal data ever
-     * rides in the URL.
+     * Full-page confirmation shown after Mayar redirects the buyer back. We
+     * confirm the payment server-side and fulfill on the spot (webhook is the
+     * backup), and look the email up from the order reference so no personal
+     * data ever rides in the URL.
      */
     public function success(Request $request): Response
     {
         $order = Order::where('order_id', $request->query('order'))->first();
+
+        if ($order && ! $order->isPaid() && $order->gateway_ref && $this->mayar->isPaidInvoice($order->gateway_ref)) {
+            $this->fulfillment->fulfill($order);
+        }
 
         return Inertia::render('CheckoutSuccess', [
             'email' => $order?->email,

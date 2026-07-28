@@ -13,7 +13,7 @@ class OrderFulfillmentService
     /**
      * Fulfill a paid order: mark it paid, provision the buyer's account, and
      * email their login details. Idempotent — safe to call from both the
-     * Midtrans webhook and the client-triggered finalize endpoint.
+     * Mayar webhook and the client-triggered finalize endpoint.
      */
     public function fulfill(Order $order): void
     {

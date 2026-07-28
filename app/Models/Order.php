@@ -20,6 +20,7 @@ class Order extends Model
         'plan',
         'amount',
         'status',
+        'gateway_ref',
         'user_id',
         'paid_at',
     ];

@@ -28,9 +28,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin' => EnsureAdmin::class,
         ]);
 
-        // Midtrans posts its payment notification server-to-server (no CSRF token).
+        // Mayar posts its payment webhook server-to-server (no CSRF token).
         $middleware->validateCsrfTokens(except: [
-            'midtrans/notification',
+            'mayar/notification',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

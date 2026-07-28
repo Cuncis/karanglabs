@@ -58,7 +58,7 @@ export default function Terms() {
 
                     <Section id="pembelian" title="2. Pembelian & Aktivasi Akun">
                         <p>
-                            Pembayaran diproses melalui payment gateway resmi (Midtrans). Setelah pembayaran
+                            Pembayaran diproses melalui payment gateway resmi (Mayar). Setelah pembayaran
                             berhasil, akses Karanglabs Studio akan diaktifkan secara otomatis dan kredensial
                             login (email &amp; kata sandi) dikirim ke alamat email yang kamu daftarkan saat
                             checkout. Pastikan alamat email yang kamu masukkan benar dan aktif.

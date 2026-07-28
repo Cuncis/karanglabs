@@ -24,6 +24,7 @@ class OrderFactory extends Factory
             'plan' => 'early-access',
             'amount' => 99000,
             'status' => 'pending',
+            'gateway_ref' => fake()->uuid(),
         ];
     }
 

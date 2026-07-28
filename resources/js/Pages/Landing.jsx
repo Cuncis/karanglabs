@@ -289,7 +289,7 @@ const CHECKOUT_PLANS = {
 };
 
 export default function Landing() {
-    const { auth, midtransClientKey, snapUrl } = usePage().props;
+    const { auth } = usePage().props;
     const [menuOpen, setMenuOpen] = useState(false);
     const [openFaq, setOpenFaq] = useState(0);
     const typed = useTypewriter(PROMPT_TEXT);
@@ -300,18 +300,6 @@ export default function Landing() {
     const [form, setForm] = useState({ name: '', email: '', phone: '' });
     const [paying, setPaying] = useState(false);
     const [checkoutError, setCheckoutError] = useState('');
-
-    // Load Midtrans Snap.js once (only if configured).
-    useEffect(() => {
-        if (!snapUrl || !midtransClientKey || document.getElementById('midtrans-snap')) {
-            return;
-        }
-        const script = document.createElement('script');
-        script.id = 'midtrans-snap';
-        script.src = snapUrl;
-        script.setAttribute('data-client-key', midtransClientKey);
-        document.body.appendChild(script);
-    }, [snapUrl, midtransClientKey]);
 
     const openCheckout = (plan) => {
         setForm({ name: '', email: '', phone: '' });
@@ -325,25 +313,14 @@ export default function Landing() {
         setCheckoutError('');
         try {
             const { data } = await window.axios.post('/checkout', { ...form, plan: checkout });
-            if (!window.snap) {
+            if (!data.link) {
                 setCheckoutError('Sistem pembayaran belum siap. Muat ulang halaman lalu coba lagi.');
                 setPaying(false);
                 return;
             }
-            const finalizeAndRedirect = async () => {
-                try {
-                    await window.axios.post('/checkout/finalize', { order_id: data.order_id });
-                } catch (e) {
-                    // Provisioning also runs via webhook, so a failed finalize is non-fatal.
-                }
-                window.location.assign('/checkout/success?order=' + encodeURIComponent(data.order_id));
-            };
-            window.snap.pay(data.token, {
-                onSuccess: finalizeAndRedirect,
-                onPending: finalizeAndRedirect,
-                onError: () => { setCheckoutError('Pembayaran gagal diproses. Coba lagi.'); setPaying(false); },
-                onClose: () => { setPaying(false); },
-            });
+            // Redirect to Mayar's hosted payment page. On success Mayar sends
+            // the buyer back to /checkout/success, which provisions the account.
+            window.location.href = data.link;
         } catch (err) {
             setCheckoutError(err?.response?.data?.message || 'Terjadi kesalahan. Coba lagi sebentar lagi.');
             setPaying(false);
@@ -986,10 +963,11 @@ export default function Landing() {
                                             />
                                         </label>
                                         <label className="block">
-                                            <span className="mb-1.5 block text-sm font-medium text-[#D4D4D8]">Nomor HP</span>
+                                            <span className="mb-1.5 block text-sm font-medium text-[#D4D4D8]">Nomor HP <span className="text-emerald-400">*</span></span>
                                             <input
                                                 type="tel"
                                                 inputMode="numeric"
+                                                required
                                                 value={form.phone}
                                                 onChange={(e) => setForm({ ...form, phone: e.target.value })}
                                                 placeholder="0812xxxxxxxx"

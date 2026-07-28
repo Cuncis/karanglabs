@@ -14,7 +14,7 @@ use App\Http\Controllers\GenerateQuestionsController;
 use App\Http\Controllers\GenerateSocializerController;
 use App\Http\Controllers\GenerateStudioBriefController;
 use App\Http\Controllers\GenerateWhispererController;
-use App\Http\Controllers\MidtransNotificationController;
+use App\Http\Controllers\MayarNotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ResellerDownloadController;
 use App\Http\Controllers\ShortenHrMessageController;
@@ -22,17 +22,13 @@ use App\Http\Controllers\StudioController;
 use App\Http\Controllers\TerminalSnippetController;
 use App\Models\ToolHistory;
 use App\Models\User;
-use App\Services\MidtransService;
 use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/', function (MidtransService $midtrans) {
-    return Inertia::render('Landing', [
-        'midtransClientKey' => config('services.midtrans.client_key'),
-        'snapUrl' => $midtrans->snapJsUrl(),
-    ]);
+Route::get('/', function () {
+    return Inertia::render('Landing');
 })->name('landing');
 
 // Terms of Service & Refund Policy (public — required for payment gateway).
@@ -40,11 +36,11 @@ Route::get('/terms', function () {
     return Inertia::render('Terms');
 })->name('terms');
 
-// Public payment endpoints (Midtrans).
+// Public payment endpoints (Mayar).
 Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
 Route::post('/checkout/finalize', [CheckoutController::class, 'finalize'])->name('checkout.finalize');
 Route::get('/checkout/success', [CheckoutController::class, 'success'])->name('checkout.success');
-Route::post('/midtrans/notification', [MidtransNotificationController::class, 'handle'])->name('midtrans.notification');
+Route::post('/mayar/notification', [MayarNotificationController::class, 'handle'])->name('mayar.notification');
 
 // Whitelabel download — protected by a signed token + license-key validation.
 Route::get('/reseller/download', ResellerDownloadController::class)

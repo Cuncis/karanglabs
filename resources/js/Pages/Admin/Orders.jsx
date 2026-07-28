@@ -60,7 +60,7 @@ export default function Orders() {
             <SubNav active="orders" hasPackage={hasPackage} />
 
             <h1 className="text-2xl font-bold tracking-tight text-[#18181B] dark:text-white">Orders</h1>
-            <p className="mt-1 text-sm text-[#71717A] dark:text-[#888]">Semua transaksi yang masuk lewat Midtrans.</p>
+            <p className="mt-1 text-sm text-[#71717A] dark:text-[#888]">Semua transaksi yang masuk lewat Mayar.</p>
 
             {/* Stats */}
             <div className="mt-8 grid gap-4 sm:grid-cols-3">

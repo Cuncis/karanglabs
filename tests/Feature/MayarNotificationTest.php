@@ -6,49 +6,66 @@ use App\Mail\StudioAccessMail;
 use App\Models\Order;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Testing\TestResponse;
 use Tests\TestCase;
 
-class MidtransNotificationTest extends TestCase
+class MayarNotificationTest extends TestCase
 {
     use RefreshDatabase;
 
-    private string $serverKey = 'SB-Mid-server-test';
+    private string $webhookToken = 'hook-secret';
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        config(['services.midtrans.server_key' => $this->serverKey]);
+        config([
+            'services.mayar.api_key' => 'mayar-test-key',
+            'services.mayar.webhook_token' => $this->webhookToken,
+            'services.mayar.is_production' => false,
+        ]);
+
         Mail::fake();
     }
 
-    /**
-     * Build a signed Midtrans notification payload for an order.
-     *
-     * @return array<string, string>
-     */
-    private function payload(Order $order, string $status = 'settlement', string $fraud = 'accept'): array
+    private function fakeInvoiceStatus(string $status): void
     {
-        $statusCode = '200';
-        $gross = number_format($order->amount, 2, '.', '');
-        $signature = hash('sha512', $order->order_id.$statusCode.$gross.$this->serverKey);
+        Http::fake([
+            'api.mayar.club/hl/v2/invoices/*' => Http::response(['data' => ['status' => $status]]),
+        ]);
+    }
 
+    /**
+     * @return array<string, mixed>
+     */
+    private function payload(Order $order, string $event = 'payment.received'): array
+    {
         return [
-            'order_id' => $order->order_id,
-            'status_code' => $statusCode,
-            'gross_amount' => $gross,
-            'signature_key' => $signature,
-            'transaction_status' => $status,
-            'fraud_status' => $fraud,
+            'event' => $event,
+            'data' => [
+                'id' => $order->gateway_ref,
+                'paymentLinkId' => $order->gateway_ref,
+                'status' => true,
+                'amount' => $order->amount,
+                'extraData' => ['order_id' => $order->order_id],
+            ],
         ];
     }
 
-    public function test_a_valid_settlement_provisions_a_new_account_with_access(): void
+    private function notify(array $payload, ?string $token = null): TestResponse
     {
+        return $this->withHeaders(['X-Callback-Token' => $token ?? $this->webhookToken])
+            ->postJson(route('mayar.notification'), $payload);
+    }
+
+    public function test_a_valid_payment_provisions_a_new_account_with_access(): void
+    {
+        $this->fakeInvoiceStatus('paid');
         $order = Order::factory()->create(['email' => 'new@buyer.com']);
 
-        $this->postJson(route('midtrans.notification'), $this->payload($order))->assertOk();
+        $this->notify($this->payload($order))->assertOk();
 
         $this->assertDatabaseHas('orders', ['id' => $order->id, 'status' => 'paid']);
 
@@ -61,9 +78,10 @@ class MidtransNotificationTest extends TestCase
 
     public function test_a_reseller_order_flags_the_account_and_mints_a_license(): void
     {
+        $this->fakeInvoiceStatus('paid');
         $order = Order::factory()->create(['email' => 'reseller@buyer.com', 'plan' => 'reseller', 'amount' => 390000]);
 
-        $this->postJson(route('midtrans.notification'), $this->payload($order))->assertOk();
+        $this->notify($this->payload($order))->assertOk();
 
         $user = User::where('email', 'reseller@buyer.com')->first();
         $this->assertTrue($user->isReseller());
@@ -74,9 +92,10 @@ class MidtransNotificationTest extends TestCase
 
     public function test_an_early_access_order_does_not_flag_reseller(): void
     {
+        $this->fakeInvoiceStatus('paid');
         $order = Order::factory()->create(['email' => 'basic@buyer.com', 'plan' => 'early-access']);
 
-        $this->postJson(route('midtrans.notification'), $this->payload($order))->assertOk();
+        $this->notify($this->payload($order))->assertOk();
 
         $user = User::where('email', 'basic@buyer.com')->first();
         $this->assertFalse($user->isReseller());
@@ -87,50 +106,57 @@ class MidtransNotificationTest extends TestCase
 
     public function test_an_existing_user_gets_access_without_a_new_password(): void
     {
+        $this->fakeInvoiceStatus('paid');
         $existing = User::factory()->create(['email' => 'old@buyer.com']);
         $order = Order::factory()->create(['email' => 'old@buyer.com']);
 
-        $this->postJson(route('midtrans.notification'), $this->payload($order))->assertOk();
+        $this->notify($this->payload($order))->assertOk();
 
         $this->assertTrue($existing->fresh()->hasStudioAccess());
         Mail::assertSent(StudioAccessMail::class, fn (StudioAccessMail $m) => $m->password === null);
     }
 
-    public function test_an_invalid_signature_is_rejected(): void
+    public function test_an_invalid_webhook_token_is_rejected(): void
     {
         $order = Order::factory()->create();
-        $payload = $this->payload($order);
-        $payload['signature_key'] = 'bogus';
 
-        $this->postJson(route('midtrans.notification'), $payload)->assertStatus(403);
+        $this->notify($this->payload($order), 'wrong-token')->assertStatus(403);
 
         $this->assertDatabaseHas('orders', ['id' => $order->id, 'status' => 'pending']);
         Mail::assertNothingSent();
     }
 
+    public function test_a_testing_event_is_acknowledged(): void
+    {
+        $this->notify(['event' => 'testing', 'data' => []])->assertOk();
+
+        Mail::assertNothingSent();
+    }
+
     public function test_an_unknown_order_returns_404(): void
     {
-        $order = Order::factory()->make(['order_id' => 'KL-DOESNOTEXIST']);
+        $order = Order::factory()->make(['order_id' => 'KL-DOESNOTEXIST', 'gateway_ref' => 'inv-nope']);
 
-        $this->postJson(route('midtrans.notification'), $this->payload($order))->assertStatus(404);
+        $this->notify($this->payload($order))->assertStatus(404);
     }
 
     public function test_an_already_paid_order_is_not_processed_twice(): void
     {
         $order = Order::factory()->paid()->create(['email' => 'x@y.com']);
 
-        $this->postJson(route('midtrans.notification'), $this->payload($order))->assertOk();
+        $this->notify($this->payload($order))->assertOk();
 
         Mail::assertNothingSent();
     }
 
-    public function test_a_failed_status_marks_the_order_failed(): void
+    public function test_an_unpaid_invoice_leaves_the_order_pending(): void
     {
+        $this->fakeInvoiceStatus('unpaid');
         $order = Order::factory()->create();
 
-        $this->postJson(route('midtrans.notification'), $this->payload($order, 'expire'))->assertOk();
+        $this->notify($this->payload($order))->assertOk();
 
-        $this->assertDatabaseHas('orders', ['id' => $order->id, 'status' => 'failed']);
+        $this->assertDatabaseHas('orders', ['id' => $order->id, 'status' => 'pending']);
         Mail::assertNothingSent();
     }
 }

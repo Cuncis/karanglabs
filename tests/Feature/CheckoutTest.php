@@ -19,16 +19,24 @@ class CheckoutTest extends TestCase
         parent::setUp();
 
         config([
-            'services.midtrans.server_key' => 'SB-Mid-server-test',
-            'services.midtrans.client_key' => 'SB-Mid-client-test',
-            'services.midtrans.is_production' => false,
+            'services.mayar.api_key' => 'mayar-test-key',
+            'services.mayar.webhook_token' => 'hook-secret',
+            'services.mayar.is_production' => false,
         ]);
     }
 
-    public function test_checkout_creates_an_order_and_returns_a_snap_token(): void
+    public function test_checkout_creates_an_order_and_returns_a_payment_link(): void
     {
         Http::fake([
-            'app.sandbox.midtrans.com/*' => Http::response(['token' => 'snap-token-123', 'redirect_url' => 'https://pay']),
+            'api.mayar.club/hl/v2/invoices/create' => Http::response([
+                'statusCode' => 200,
+                'messages' => 'success',
+                'data' => [
+                    'id' => 'inv-abc-123',
+                    'transactionId' => 'txn-abc-123',
+                    'link' => 'https://testing.myr.id/invoices/abc123',
+                ],
+            ]),
         ]);
 
         $this->postJson(route('checkout.store'), [
@@ -36,7 +44,7 @@ class CheckoutTest extends TestCase
             'name' => 'Buyer',
             'phone' => '081234567890',
             'plan' => 'early-access',
-        ])->assertOk()->assertJson(['token' => 'snap-token-123']);
+        ])->assertOk()->assertJson(['link' => 'https://testing.myr.id/invoices/abc123']);
 
         $this->assertDatabaseHas('orders', [
             'email' => 'buyer@example.com',
@@ -45,28 +53,35 @@ class CheckoutTest extends TestCase
             'plan' => 'early-access',
             'amount' => 99000,
             'status' => 'pending',
+            'gateway_ref' => 'inv-abc-123',
         ]);
     }
 
     public function test_checkout_rejects_an_unknown_plan(): void
     {
-        $this->postJson(route('checkout.store'), ['email' => 'a@b.com', 'plan' => 'nope'])
+        $this->postJson(route('checkout.store'), ['email' => 'a@b.com', 'phone' => '0812', 'plan' => 'nope'])
             ->assertStatus(422);
     }
 
     public function test_checkout_requires_an_email(): void
     {
-        $this->postJson(route('checkout.store'), ['plan' => 'early-access'])
+        $this->postJson(route('checkout.store'), ['phone' => '0812', 'plan' => 'early-access'])
             ->assertStatus(422);
     }
 
-    public function test_checkout_fails_gracefully_when_midtrans_errors(): void
+    public function test_checkout_requires_a_phone(): void
+    {
+        $this->postJson(route('checkout.store'), ['email' => 'a@b.com', 'plan' => 'early-access'])
+            ->assertStatus(422);
+    }
+
+    public function test_checkout_fails_gracefully_when_mayar_errors(): void
     {
         Http::fake([
-            'app.sandbox.midtrans.com/*' => Http::response(['error_messages' => ['bad key']], 401),
+            'api.mayar.club/hl/v2/invoices/create' => Http::response(['messages' => 'bad key'], 401),
         ]);
 
-        $this->postJson(route('checkout.store'), ['email' => 'a@b.com', 'plan' => 'early-access'])
+        $this->postJson(route('checkout.store'), ['email' => 'a@b.com', 'phone' => '0812', 'plan' => 'early-access'])
             ->assertStatus(422)
             ->assertJsonStructure(['message']);
     }
@@ -75,9 +90,9 @@ class CheckoutTest extends TestCase
     {
         Mail::fake();
         Http::fake([
-            'api.sandbox.midtrans.com/*' => Http::response(['transaction_status' => 'settlement', 'fraud_status' => 'accept']),
+            'api.mayar.club/hl/v2/invoices/*' => Http::response(['data' => ['status' => 'paid']]),
         ]);
-        $order = Order::factory()->create(['email' => 'finalize@buyer.com']);
+        $order = Order::factory()->create(['email' => 'finalize@buyer.com', 'gateway_ref' => 'inv-paid']);
 
         $this->postJson(route('checkout.finalize'), ['order_id' => $order->order_id])
             ->assertOk()
@@ -92,7 +107,7 @@ class CheckoutTest extends TestCase
     {
         Mail::fake();
         Http::fake([
-            'api.sandbox.midtrans.com/*' => Http::response(['transaction_status' => 'pending']),
+            'api.mayar.club/hl/v2/invoices/*' => Http::response(['data' => ['status' => 'unpaid']]),
         ]);
         $order = Order::factory()->create();
 
@@ -122,15 +137,21 @@ class CheckoutTest extends TestCase
             ->assertStatus(404);
     }
 
-    public function test_the_success_page_renders_with_the_order_email(): void
+    public function test_the_success_page_renders_and_provisions_a_paid_order(): void
     {
-        $order = Order::factory()->paid()->create(['email' => 'done@buyer.com']);
+        Mail::fake();
+        Http::fake([
+            'api.mayar.club/hl/v2/invoices/*' => Http::response(['data' => ['status' => 'paid']]),
+        ]);
+        $order = Order::factory()->create(['email' => 'done@buyer.com', 'gateway_ref' => 'inv-done']);
 
         $this->get(route('checkout.success', ['order' => $order->order_id]))
             ->assertOk()
             ->assertInertia(fn ($page) => $page
                 ->component('CheckoutSuccess')
                 ->where('email', 'done@buyer.com'));
+
+        $this->assertDatabaseHas('orders', ['id' => $order->id, 'status' => 'paid']);
     }
 
     public function test_the_success_page_renders_without_a_known_order(): void

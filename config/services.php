@@ -48,10 +48,10 @@ return [
         'chat_id' => env('TELEGRAM_CHAT_ID'),
     ],
 
-    'midtrans' => [
-        'server_key' => env('MIDTRANS_SERVER_KEY'),
-        'client_key' => env('MIDTRANS_CLIENT_KEY'),
-        'is_production' => env('MIDTRANS_IS_PRODUCTION', false),
+    'mayar' => [
+        'api_key' => env('MAYAR_API_KEY'),
+        'webhook_token' => env('MAYAR_WEBHOOK_TOKEN'),
+        'is_production' => env('MAYAR_IS_PRODUCTION', false),
     ],
 
 ];
