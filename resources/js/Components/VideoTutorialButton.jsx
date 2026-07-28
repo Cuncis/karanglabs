@@ -1,14 +1,20 @@
 import { useState } from 'react';
-import { Video, PlayCircle, X } from 'lucide-react';
+import { Video, X } from 'lucide-react';
 import Modal from '@/Components/Modal';
+
+const VIDEOS = [
+    { title: 'Tutorial Penggunaan Engine Karanglabs', videoUrl: 'https://www.youtube.com/embed/52TFeYN_L-s' },
+    { title: 'Tutorial Publish Website Karanglabs', videoUrl: 'https://www.youtube.com/embed/0RWdR4Inkt4' },
+];
 
 /**
  * A self-contained "watch tutorial" button + popup, dropped into any Studio
- * page. Pass `videoUrl` (a YouTube/Vimeo/MP4 embed URL) once a real tutorial
- * exists for that section; until then it shows a placeholder.
+ * page. Lists both Karanglabs tutorial videos with a tab switcher.
  */
-export default function VideoTutorialButton({ title = 'Video Tutorial', videoUrl = null }) {
+export default function VideoTutorialButton() {
     const [open, setOpen] = useState(false);
+    const [active, setActive] = useState(0);
+    const current = VIDEOS[active];
 
     return (
         <>
@@ -33,27 +39,35 @@ export default function VideoTutorialButton({ title = 'Video Tutorial', videoUrl
                     </button>
 
                     <div className="p-6 sm:p-8">
-                        <h2 className="text-lg font-bold text-[#18181B] dark:text-white">{title}</h2>
+                        <div className="flex flex-wrap gap-2">
+                            {VIDEOS.map((v, i) => (
+                                <button
+                                    key={v.title}
+                                    type="button"
+                                    onClick={() => setActive(i)}
+                                    className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+                                        i === active
+                                            ? 'bg-emerald-400 text-black'
+                                            : 'border border-[#D4D4D8] dark:border-[#333] text-[#52525B] dark:text-[#A1A1AA] hover:bg-[#EFEFF1] dark:hover:bg-[#161616]'
+                                    }`}
+                                >
+                                    {v.title}
+                                </button>
+                            ))}
+                        </div>
 
-                        {videoUrl ? (
-                            <div className="mt-4 aspect-video w-full overflow-hidden rounded-xl border border-[#E4E4E7] dark:border-[#222] bg-black">
-                                <iframe
-                                    src={videoUrl}
-                                    title={title}
-                                    className="h-full w-full"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                    allowFullScreen
-                                />
-                            </div>
-                        ) : (
-                            <div className="mt-4 flex aspect-video w-full flex-col items-center justify-center rounded-xl border border-dashed border-[#D4D4D8] dark:border-[#333] bg-[#FAFAFA] dark:bg-[#0D0D0D] text-center">
-                                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-400/10">
-                                    <PlayCircle className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
-                                </div>
-                                <p className="mt-4 text-sm font-medium text-[#52525B] dark:text-[#A1A1AA]">Video tutorial akan tampil di sini</p>
-                                <p className="mt-1 text-xs text-[#9CA3AF] dark:text-[#555]">Ganti placeholder ini dengan video kamu</p>
-                            </div>
-                        )}
+                        <h2 className="mt-4 text-lg font-bold text-[#18181B] dark:text-white">{current.title}</h2>
+
+                        <div className="mt-4 aspect-video w-full overflow-hidden rounded-xl border border-[#E4E4E7] dark:border-[#222] bg-black">
+                            <iframe
+                                key={current.videoUrl}
+                                src={current.videoUrl}
+                                title={current.title}
+                                className="h-full w-full"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowFullScreen
+                            />
+                        </div>
                     </div>
                 </div>
             </Modal>
