@@ -9,6 +9,15 @@ import { findEngine, buildPrompt, fieldSchema, ACCENT, MULTI_FILE_OUTPUT } from 
 // Matches the `studio-random-brief` rate limiter in AppServiceProvider (1 per 2 min/user).
 const RANDOM_BRIEF_COOLDOWN_SECONDS = 120;
 
+// Claude first: it's the priority AI for this prompt style.
+const AI_TARGETS = [
+    { name: 'Claude', url: 'https://claude.ai/new' },
+    { name: 'ChatGPT', url: 'https://chatgpt.com/' },
+    { name: 'Gemini', url: 'https://gemini.google.com/app' },
+    { name: 'v0', url: 'https://v0.dev' },
+    { name: 'Lovable', url: 'https://lovable.dev' },
+];
+
 const INPUT_BASE = 'w-full rounded-lg border border-[#E4E4E7] dark:border-[#222] bg-[#FAFAFA] dark:bg-[#0D0D0D] px-3 py-2 text-sm text-[#27272A] dark:text-[#EDEDED] placeholder-[#9CA3AF] dark:placeholder-[#555] focus:border-emerald-400/50 focus:outline-none focus:ring-1 focus:ring-emerald-400/30';
 
 const COLOR_PRESETS = [
@@ -519,8 +528,23 @@ export default function Engine() {
                         <pre className="max-h-[52vh] overflow-auto whitespace-pre-wrap p-5 font-mono text-[12px] leading-relaxed text-[#3F3F46] dark:text-[#C8C8C8]">
                             {prompt}
                         </pre>
-                        <div className="flex items-center justify-between gap-3 border-t border-[#E4E4E7] dark:border-[#222] px-5 py-3">
-                            <p className="text-xs text-[#8A8A93] dark:text-[#666]">Paste ke ChatGPT · Claude · Gemini · v0 · Lovable</p>
+                        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#E4E4E7] dark:border-[#222] px-5 py-3">
+                            <p className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs text-[#8A8A93] dark:text-[#666]">
+                                <span>Paste ke</span>
+                                {AI_TARGETS.map((ai, i) => (
+                                    <span key={ai.name} className="flex items-center gap-1.5">
+                                        <a
+                                            href={ai.url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="font-medium text-emerald-600 underline decoration-dotted underline-offset-2 transition-colors hover:text-emerald-500 dark:text-emerald-400 dark:hover:text-emerald-300"
+                                        >
+                                            {ai.name}
+                                        </a>
+                                        {i < AI_TARGETS.length - 1 && <span>·</span>}
+                                    </span>
+                                ))}
+                            </p>
                             <button
                                 type="button"
                                 onClick={save}
