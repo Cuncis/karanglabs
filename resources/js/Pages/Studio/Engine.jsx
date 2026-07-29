@@ -1,7 +1,7 @@
 import { Head, useForm, usePage, router } from '@inertiajs/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import axios from 'axios';
-import { Copy, Check, Save, Trash2, Wand2, Palette, X as XIcon, Star, Plus, Shuffle, Clock } from 'lucide-react';
+import { Copy, Check, Save, Trash2, Wand2, Palette, X as XIcon, Star, Plus, Shuffle, Clock, ChevronDown } from 'lucide-react';
 import StudioLayout from '@/Layouts/StudioLayout';
 import VideoTutorialButton from '@/Components/VideoTutorialButton';
 import { findEngine, buildPrompt, fieldSchema, ACCENT, MULTI_FILE_OUTPUT } from '@/studioEngines';
@@ -252,8 +252,139 @@ function AddonsField({ field, value, onChange }) {
     );
 }
 
+// Curated Google Fonts for the typography picker. Each is previewed in its own
+// typeface in the dropdown, so the list "looks like the font it is".
+const FONT_OPTIONS = [
+    'Inter', 'Poppins', 'Montserrat', 'Raleway', 'Work Sans', 'Nunito', 'DM Sans', 'Manrope',
+    'Playfair Display', 'Merriweather', 'Lora', 'Cormorant Garamond', 'DM Serif Display', 'Roboto Slab',
+    'Bebas Neue', 'Oswald', 'Sacramento', 'Dancing Script',
+];
+
+// Load the preview fonts once, lazily (only when a font field is shown).
+function ensurePreviewFontsLoaded() {
+    if (typeof document === 'undefined' || document.getElementById('studio-font-previews')) {
+        return;
+    }
+    const families = FONT_OPTIONS.map((f) => `family=${f.replace(/ /g, '+')}`).join('&');
+    const link = document.createElement('link');
+    link.id = 'studio-font-previews';
+    link.rel = 'stylesheet';
+    link.href = `https://fonts.googleapis.com/css2?${families}&display=swap`;
+    document.head.appendChild(link);
+}
+
+function parseJson(value) {
+    try {
+        return value ? JSON.parse(value) : {};
+    } catch {
+        return {};
+    }
+}
+
+function FontSelect({ label, value, onChange }) {
+    const [open, setOpen] = useState(false);
+    const ref = useRef(null);
+
+    useEffect(() => {
+        const handler = (e) => {
+            if (ref.current && !ref.current.contains(e.target)) {
+                setOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handler);
+
+        return () => document.removeEventListener('mousedown', handler);
+    }, []);
+
+    return (
+        <div ref={ref} className="relative">
+            <span className="mb-1 block text-xs font-medium text-[#8A8A93] dark:text-[#888]">{label}</span>
+            <button
+                type="button"
+                onClick={() => setOpen((o) => !o)}
+                className={`${INPUT_BASE} flex items-center justify-between text-left`}
+                style={{ fontFamily: value ? `"${value}"` : undefined }}
+            >
+                <span className={value ? '' : 'text-[#9CA3AF] dark:text-[#555]'}>{value || 'Pilih font'}</span>
+                <ChevronDown className="h-4 w-4 flex-shrink-0 text-[#8A8A93]" />
+            </button>
+
+            {open && (
+                <div className="absolute z-30 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-[#E4E4E7] bg-white py-1 shadow-xl dark:border-[#222] dark:bg-[#111]">
+                    {FONT_OPTIONS.map((f) => {
+                        const selected = f === value;
+
+                        return (
+                            <button
+                                key={f}
+                                type="button"
+                                onClick={() => { onChange(selected ? '' : f); setOpen(false); }}
+                                style={{ fontFamily: `"${f}"` }}
+                                className={`flex w-full items-center justify-between px-3 py-2 text-left text-base ${
+                                    selected
+                                        ? 'bg-emerald-400/10 text-emerald-700 dark:text-emerald-300'
+                                        : 'text-[#27272A] hover:bg-[#F1F1F2] dark:text-[#EDEDED] dark:hover:bg-[#161616]'
+                                }`}
+                            >
+                                <span>{f}</span>
+                                {selected && <Check className="h-4 w-4 flex-shrink-0" />}
+                            </button>
+                        );
+                    })}
+                </div>
+            )}
+        </div>
+    );
+}
+
+function FontField({ field, value, onChange }) {
+    useEffect(() => { ensurePreviewFontsLoaded(); }, []);
+
+    const state = parseJson(value);
+    const auto = (value || '').trim() === '';
+
+    const setFont = (key, font) => {
+        const next = parseJson(value);
+        if (font) {
+            next[key] = font;
+        } else {
+            delete next[key];
+        }
+        onChange(JSON.stringify(next));
+    };
+
+    return (
+        <div>
+            <FieldTitle field={field} />
+
+            <label className="mb-2 flex cursor-pointer items-center gap-2.5">
+                <input
+                    type="checkbox"
+                    checked={auto}
+                    onChange={() => onChange(auto ? '{}' : '')}
+                    className="h-4 w-4 rounded border-[#C4C4C8] bg-white text-emerald-500 focus:ring-emerald-400/30 dark:border-[#333] dark:bg-[#111]"
+                />
+                <span className="text-sm text-[#27272A] dark:text-[#EDEDED]">Otomatis dipilihkan</span>
+            </label>
+
+            {!auto && (
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <FontSelect label="Font Heading" value={state.heading || ''} onChange={(f) => setFont('heading', f)} />
+                    <FontSelect label="Font Body" value={state.body || ''} onChange={(f) => setFont('body', f)} />
+                </div>
+            )}
+
+            <FieldHint field={field} />
+        </div>
+    );
+}
+
 function Field({ field, value, onChange }) {
     const base = INPUT_BASE;
+
+    if (field.type === 'font') {
+        return <FontField field={field} value={value} onChange={onChange} />;
+    }
 
     if (field.type === 'color') {
         return <ColorPaletteField field={field} value={value} onChange={onChange} />;
@@ -420,7 +551,7 @@ export default function Engine() {
             setValues((prev) => {
                 const next = { ...prev };
                 engine.fields.forEach((field) => {
-                    if (field.type !== 'addons' && data[field.name] !== undefined) {
+                    if (field.type !== 'addons' && field.type !== 'font' && data[field.name] !== undefined) {
                         next[field.name] = String(data[field.name]);
                     }
                 });

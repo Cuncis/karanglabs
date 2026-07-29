@@ -70,6 +70,33 @@ const ADDON_INSTRUCTIONS = {
 };
 
 /**
+ * Turn the typography picker (stored as a JSON string `{heading, body}`) into
+ * instruction lines. When no font is chosen, the AI is told to pick a fitting
+ * pair itself — matching the "Otomatis dipilihkan" checkbox in the UI.
+ */
+function fontInstructions(value) {
+    let state = {};
+    try {
+        state = value ? JSON.parse(value) : {};
+    } catch {
+        state = {};
+    }
+
+    if (!state.heading && !state.body) {
+        return [
+            '- Pilih sendiri pasangan font (heading + body) dari Google Fonts yang paling cocok dengan gaya visual & brand; pastikan mudah dibaca dan hierarki heading vs teks isi terlihat jelas.',
+            '- Import font via <link> Google Fonts di <head>.',
+        ];
+    }
+
+    return [
+        state.heading ? `- Font heading/judul: "${state.heading}" (Google Fonts).` : null,
+        state.body ? `- Font body/teks isi: "${state.body}" (Google Fonts).` : null,
+        '- Import font terpilih via <link> Google Fonts di <head>, lalu terapkan konsisten: judul pakai font heading, teks isi pakai font body.',
+    ];
+}
+
+/**
  * Turn the selected add-ons (stored as a JSON string on the field) into
  * instruction lines for the prompt.
  */
@@ -98,9 +125,11 @@ function addonInstructions(value) {
 export function buildPrompt(engine, values) {
     const v = values || {};
     const brand = v.brand || v.name || v.hosts || 'brand ini';
-    const pages = items(v.pages);
-    const format = v.output || (pages.length ? MULTI_FILE_OUTPUT : OUTPUT_OPTIONS[0]);
-    const isMultiPage = pages.length > 0 || format === MULTI_FILE_OUTPUT;
+    const pages = engine.singlePage ? [] : items(v.pages);
+    const format = engine.singlePage
+        ? (v.output && v.output !== MULTI_FILE_OUTPUT ? v.output : OUTPUT_OPTIONS[0])
+        : (v.output || (pages.length ? MULTI_FILE_OUTPUT : OUTPUT_OPTIONS[0]));
+    const isMultiPage = ! engine.singlePage && (pages.length > 0 || format === MULTI_FILE_OUTPUT);
 
     const parts = [
         `Kamu adalah web designer & front-end developer senior. Buatkan ${engine.label} untuk "${brand}".`,
@@ -111,8 +140,18 @@ export function buildPrompt(engine, values) {
             '- Bahasa konten: Indonesia, ramah namun profesional',
             '- Mobile-first, responsive, aksesibel, dan loading cepat',
         ]),
+        block('TIPOGRAFI', fontInstructions(v.fonts)),
         block('STRUKTUR HALAMAN', engine.sections.map((s, i) => `${i + 1}. ${s}`)),
-        isMultiPage ? block('HALAMAN & NAVIGASI', [
+        engine.slug === 'undangan' ? block('NAVIGASI', [
+            '- Undangan ini SATU HALAMAN (single-page).',
+            '- Buat menu navigasi MENGAMBANG (floating) yang menempel di BAGIAN BAWAH layar (fixed di bottom, mengambang di atas konten), BUKAN di header/atas.',
+            '- Menu berisi MAKSIMAL 5 item — pilih 5 section terpenting dari STRUKTUR HALAMAN di atas (mis. Mempelai, Acara, Galeri, RSVP, Amplop).',
+            '- Tiap item tampil sebagai ikon yang relevan dengan section-nya (mis. hati untuk mempelai, kalender untuk acara, foto untuk galeri, amplop untuk amplop digital, centang untuk RSVP) dengan NAMA/label kecil DI BAWAH ikon.',
+            '- Menu mengambang selalu terlihat saat scroll, dengan latar semi-transparan + blur/shadow lembut dan sudut membulat (pill) agar tetap terbaca di atas konten.',
+            '- Tiap item pakai anchor scroll ke id section terkait; saat diklik, halaman scroll SMOOTH (scroll-behavior: smooth) ke section tersebut, bukan reload atau loncat mendadak.',
+            '- Tandai item yang sedang aktif sesuai section yang sedang dilihat.',
+            '- Beri padding bawah yang cukup pada konten paling bawah agar tidak tertutup menu mengambang.',
+        ]) : isMultiPage ? block('HALAMAN & NAVIGASI', [
             '- Website ini MULTI-HALAMAN (bukan satu halaman).',
             pages.length
                 ? '- Buat halaman berikut, masing-masing sebagai file HTML terpisah yang saling terhubung:'
@@ -189,6 +228,19 @@ const outputField = {
         { value: 'React + Tailwind (komponen)', label: 'React', icon: Component },
         { value: 'HTML + CSS biasa (tanpa framework)', label: 'HTML/CSS', icon: Code },
     ],
+};
+// For engines that are single-page by nature (undangan, link-in-bio): no
+// "Multi-halaman" option, since the whole experience is one scrolling page.
+const singlePageOutputField = {
+    name: 'output', label: 'Format Output', type: 'choice', columns: 3, options: [
+        { value: 'HTML + Tailwind CSS (satu file)', label: 'HTML 1 file', icon: FileCode },
+        { value: 'React + Tailwind (komponen)', label: 'React', icon: Component },
+        { value: 'HTML + CSS biasa (tanpa framework)', label: 'HTML/CSS', icon: Code },
+    ],
+};
+const fontsField = {
+    name: 'fonts', label: 'Tipografi (Font)', type: 'font',
+    hint: 'Centang "Otomatis dipilihkan" agar font disesuaikan dengan gaya, atau pilih sendiri font heading & body.',
 };
 const waField = { name: 'whatsapp', label: 'Nomor WhatsApp', type: 'text', placeholder: '628123456789' };
 const pagesField = (placeholder = 'Beranda, Tentang, Layanan, Kontak') => ({ name: 'pages', label: 'Halaman yang dibutuhkan', type: 'tags', placeholder, hint: 'kosongkan untuk satu halaman; isi (pisah koma) untuk website multi-halaman' });
@@ -399,6 +451,7 @@ export const ENGINES = [
         label: 'sebuah undangan digital',
         icon: HeartHandshake,
         accent: 'rose',
+        singlePage: true,
         tagline: 'Undangan pernikahan & acara lengkap fitur kekinian.',
         sections: [
             'Cover pembuka + nama tamu personal (via parameter ?to=nama)',
@@ -423,7 +476,7 @@ export const ENGINES = [
             { name: 'rsvpWa', label: 'Nomor WhatsApp RSVP', type: 'text', placeholder: '628123456789' },
             { name: 'bank', label: 'Amplop Digital (rekening + e-wallet)', type: 'textarea', placeholder: 'BCA 1234567890 a.n. Doni Saputra\nGopay: 08123456789 a.n. Doni Saputra' },
             { name: 'features', label: 'Fitur Tambahan', type: 'tags', placeholder: 'Musik latar, Galeri foto, Buku tamu, Live streaming' },
-            colorsField('Sage green + cream, elegan & lembut'), outputField, addonsField,
+            colorsField('Sage green + cream, elegan & lembut'), singlePageOutputField, addonsField,
         ],
         details: (v) => [
             line('Mempelai / tuan rumah', v.hosts),
@@ -449,6 +502,7 @@ export const ENGINES = [
         label: 'sebuah halaman link-in-bio',
         icon: Link2,
         accent: 'fuchsia',
+        singlePage: true,
         tagline: 'Semua link kamu dalam satu halaman cantik.',
         sections: [
             'Avatar + nama + bio singkat',
@@ -462,7 +516,7 @@ export const ENGINES = [
             { name: 'links', label: 'Daftar Link', type: 'lines', placeholder: 'Menu & Order | https://gofood.co.id/kopisenja\nReservasi Tempat | https://wa.me/628123456789\nInstagram | https://instagram.com/kopisenja', hint: 'satu link per baris, format: Label | URL', required: true },
             { name: 'socials', label: 'Sosial Media', type: 'tags', placeholder: 'Instagram, TikTok, WhatsApp' },
             buttonStyleChoiceField,
-            styleField, colorsField('Cokelat susu + krem, cozy'), outputField, addonsField,
+            styleField, colorsField('Cokelat susu + krem, cozy'), singlePageOutputField, addonsField,
         ],
         details: (v) => [
             line('Nama / handle', v.name),
@@ -548,6 +602,15 @@ export const ENGINES = [
         ],
     },
 ];
+
+// The typography picker (heading + body font) is offered on every engine.
+// Inserted just before the trailing "meta" fields (output/add-ons) so it sits
+// with the brand/style inputs. `fontsField` is a shared singleton, same as
+// styleField/outputField/addonsField.
+for (const engine of ENGINES) {
+    const tailIndex = engine.fields.findIndex((f) => f.name === 'output' || f.name === 'addons');
+    engine.fields.splice(tailIndex === -1 ? engine.fields.length : tailIndex, 0, fontsField);
+}
 
 export function findEngine(slug) {
     return ENGINES.find((e) => e.slug === slug) || null;
