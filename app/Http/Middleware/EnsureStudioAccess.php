@@ -11,8 +11,9 @@ class EnsureStudioAccess
     /**
      * Handle an incoming request.
      *
-     * Only buyers who have been granted Studio access may enter. Everyone else
-     * is sent to the "locked" screen explaining how to unlock the Studio.
+     * Only buyers who have been granted Studio access may enter. Admins always
+     * pass through. Everyone else is sent to the "locked" screen explaining how
+     * to unlock the Studio.
      *
      * @param  Closure(Request): (Response)  $next
      */
@@ -20,7 +21,7 @@ class EnsureStudioAccess
     {
         $user = $request->user();
 
-        if (! $user || ! $user->hasStudioAccess()) {
+        if (! $user || (! $user->isAdmin() && ! $user->hasStudioAccess())) {
             return redirect()->route('studio.locked');
         }
 

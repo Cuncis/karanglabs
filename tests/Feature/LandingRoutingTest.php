@@ -45,13 +45,23 @@ class LandingRoutingTest extends TestCase
         $this->get(route('home'))->assertRedirect(route('login'));
     }
 
-    public function test_login_redirects_an_authenticated_user_to_the_tools_directory(): void
+    public function test_login_redirects_an_authenticated_user_to_the_studio(): void
     {
         $user = User::factory()->create();
 
         $this->post(route('login'), [
             'email' => $user->email,
             'password' => 'password',
-        ])->assertRedirect(route('home'));
+        ])->assertRedirect(route('studio.index'));
+    }
+
+    public function test_login_redirects_an_admin_to_the_studio_too(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        $this->post(route('login'), [
+            'email' => $admin->email,
+            'password' => 'password',
+        ])->assertRedirect(route('studio.index'));
     }
 }

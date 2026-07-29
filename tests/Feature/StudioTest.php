@@ -26,6 +26,16 @@ class StudioTest extends TestCase
             ->assertRedirect(route('studio.locked'));
     }
 
+    public function test_an_admin_can_open_the_studio_dashboard_without_studio_access_flag(): void
+    {
+        $admin = User::factory()->admin()->create(['has_studio_access' => false]);
+
+        $this->actingAs($admin)
+            ->get(route('studio.index'))
+            ->assertOk()
+            ->assertInertia(fn (AssertableInertia $page) => $page->component('Studio/Dashboard'));
+    }
+
     public function test_the_locked_screen_renders_for_a_user_without_access(): void
     {
         $user = User::factory()->create();
