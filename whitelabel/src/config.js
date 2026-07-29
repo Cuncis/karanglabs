@@ -4,9 +4,9 @@
 // ============================================================================
 export const CONFIG = {
     // Shown in the sidebar, browser tab, and landing page.
-    brandName: 'Karanglabs',
+    brandName: 'Nama Brand Kamu',
     // Short initials shown in the small logo tile (2-3 letters).
-    logoInitials: 'KL',
+    logoInitials: 'YB',
     // One-line pitch shown on the landing page hero.
     tagline: 'Bikin website sendiri pakai AI, tanpa coding.',
 
@@ -23,7 +23,7 @@ export const CONFIG = {
     paymentUrl: 'https://your-payment-link.example.com',
 
     // WhatsApp number customers can contact for support (numbers only, country code, no +/spaces).
-    whatsapp: '6283',
+    whatsapp: '',
 
     // Your Google Apps Script Web App URL (see google-apps-script/Code.gs and
     // README.md for how to create and deploy this under your own Google account).

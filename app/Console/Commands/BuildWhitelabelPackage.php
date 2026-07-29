@@ -12,10 +12,13 @@ use RecursiveIteratorIterator;
 use ZipArchive;
 
 #[Signature('whitelabel:build')]
-#[Description('Build the whitelabel/ static app and publish it as the downloadable reseller package (RESELLER_PACKAGE_PATH).')]
+#[Description('Verify the whitelabel/ source builds cleanly, then publish its source code as the downloadable reseller package (RESELLER_PACKAGE_PATH).')]
 class BuildWhitelabelPackage extends Command
 {
     private const STORAGE_PATH = 'whitelabel/karanglabs-whitelabel.zip';
+
+    /** Top-level directories under whitelabel/ excluded from the shipped source zip. */
+    private const EXCLUDED_DIRS = ['node_modules', 'dist'];
 
     public function handle(): int
     {
@@ -36,7 +39,7 @@ class BuildWhitelabelPackage extends Command
             return self::FAILURE;
         }
 
-        $this->info('Building whitelabel static site...');
+        $this->info('Verifying whitelabel builds cleanly...');
         $build = Process::path($whitelabelDir)->timeout(300)->run('npm run build');
 
         if ($build->failed()) {
@@ -45,18 +48,10 @@ class BuildWhitelabelPackage extends Command
             return self::FAILURE;
         }
 
-        $distDir = "{$whitelabelDir}/dist";
-
-        if (! is_dir($distDir)) {
-            $this->error("Build succeeded but dist/ was not found at {$distDir}");
-
-            return self::FAILURE;
-        }
-
-        $this->info('Zipping dist/...');
+        $this->info('Zipping source code (buyers rebrand config.js and build it themselves)...');
         $zipPath = tempnam(sys_get_temp_dir(), 'whitelabel').'.zip';
 
-        if (! $this->zipDirectory($distDir, $zipPath)) {
+        if (! $this->zipDirectory($whitelabelDir, $zipPath)) {
             $this->error('Could not create zip archive.');
 
             return self::FAILURE;
@@ -71,7 +66,7 @@ class BuildWhitelabelPackage extends Command
         return self::SUCCESS;
     }
 
-    private function zipDirectory(string $distDir, string $zipPath): bool
+    private function zipDirectory(string $sourceDir, string $zipPath): bool
     {
         $zip = new ZipArchive;
 
@@ -80,12 +75,18 @@ class BuildWhitelabelPackage extends Command
         }
 
         $files = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator($distDir, RecursiveDirectoryIterator::SKIP_DOTS),
+            new RecursiveDirectoryIterator($sourceDir, RecursiveDirectoryIterator::SKIP_DOTS),
             RecursiveIteratorIterator::LEAVES_ONLY,
         );
 
         foreach ($files as $file) {
-            $relativePath = substr($file->getPathname(), strlen($distDir) + 1);
+            $relativePath = substr($file->getPathname(), strlen($sourceDir) + 1);
+            $topLevelDir = explode(DIRECTORY_SEPARATOR, $relativePath)[0];
+
+            if (in_array($topLevelDir, self::EXCLUDED_DIRS, true) || basename($relativePath) === '.DS_Store') {
+                continue;
+            }
+
             $zip->addFile($file->getPathname(), $relativePath);
         }
 

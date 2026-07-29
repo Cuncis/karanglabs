@@ -4,6 +4,7 @@ import { Rocket, Globe, Link as LinkIcon, Server, X, ArrowRight } from 'lucide-r
 import StudioLayout from '@/Layouts/StudioLayout';
 import Modal from '@/Components/Modal';
 import VideoTutorialButton from '@/Components/VideoTutorialButton';
+import { buildLinkifier } from '@/Utils/richText';
 
 const STEPS = [
     {
@@ -62,50 +63,7 @@ const LINK_TERMS = [
     { text: 'Netlify', url: 'https://app.netlify.com/' },
 ];
 
-const LINK_TERM_PATTERN = LINK_TERMS.map((t) => t.text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
-const LINKIFY_URLS = Object.fromEntries(LINK_TERMS.map((t) => [t.text, t.url]));
-
-// Parses **bold** (key action, pay attention) and *italic* (side note/example) markers
-// in addition to auto-linking known AI/tool names, so step text can flag what matters.
-const RICH_TEXT_PATTERN = new RegExp(`(\\*\\*[^*]+\\*\\*|\\*[^*]+\\*|${LINK_TERM_PATTERN})`, 'g');
-
-function linkifyKnownTerms(text) {
-    return text.split(RICH_TEXT_PATTERN).filter((part) => part !== '').map((part, i) => {
-        if (part.startsWith('**') && part.endsWith('**')) {
-            return (
-                <strong key={`b-${i}`} className="font-semibold text-emerald-700 dark:text-emerald-400">
-                    {part.slice(2, -2)}
-                </strong>
-            );
-        }
-
-        if (part.startsWith('*') && part.endsWith('*')) {
-            return (
-                <em key={`i-${i}`} className="italic text-[#71717A] dark:text-[#888]">
-                    {part.slice(1, -1)}
-                </em>
-            );
-        }
-
-        const url = LINKIFY_URLS[part];
-        if (!url) {
-            return part;
-        }
-
-        return (
-            <a
-                key={`l-${i}`}
-                href={url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-medium text-emerald-600 underline decoration-dotted underline-offset-2 hover:text-emerald-500 dark:text-emerald-400 dark:hover:text-emerald-300"
-                onClick={(e) => e.stopPropagation()}
-            >
-                {part}
-            </a>
-        );
-    });
-}
+const linkifyKnownTerms = buildLinkifier(LINK_TERMS);
 
 const ADDONS = [
     'Form kontak / SMTP', 'Tombol WhatsApp mengambang', 'Google Analytics',
