@@ -1,19 +1,19 @@
 /**
- * Deploy this inside a Google Sheet (Extensions > Apps Script) that has a
- * "Customers" tab with 3 columns, one header row + one data row per customer:
+ * Deploy kode ini di dalam Google Sheet (Extensions > Apps Script) yang punya
+ * tab "Customers" dengan 3 kolom, satu baris header + satu baris data per pelanggan:
  *
  *   A: Email            B: Kode Akses        C: Status
  *   budi@email.com       ABC123               active
  *   siti@email.com       XYZ789               inactive
  *
- * Add a row here manually whenever someone pays. Set Status to "inactive" to
- * revoke access without deleting the row (keeps their history).
+ * Tambahkan baris baru secara manual setiap ada yang bayar. Ubah Status jadi
+ * "inactive" untuk mencabut akses tanpa menghapus barisnya (riwayat tetap ada).
  *
- * After pasting this file's contents into the Apps Script editor:
+ * Setelah paste isi file ini ke editor Apps Script:
  *   Deploy > New deployment > type: Web app
  *     Execute as: Me
  *     Who has access: Anyone
- *   Copy the resulting /exec URL into src/config.js as `appsScriptUrl`.
+ *   Salin URL /exec yang muncul ke `appsScriptUrl` di src/config.js.
  */
 function doGet(e) {
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Customers');

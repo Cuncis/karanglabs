@@ -1,37 +1,39 @@
 // ============================================================================
-// REBRAND CONFIG — this is the ONE file you edit to make this your own product.
-// After changing anything here, run `npm run build` again before re-deploying.
+// KONFIGURASI REBRAND — ini SATU-SATUNYA file yang perlu kamu edit untuk
+// menjadikan produk ini milikmu sendiri.
+// Setelah mengubah apa pun di sini, jalankan `npm run build` lagi sebelum
+// upload ulang ke hosting.
 // ============================================================================
 export const CONFIG = {
-    // Shown in the sidebar, browser tab, and landing page.
+    // Tampil di sidebar, tab browser, dan halaman utama.
     brandName: 'Nama Brand Kamu',
-    // Short initials shown in the small logo tile (2-3 letters).
+    // Inisial singkat yang tampil di logo kecil (2-3 huruf).
     logoInitials: 'YB',
-    // One-line pitch shown on the landing page hero.
+    // Kalimat pendek yang tampil di bagian hero halaman utama.
     tagline: 'Bikin website sendiri pakai AI, tanpa coding.',
 
-    // A single hex color. Every "brand-*" accent in the UI (buttons, active nav,
-    // highlights) is derived from this at runtime — no rebuild needed to reskin.
+    // Satu kode warna hex. Semua aksen "brand-*" di tampilan (tombol, menu
+    // aktif, highlight) otomatis mengikuti warna ini — tidak perlu build ulang untuk reskin.
     accentColor: '#34d399',
 
-    // Pricing shown on the landing page. Purely display text, not enforced here.
+    // Harga yang tampil di halaman utama. Hanya teks tampilan, tidak divalidasi di sini.
     priceLabel: 'Rp 149.000',
     priceNote: 'sekali bayar, akses selamanya',
 
-    // Where the "Beli sekarang" button on the landing page sends buyers —
-    // your own payment link (Midtrans, Trakteer, QRIS, WhatsApp order, etc.).
+    // Tujuan tombol "Beli sekarang" di halaman utama —
+    // link pembayaran milikmu sendiri (Midtrans, Trakteer, QRIS, order via WhatsApp, dll).
     paymentUrl: 'https://your-payment-link.example.com',
 
-    // WhatsApp number customers can contact for support (numbers only, country code, no +/spaces).
+    // Nomor WhatsApp yang bisa dihubungi pelanggan untuk bantuan (angka saja, pakai kode negara, tanpa +/spasi).
     whatsapp: '',
 
-    // Your Google Apps Script Web App URL (see google-apps-script/Code.gs and
-    // README.md for how to create and deploy this under your own Google account).
-    // Customer login checks email + access code against your Google Sheet through this URL.
+    // URL Web App Google Apps Script kamu (lihat google-apps-script/Code.gs dan
+    // README.md untuk cara membuat & deploy ini pakai akun Google-mu sendiri).
+    // Login pelanggan dicek lewat email + kode akses ke Google Sheet kamu lewat URL ini.
     appsScriptUrl: 'https://script.google.com/macros/s/REPLACE_WITH_YOUR_DEPLOYMENT_ID/exec',
 
-    // Tutorial videos shown behind the "Tutorial" button on every page.
-    // Leave videoUrl empty to show a placeholder instead of an embed.
+    // Video tutorial yang tampil di balik tombol "Tutorial" pada tiap halaman.
+    // Biarkan videoUrl kosong untuk menampilkan placeholder, bukan video.
     tutorialVideos: [
         { title: 'Cara Pakai', videoUrl: '' },
     ],

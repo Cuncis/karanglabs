@@ -131,7 +131,7 @@ export default function AppLayout({ children, active }) {
                     onClick={handleLogout}
                     className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm text-[#52525B] dark:text-[#A1A1AA] transition-colors hover:bg-[#EFEFF1] dark:hover:bg-[#141414] hover:text-[#18181B] dark:hover:text-white"
                 >
-                    <LogOut className="h-4 w-4 text-[#8A8A93] dark:text-[#666]" /> Log out
+                    <LogOut className="h-4 w-4 text-[#8A8A93] dark:text-[#666]" /> Keluar
                 </button>
             </div>
         </div>

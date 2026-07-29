@@ -1,58 +1,62 @@
-# Whitelabel Website Builder — Setup Guide
+# Whitelabel Website Builder — Panduan Setup
 
-This is your own copy of the website-builder product: a static site (no server, no monthly hosting cost) with your branding, your price, and your own customer login via a Google Sheet. This file is written as a step-by-step you can follow while recording your own tutorial video for buyers.
+Ini adalah salinan produk website-builder milikmu sendiri: website statis (tanpa server, tanpa biaya hosting bulanan) dengan brand-mu sendiri, harga-mu sendiri, dan sistem login pelanggan lewat Google Sheet milikmu sendiri. File ini ditulis step-by-step supaya bisa kamu ikuti sambil merekam video tutorial untuk pembelimu sendiri.
 
-## What's included / what's not
+## Apa yang termasuk / tidak termasuk
 
-- All engine pages (Landing Page, Toko Online, Company Profile, Undangan, etc.) with the same prompt-builder logic.
-- Panduan Online (deploy guide) and Add-ons pages.
-- Customer login gated by a Google Sheet you control (no server needed).
-- "Simpan project" saves to the customer's own browser (localStorage) — it does not sync across devices, since there's no database here.
-- **Not included:** the "Isi Acak (AI)" random-fill button. That feature calls a paid AI API from a server, which contradicts the "no server cost" model of this package. If you want it, you'd need to run your own small backend and API key — talk to us first.
+- Semua halaman engine (Landing Page, Toko Online, Company Profile, Undangan, dll) dengan logika prompt-builder yang sama.
+- Panduan Online (panduan deploy) dan halaman Add-ons.
+- Login pelanggan dicek lewat Google Sheet yang kamu kontrol sendiri (tanpa server).
+- "Simpan project" disimpan di browser pelanggan sendiri (localStorage) — tidak sinkron antar-perangkat, karena tidak ada database di sini.
+- **Tidak termasuk:** tombol "Isi Acak (AI)". Fitur itu memanggil API AI berbayar dari server, yang bertentangan dengan model "tanpa biaya server" paket ini. Kalau kamu mau fitur ini, kamu perlu jalankan backend kecil sendiri + API key — hubungi kami dulu.
 
-## Step 1 — Rebrand
+## Langkah 1 — Rebrand
 
-Open `src/config.js` and edit:
+Buka `src/config.js` dan edit:
 
-- `brandName`, `logoInitials`, `tagline` — your name/logo/pitch.
-- `accentColor` — one hex color; every button/highlight in the app re-colors from this automatically, no design work needed.
-- `priceLabel`, `priceNote`, `paymentUrl` — your price and your own payment link (Midtrans, Trakteer, QRIS, WhatsApp order, etc.).
-- `whatsapp` — your support number.
-- `appsScriptUrl` — filled in during Step 2 below.
+- `brandName`, `logoInitials`, `tagline` — nama/logo/pitch kamu.
+- `accentColor` — satu kode warna hex; semua tombol/highlight di aplikasi otomatis ikut berubah warna, tidak perlu kerja desain.
+- `priceLabel`, `priceNote`, `paymentUrl` — harga dan link pembayaranmu sendiri (Midtrans, Trakteer, QRIS, order via WhatsApp, dll).
+- `whatsapp` — nomor support kamu.
+- `appsScriptUrl` — diisi di Langkah 2 di bawah.
 
-## Step 2 — Set up customer login (Google Sheet)
+## Langkah 2 — Setup login pelanggan (Google Sheet)
 
-1. Create a new Google Sheet. Rename the first tab to `Customers`.
-2. Add a header row: `Email | Kode Akses | Status`.
-3. Go to **Extensions > Apps Script**, delete the placeholder code, and paste in the contents of `google-apps-script/Code.gs` from this package.
-4. Click **Deploy > New deployment**. Type: **Web app**. Execute as: **Me**. Who has access: **Anyone**.
-5. Click **Deploy**, authorize the permissions Google asks for, then copy the URL ending in `/exec`.
-6. Paste that URL into `appsScriptUrl` in `src/config.js`.
+1. Buat Google Sheet baru. Rename tab pertama jadi `Customers`.
+2. Tambahkan baris header: `Email | Kode Akses | Status`.
+3. Buka **Extensions > Apps Script**, hapus kode default, lalu paste isi file `google-apps-script/Code.gs` dari paket ini.
+4. Klik **Deploy > New deployment**. Type: **Web app**. Execute as: **Me**. Who has access: **Anyone**.
+5. Klik **Deploy**, izinkan permission yang diminta Google, lalu salin URL yang berakhiran `/exec`.
+6. Paste URL itu ke `appsScriptUrl` di `src/config.js`.
 
-Whenever someone pays you, add a row to the `Customers` sheet: their email, a short access code you send them, and `active` in Status. To revoke access later, change Status to `inactive` — no need to delete the row.
+Setiap ada yang bayar, tambahkan baris baru di sheet `Customers`: email mereka, kode akses singkat yang kamu kirim, dan `active` di kolom Status. Untuk mencabut akses nanti, ubah Status jadi `inactive` — tidak perlu menghapus barisnya.
 
-## Step 3 — Build
+## Langkah 3 — Build
 
 ```
 npm install
 npm run build
 ```
 
-This produces a `dist/` folder — a plain static site, ready to deploy.
+Ini menghasilkan folder `dist/` — website statis polos, siap deploy.
 
-## Step 4 — Deploy for free (same flow as the in-app guide)
+## Langkah 4 — Deploy gratis (alur yang sama seperti panduan di dalam app)
 
-1. Zip the contents of `dist/` into one `.zip` (or just the folder if your host accepts folders).
-2. Open https://vercel.com/drop, log in first (GitHub, GitLab, or email).
-3. Drag & drop the zipped `dist/` folder onto the upload area.
-4. Your site is live immediately at a free `yourname.vercel.app` address.
+1. Zip isi `dist/` jadi satu file `.zip` (atau langsung folder-nya kalau hosting kamu menerima folder).
+2. Buka https://vercel.com/drop, login dulu (GitHub, GitLab, atau email).
+3. Drag & drop folder `dist/` yang sudah di-zip ke area upload.
+4. Website kamu langsung live dengan alamat gratis `namamu.vercel.app`.
 
-(Netlify's https://app.netlify.com/drop works the same way if you prefer it.)
+(Netlify di https://app.netlify.com/drop juga bisa dipakai dengan cara yang sama kalau kamu lebih suka.)
 
-## Step 5 — Sell it
+## Langkah 5 — Jual
 
-Send buyers to your live URL. After they pay through your `paymentUrl`, add their row to the Google Sheet, then send them their email + access code so they can log in at `yourdomain/#/login`.
+Kirim pembeli ke URL website-mu yang sudah live. Setelah mereka bayar lewat `paymentUrl` kamu, tambahkan baris mereka di Google Sheet, lalu kirim email + kode akses supaya mereka bisa login di `websitekamu.com/#/login`.
 
-## Re-deploying after a rebrand change
+## Deploy ulang setelah ganti rebrand
 
-Any time you edit `src/config.js`, repeat Step 3 (build) and Step 4 (drop the new `dist/` folder) — static sites need a rebuild to pick up config changes, there's no live server to restart.
+Setiap kali kamu edit `src/config.js`, ulangi Langkah 3 (build) dan Langkah 4 (drop folder `dist/` yang baru) — website statis butuh build ulang untuk memakai perubahan config, tidak ada server yang bisa di-restart.
+
+## Butuh bantuan?
+
+Ada langkah yang macet atau error? Hubungi kami langsung lewat WhatsApp: **wa.me/6283854775376**.

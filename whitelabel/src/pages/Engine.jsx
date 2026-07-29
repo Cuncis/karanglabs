@@ -168,7 +168,7 @@ export default function Engine({ slug }) {
                                                 type="button"
                                                 onClick={() => { navigator.clipboard?.writeText(p.prompt); }}
                                                 className="rounded-md p-2 text-[#71717A] dark:text-[#888] transition-colors hover:bg-[#E8E8EB] dark:hover:bg-[#1A1A1A] hover:text-[#18181B] dark:hover:text-white"
-                                                title="Copy prompt"
+                                                title="Salin prompt"
                                             >
                                                 <Copy className="h-4 w-4" />
                                             </button>
