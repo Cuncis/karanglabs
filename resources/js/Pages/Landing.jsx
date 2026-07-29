@@ -87,38 +87,18 @@ const ENGINES = [
     },
 ];
 
-const RIMBA_KAYU_TILE = { image: 'https://cdn.libradigital.id/karanglabs/compro-rimba-kayu.png', alt: 'Company profile Rimba Kayu, hasil generate Karanglabs' };
+// Portfolio showcase tiles: 20 real generated-website screenshots hosted on the
+// CDN as 1.png .. 20.png. Two marquee lines scroll in opposite directions.
+const showcaseTile = (n) => ({
+    image: `https://cdn.libradigital.id/karanglabs/${n}.png`,
+    alt: `Contoh website hasil generate Karanglabs #${n}`,
+});
 
-// Two independent marquee lines, 12 tiles each, scrolling opposite directions.
-const SHOWCASE_LINE_1 = [
-    RIMBA_KAYU_TILE,
-    'from-emerald-500/30 to-teal-500/10',
-    'from-indigo-500/30 to-purple-500/10',
-    'from-rose-500/30 to-orange-500/10',
-    'from-sky-500/30 to-cyan-500/10',
-    'from-amber-500/30 to-yellow-500/10',
-    'from-fuchsia-500/30 to-pink-500/10',
-    'from-teal-500/30 to-emerald-500/10',
-    'from-orange-500/30 to-red-500/10',
-    'from-blue-500/30 to-indigo-500/10',
-    'from-lime-500/30 to-green-500/10',
-    'from-purple-500/30 to-violet-500/10',
-];
+// Top line: images 1-10.
+const SHOWCASE_LINE_1 = Array.from({ length: 10 }, (_, i) => showcaseTile(i + 1));
 
-const SHOWCASE_LINE_2 = [
-    'from-violet-500/30 to-indigo-500/10',
-    'from-cyan-500/30 to-sky-500/10',
-    'from-fuchsia-500/30 to-rose-500/10',
-    'from-rose-500/30 to-pink-500/10',
-    'from-amber-500/30 to-orange-500/10',
-    'from-emerald-500/30 to-lime-500/10',
-    RIMBA_KAYU_TILE,
-    'from-slate-500/30 to-gray-500/10',
-    'from-teal-500/30 to-cyan-500/10',
-    'from-indigo-500/30 to-blue-500/10',
-    'from-pink-500/30 to-rose-500/10',
-    'from-green-500/30 to-emerald-500/10',
-];
+// Bottom line: images 11-20.
+const SHOWCASE_LINE_2 = Array.from({ length: 10 }, (_, i) => showcaseTile(i + 11));
 
 const STEPS = [
     {
