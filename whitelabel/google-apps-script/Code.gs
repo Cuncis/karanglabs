@@ -6,6 +6,12 @@
  *   budi@email.com       ABC123               active
  *   siti@email.com       XYZ789               inactive
  *
+ * Cara tercepat membuat tab ini: import `Customers-template.csv` (satu folder
+ * dengan file ini) lewat File > Import di Google Sheets - header dan 2 baris
+ * contoh di atas sudah otomatis terisi. Lihat README.md Langkah 2 untuk detail.
+ * HAPUS 2 baris contoh itu sebelum sheet ini dipakai sungguhan, karena kode
+ * akses "ABC123" ada di paket publik dan siapa pun bisa memakainya untuk login.
+ *
  * Tambahkan baris baru secara manual setiap ada yang bayar. Ubah Status jadi
  * "inactive" untuk mencabut akses tanpa menghapus barisnya (riwayat tetap ada).
  *

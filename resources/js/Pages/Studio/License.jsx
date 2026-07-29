@@ -37,8 +37,10 @@ const STEPS = [
         n: '03', icon: FileSpreadsheet, title: 'Setup login pelanggan (Google Spreadsheet)',
         body: 'Login pelanggan dicek lewat Google Spreadsheet milikmu sendiri — gratis, tanpa server, tanpa database.',
         detail: [
-            'Buka **Google Sheets**, buat spreadsheet baru, rename sheet pertama jadi "Customers".',
-            'Isi baris pertama (header): `Email | Kode Akses | Status`.',
+            'Buka **Google Sheets**, buat spreadsheet baru.',
+            'Klik **File > Import > Upload**, pilih file `google-apps-script/Customers-template.csv` dari paket yang kamu download, lalu pilih **Sisipkan sheet baru**.',
+            'Sheet baru otomatis terisi header `Email | Kode Akses | Status` + 2 baris contoh. Rename tab-nya jadi persis "Customers".',
+            '**Hapus 2 baris contoh** — kode aksesnya sudah publik di paket ini, jangan dipakai untuk pelanggan asli.',
             'Buka menu **Extensions > Apps Script** di spreadsheet itu.',
             'Hapus kode default yang ada, lalu paste isi file `google-apps-script/Code.gs` dari paket yang kamu download.',
             'Klik **Deploy > New deployment**, pilih tipe **Web app**. Execute as: `Me`, Who has access: `Anyone`.',

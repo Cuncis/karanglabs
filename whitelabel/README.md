@@ -22,12 +22,14 @@ Buka `src/config.js` dan edit:
 
 ## Langkah 2 — Setup login pelanggan (Google Sheet)
 
-1. Buat Google Sheet baru. Rename tab pertama jadi `Customers`.
-2. Tambahkan baris header: `Email | Kode Akses | Status`.
-3. Buka **Extensions > Apps Script**, hapus kode default, lalu paste isi file `google-apps-script/Code.gs` dari paket ini.
-4. Klik **Deploy > New deployment**. Type: **Web app**. Execute as: **Me**. Who has access: **Anyone**.
-5. Klik **Deploy**, izinkan permission yang diminta Google, lalu salin URL yang berakhiran `/exec`.
-6. Paste URL itu ke `appsScriptUrl` di `src/config.js`.
+1. Buka https://sheets.new untuk membuat spreadsheet baru.
+2. Klik **File > Import > Upload**, lalu pilih file `google-apps-script/Customers-template.csv` dari paket ini. Pilih opsi **Sisipkan sheet baru** (Insert new sheet) saat diminta lokasi import.
+3. Sheet baru akan otomatis terisi header `Email | Kode Akses | Status` plus 2 baris contoh. Klik kanan tab sheet itu, **Ganti nama** (Rename) jadi persis `Customers` (huruf besar-kecil harus sama).
+4. **Hapus 2 baris contoh** (`budi@email.com` dan `siti@email.com`) — itu hanya contoh format, bukan data asli. Kode akses `ABC123` ada di paket publik ini, jadi kalau tidak dihapus, siapa pun yang punya paket ini bisa memakainya untuk login ke sitemu.
+5. Buka menu **Extensions > Apps Script** di spreadsheet ini, hapus kode default, lalu paste isi file `google-apps-script/Code.gs` dari paket ini.
+6. Klik **Deploy > New deployment**. Type: **Web app**. Execute as: **Me**. Who has access: **Anyone**.
+7. Klik **Deploy**, izinkan permission yang diminta Google, lalu salin URL yang berakhiran `/exec`.
+8. Paste URL itu ke `appsScriptUrl` di `src/config.js`.
 
 Setiap ada yang bayar, tambahkan baris baru di sheet `Customers`: email mereka, kode akses singkat yang kamu kirim, dan `active` di kolom Status. Untuk mencabut akses nanti, ubah Status jadi `inactive` — tidak perlu menghapus barisnya.
 
