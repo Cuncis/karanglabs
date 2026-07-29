@@ -128,6 +128,16 @@ export function buildPrompt(engine, values) {
         ]),
         block('DETAIL KONTEN', engine.details(v)),
         block('CTA & KONVERSI', engine.cta ? engine.cta(v) : []),
+        engine.slug === 'toko-online' ? block('KERANJANG BELANJA', [
+            '- Tambahkan fitur keranjang belanja (shopping cart) sederhana, 100% client-side pakai JavaScript (tanpa backend/database).',
+            '- Setiap kartu produk punya kontrol jumlah dengan tombol "+" dan "-" (increment/decrement), mulai dari 0, untuk menambah/mengurangi produk itu di keranjang.',
+            '- Di header/navbar, tambahkan ikon keranjang yang selalu terlihat di semua halaman atau section.',
+            '- Ikon keranjang punya badge angka kecil di pojok kanan atas, menampilkan TOTAL jumlah item di keranjang (dijumlah dari semua produk, bukan jumlah jenis produk yang berbeda).',
+            '- Badge harus update secara real-time (tanpa reload halaman) setiap kali tombol +/- diklik, dan disembunyikan kalau total keranjang masih 0.',
+            '- Klik ikon keranjang membuka panel/dropdown ringkasan berisi: daftar produk yang dipilih beserta jumlahnya, subtotal per produk, dan total harga keseluruhan.',
+            '- Di panel keranjang, sediakan tombol checkout yang menyusun pesan berisi rincian pesanan lengkap (nama produk, jumlah, harga satuan, total) sesuai metode order pada CTA & KONVERSI di atas.',
+            '- State keranjang (jumlah tiap produk) disimpan di variable/state JavaScript biasa selama sesi kunjungan; tidak perlu localStorage atau database.',
+        ]) : null,
         block('ADD-ON', addonInstructions(v.addons)),
         block('GAMBAR', [
             `- Gambar hero/banner utama: pakai foto asli dari Unsplash yang temanya nyambung dengan "${brand}" (${engine.label}${v.style ? `, gaya ${v.style}` : ''}), format URL https://images.unsplash.com/photo-[ID]?auto=format&fit=crop&w=1600&q=80 dengan ID foto yang benar-benar ada dan relevan.`,
