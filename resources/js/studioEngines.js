@@ -135,6 +135,12 @@ export function buildPrompt(engine, values) {
             '- Untuk semua gambar lain selain hero (galeri, produk, tim, testimoni, dsb), jangan cari foto asli satu-satu; cukup pakai placeholder dari https://placehold.co/{lebar}x{tinggi}/EEEEEE/999999?text={label singkat sesuai isi gambar}.',
             '- Setiap tag <img> wajib punya src yang pasti valid (Unsplash dengan fallback, atau placehold.co); jangan pernah biarkan src kosong atau menunjuk ke URL yang belum tentu ada.',
         ]),
+        block('KONTRAS TEKS', [
+            '- WAJIB kontras tinggi di setiap kombinasi teks-di-atas-latar (termasuk teks di atas gambar/hero, section gelap, tombol, badge, card, footer): rasio kontras minimal 4.5:1 untuk teks biasa dan 3:1 untuk judul besar (standar WCAG AA). Jangan pernah teks terang di atas latar terang, atau teks gelap di atas latar gelap.',
+            '- Kalau pakai Tailwind CSS lewat CDN (<script src="https://cdn.tailwindcss.com">) dan mendefinisikan warna custom sendiri di tailwind.config (mis. warna "cream", "ink"), JANGAN PERNAH gabungkan warna custom itu dengan modifier opacity (contoh yang DILARANG: text-cream/60, bg-ink/10, border-ink/20) karena Tailwind Play CDN tidak selalu bisa me-render utility opacity untuk warna custom, sehingga teks jadi transparan, hilang, atau kontrasnya rendah.',
+            '- Sebagai gantinya, definisikan tiap level warna sebagai kode hex solid terpisah di tailwind.config (mis. ink: "#1A1A1A", "ink-muted": "#6B6B6B", "ink-soft": "#9CA3AF"), lalu pakai nama warnanya langsung TANPA modifier opacity (mis. text-ink-muted, bukan text-ink/60). Kalau memang butuh transparansi, tulis nilai literal seperti text-[#6B6B6B] atau bg-[rgba(26,26,26,0.1)], jangan warna custom + "/opacity".',
+            '- Sebelum output final, cek ulang seluruh halaman: pastikan tidak ada teks yang nyaris tak terlihat karena kontrasnya kurang, terutama di hero section, overlay di atas gambar, dan dark mode kalau ada.',
+        ]),
         block('OUTPUT', [
             line('Format', format),
             '- Kode bersih & rapi, siap langsung deploy (Netlify / Vercel / GitHub Pages)',
