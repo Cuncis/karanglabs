@@ -1,6 +1,10 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Star } from 'lucide-react';
+import {
+    Star, Store, Coffee, ShoppingBag, Camera, Heart, Sparkles, Shirt, Wrench,
+    GraduationCap, Dumbbell, Building2, Briefcase, Laptop, FileText, Mail, Users,
+    PartyPopper, Plane, Stethoscope, Car,
+} from 'lucide-react';
 
 const LOGO = 'https://cdn.libradigital.id/logo-01%20(1)%20(1).png';
 
@@ -15,10 +19,26 @@ const NAV_LINKS = [
 ];
 
 const CATEGORIES = [
-    'UMKM', 'Kafe & Resto', 'Toko Online', 'Fotografer', 'Wedding & MUA', 'Skincare',
-    'Fashion', 'Jasa Servis', 'Les Privat', 'Fitness', 'Properti', 'Agency',
-    'Freelancer', 'Mahasiswa & CV', 'Undangan', 'Komunitas', 'Event', 'Travel',
-    'Klinik', 'Bengkel',
+    { label: 'UMKM', icon: Store },
+    { label: 'Kafe & Resto', icon: Coffee },
+    { label: 'Toko Online', icon: ShoppingBag },
+    { label: 'Fotografer', icon: Camera },
+    { label: 'Wedding & MUA', icon: Heart },
+    { label: 'Skincare', icon: Sparkles },
+    { label: 'Fashion', icon: Shirt },
+    { label: 'Jasa Servis', icon: Wrench },
+    { label: 'Les Privat', icon: GraduationCap },
+    { label: 'Fitness', icon: Dumbbell },
+    { label: 'Properti', icon: Building2 },
+    { label: 'Agency', icon: Briefcase },
+    { label: 'Freelancer', icon: Laptop },
+    { label: 'Mahasiswa & CV', icon: FileText },
+    { label: 'Undangan', icon: Mail },
+    { label: 'Komunitas', icon: Users },
+    { label: 'Event', icon: PartyPopper },
+    { label: 'Travel', icon: Plane },
+    { label: 'Klinik', icon: Stethoscope },
+    { label: 'Bengkel', icon: Car },
 ];
 
 const PAIN_POINTS = [
@@ -487,11 +507,19 @@ export default function Landing() {
                         <p className="mb-5 text-center text-xs uppercase tracking-[0.2em] text-[#666]">bisa untuk semua jenis usaha &amp; kebutuhan</p>
                         <div className="relative overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]">
                             <div className="flex w-max kl-marquee">
-                                {[...CATEGORIES, ...CATEGORIES].map((cat, i) => (
-                                    <span key={i} className="mx-3 whitespace-nowrap rounded-full border border-[#222] bg-[#111] px-4 py-1.5 text-sm text-[#A1A1AA]">
-                                        {cat}
-                                    </span>
-                                ))}
+                                {[...CATEGORIES, ...CATEGORIES].map((cat, i) => {
+                                    const Icon = cat.icon;
+
+                                    return (
+                                        <div
+                                            key={i}
+                                            className="mx-2.5 flex w-32 flex-shrink-0 flex-col items-center justify-center gap-2 rounded-2xl border border-[#222] bg-[#111] px-3 py-5 text-center"
+                                        >
+                                            <Icon className="h-7 w-7 text-emerald-400" />
+                                            <span className="text-sm font-medium leading-tight text-[#A1A1AA]">{cat.label}</span>
+                                        </div>
+                                    );
+                                })}
                             </div>
                         </div>
                     </section>

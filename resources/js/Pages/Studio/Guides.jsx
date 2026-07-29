@@ -77,7 +77,7 @@ export default function Guides() {
         <StudioLayout>
             <Head title="Panduan Online Studio" />
 
-            <div className="mb-10 flex items-start justify-between gap-4">
+            <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                     <span className="text-xs font-medium uppercase tracking-[0.2em] text-emerald-600 dark:text-emerald-400">Panduan Online</span>
                     <h1 className="mt-3 text-3xl font-bold tracking-tight text-[#18181B] dark:text-white">Dari nol sampai website tayang.</h1>

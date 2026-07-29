@@ -592,7 +592,7 @@ export default function Engine() {
         <StudioLayout>
             <Head title={`${engine.name} Studio`} />
 
-            <div className="mb-8 flex items-start justify-between gap-4">
+            <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div className="flex items-center gap-4">
                     <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${accent.bg}`}>
                         <engine.icon className={`h-6 w-6 ${accent.text}`} />

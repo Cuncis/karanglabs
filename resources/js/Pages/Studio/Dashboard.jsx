@@ -22,7 +22,7 @@ export default function Dashboard() {
         <StudioLayout>
             <Head title="Dashboard Studio" />
 
-            <div className="mb-10 flex items-start justify-between gap-4">
+            <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                     <span className="inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-300">
                         <Sparkles className="h-3.5 w-3.5" /> Selamat datang, Member

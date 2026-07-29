@@ -103,7 +103,7 @@ export default function License() {
         <StudioLayout>
             <Head title="Lisensi Reseller Studio" />
 
-            <div className="mb-10 flex items-start justify-between gap-4">
+            <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                     <span className="inline-flex items-center gap-1.5 text-xs font-medium uppercase tracking-[0.2em] text-emerald-600 dark:text-emerald-400">
                         <KeyRound className="h-3.5 w-3.5" /> Lisensi Reseller
