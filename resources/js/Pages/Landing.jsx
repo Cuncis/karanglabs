@@ -416,14 +416,14 @@ export default function Landing() {
                                 </h1>
 
                                 <p className="mt-6 text-lg leading-relaxed text-[#A1A1AA]">
-                                    Semua orang bisa buat website simpel dan gratis, cuma 99rb. Isi form, copy prompt-nya,
+                                    Semua orang bisa buat website simpel dan cepat. Isi form, copy prompt-nya,
                                     paste ke ChatGPT / Claude / Gemini, website kamu jadi dan online hari ini juga.
                                     Tanpa langganan, tanpa biaya hosting.
                                 </p>
 
                                 <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                                     <a href="#harga" className="rounded-lg bg-emerald-400 px-6 py-3 text-center text-sm font-semibold text-black transition-colors hover:bg-emerald-300">
-                                        Ambil Early Access, Rp 99.000
+                                        Ambil Early Access
                                     </a>
                                     <a href="#cara-kerja" className="rounded-lg border border-[#333] px-6 py-3 text-center text-sm font-medium text-[#EDEDED] transition-colors hover:border-[#555] hover:bg-[#111]">
                                         Lihat Cara Kerjanya
