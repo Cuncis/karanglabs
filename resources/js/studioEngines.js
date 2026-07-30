@@ -162,6 +162,10 @@ export function buildPrompt(engine, values) {
             '- Pakai navbar/menu yang sama di semua halaman, lengkap dengan penanda halaman yang sedang aktif.',
             '- Tiap item nav adalah link (href) ke file halaman lain yang sesuai, BUKAN anchor scroll dalam satu halaman.',
             '- Struktur section di atas diterapkan pada halaman yang relevan (umumnya halaman utama/Beranda).',
+            '- Halaman utama/beranda WAJIB bernama index.html; nama file halaman lain pakai huruf kecil tanpa spasi (mis. tentang.html, kontak.html), dan semua link antar-halaman menunjuk ke nama file itu persis.',
+            '- PENTING: tiap file HTML harus BERDIRI SENDIRI (self-contained). Suntikkan (inline) SEMUA konfigurasi warna (tailwind.config), CSS, dan JavaScript langsung DI DALAM tiap file HTML - CSS di dalam <style> pada <head>, JS di dalam <script>.',
+            '- JANGAN pisahkan CSS/JS ke file eksternal, dan JANGAN buat folder assets/ (atau css/, js/) apa pun. Tidak boleh ada <link rel="stylesheet" href="assets/..."> atau <script src="assets/...">; semua style & script harus inline.',
+            '- Karena semua file berada di level yang sama (satu folder datar) saat di-download, tiap halaman harus tetap tampil sempurna tanpa bergantung pada file atau folder lain selain gambar. Duplikasikan config warna, style, dan script yang sama ke setiap halaman.',
         ]) : block('NAVIGASI', [
             '- Website ini SATU HALAMAN (single-page). Buat navbar sticky di header berisi link ke tiap section utama.',
             '- Tiap item nav pakai anchor scroll ke id section terkait (contoh: #harga, #faq, #testimoni), sesuaikan nama anchor dengan section pada STRUKTUR HALAMAN di atas.',
