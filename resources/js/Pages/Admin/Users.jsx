@@ -21,6 +21,7 @@ function SubNav({ active, hasPackage }) {
 
     return (
         <div className="mb-8 flex flex-wrap items-center gap-2">
+            <Link href={route('admin.traffic')} className={`${base} ${active === 'traffic' ? on : off}`}>Traffic</Link>
             <Link href={route('admin.orders')} className={`${base} ${active === 'orders' ? on : off}`}>Orders</Link>
             <Link href={route('admin.users')} className={`${base} ${active === 'users' ? on : off}`}>Users</Link>
             {hasPackage && (

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\OrderController;
+use App\Http\Controllers\Admin\TrafficController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\WhitelabelController;
 use App\Http\Controllers\CheckoutController;
@@ -132,6 +133,7 @@ Route::middleware('auth')->group(function () {
 
     // Admin (owner only, gated by ADMIN_EMAILS).
     Route::middleware('admin')->prefix('admin')->group(function () {
+        Route::get('/traffic', [TrafficController::class, 'index'])->name('admin.traffic');
         Route::get('/orders', [OrderController::class, 'index'])->name('admin.orders');
         Route::post('/orders/{order}/resend', [OrderController::class, 'resend'])->name('admin.orders.resend');
         Route::get('/users', [UserController::class, 'index'])->name('admin.users');
