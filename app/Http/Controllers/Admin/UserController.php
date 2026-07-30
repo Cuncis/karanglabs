@@ -51,6 +51,30 @@ class UserController extends Controller
     }
 
     /**
+     * Update a user's name and email. Admin-only editing of any account.
+     */
+    public function update(Request $request, User $user): RedirectResponse
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => [
+                'required', 'string', 'lowercase', 'email', 'max:255',
+                Rule::unique(User::class)->ignore($user->id),
+            ],
+        ]);
+
+        $user->fill($validated);
+
+        if ($user->isDirty('email')) {
+            $user->email_verified_at = null;
+        }
+
+        $user->save();
+
+        return back()->with('success', "Data {$user->email} diperbarui.");
+    }
+
+    /**
      * Change a user's login level.
      */
     public function updateRole(Request $request, User $user): RedirectResponse

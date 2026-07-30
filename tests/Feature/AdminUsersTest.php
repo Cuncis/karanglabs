@@ -38,6 +38,53 @@ class AdminUsersTest extends TestCase
                 ->has('users', 4));
     }
 
+    public function test_an_admin_can_update_a_user_name_and_email(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $member = User::factory()->create(['name' => 'Old Name', 'email' => 'old@example.com']);
+
+        $this->actingAs($admin)
+            ->patch(route('admin.users.update', $member), [
+                'name' => 'New Name',
+                'email' => 'new@example.com',
+            ])
+            ->assertSessionHasNoErrors()
+            ->assertRedirect();
+
+        $member->refresh();
+        $this->assertSame('New Name', $member->name);
+        $this->assertSame('new@example.com', $member->email);
+    }
+
+    public function test_admin_user_update_rejects_a_duplicate_email(): void
+    {
+        $admin = User::factory()->admin()->create();
+        User::factory()->create(['email' => 'taken@example.com']);
+        $member = User::factory()->create();
+
+        $this->actingAs($admin)
+            ->patch(route('admin.users.update', $member), [
+                'name' => 'Whoever',
+                'email' => 'taken@example.com',
+            ])
+            ->assertSessionHasErrors('email');
+    }
+
+    public function test_a_non_admin_cannot_update_a_user(): void
+    {
+        $member = User::factory()->create();
+        $victim = User::factory()->create(['email' => 'victim@example.com']);
+
+        $this->actingAs($member)
+            ->patch(route('admin.users.update', $victim), [
+                'name' => 'Changed',
+                'email' => 'changed@example.com',
+            ])
+            ->assertForbidden();
+
+        $this->assertSame('victim@example.com', $victim->fresh()->email);
+    }
+
     public function test_an_admin_can_promote_a_user_to_reseller(): void
     {
         $admin = User::factory()->admin()->create();

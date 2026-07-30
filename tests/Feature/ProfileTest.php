@@ -21,9 +21,9 @@ class ProfileTest extends TestCase
         $response->assertOk();
     }
 
-    public function test_profile_information_can_be_updated(): void
+    public function test_an_admin_can_update_their_profile_information(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
 
         $response = $this
             ->actingAs($user)
@@ -41,6 +41,25 @@ class ProfileTest extends TestCase
         $this->assertSame('Test User', $user->name);
         $this->assertSame('test@example.com', $user->email);
         $this->assertNull($user->email_verified_at);
+    }
+
+    public function test_a_regular_user_cannot_change_their_name_or_email(): void
+    {
+        $user = User::factory()->create(['name' => 'Original', 'email' => 'original@example.com']);
+
+        $this
+            ->actingAs($user)
+            ->patch('/profile', [
+                'name' => 'Hacker',
+                'email' => 'hacker@example.com',
+            ])
+            ->assertSessionHasNoErrors()
+            ->assertRedirect('/profile');
+
+        $user->refresh();
+
+        $this->assertSame('Original', $user->name);
+        $this->assertSame('original@example.com', $user->email);
     }
 
     public function test_email_verification_status_is_unchanged_when_the_email_address_is_unchanged(): void

@@ -33,7 +33,8 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('studio.index', absolute: false));
+        // Everyone lands on the Studio after login, including admins.
+        return redirect()->route('studio.index');
     }
 
     /**

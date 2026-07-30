@@ -1,6 +1,6 @@
-import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { useState } from 'react';
-import { Users as UsersIcon, ShieldCheck, KeyRound, UserRound, Check, Download, Trash2, AlertTriangle } from 'lucide-react';
+import { Users as UsersIcon, ShieldCheck, KeyRound, UserRound, Check, Download, Trash2, AlertTriangle, Pencil } from 'lucide-react';
 import StudioLayout from '@/Layouts/StudioLayout';
 
 function formatDate(value) {
@@ -39,6 +39,23 @@ export default function Users() {
     const [savingId, setSavingId] = useState(null);
     const [confirming, setConfirming] = useState(null);
     const [deleting, setDeleting] = useState(false);
+    const [editing, setEditing] = useState(null);
+
+    const editForm = useForm({ name: '', email: '' });
+
+    const openEdit = (user) => {
+        editForm.clearErrors();
+        editForm.setData({ name: user.name, email: user.email });
+        setEditing(user);
+    };
+
+    const saveEdit = (e) => {
+        e.preventDefault();
+        editForm.patch(route('admin.users.update', { user: editing.id }), {
+            preserveScroll: true,
+            onSuccess: () => setEditing(null),
+        });
+    };
 
     const changeRole = (user, role) => {
         if (role === user.role) return;
@@ -134,19 +151,29 @@ export default function Users() {
                                             </div>
                                         )}
                                     </td>
-                                    <td className="px-5 py-4 text-right">
-                                        {isProtected ? (
-                                            <span className="text-xs text-[#B4B4BB] dark:text-[#555]">-</span>
-                                        ) : (
+                                    <td className="px-5 py-4">
+                                        <div className="flex items-center justify-end gap-2">
                                             <button
                                                 type="button"
-                                                onClick={() => setConfirming(u)}
-                                                className="inline-flex items-center gap-1.5 rounded-md border border-red-300/60 dark:border-red-500/30 px-3 py-1.5 text-xs font-medium text-red-600 dark:text-red-400 transition-colors hover:bg-red-50 dark:hover:bg-red-500/10"
-                                                title="Hapus user"
+                                                onClick={() => openEdit(u)}
+                                                className="inline-flex items-center gap-1.5 rounded-md border border-[#D4D4D8] dark:border-[#333] px-3 py-1.5 text-xs font-medium text-[#27272A] dark:text-[#EDEDED] transition-colors hover:border-[#A1A1AA] dark:hover:border-[#555] hover:bg-[#EFEFF1] dark:hover:bg-[#1A1A1A]"
+                                                title="Edit nama & email"
                                             >
-                                                <Trash2 className="h-3.5 w-3.5" /> Hapus
+                                                <Pencil className="h-3.5 w-3.5" /> Edit
                                             </button>
-                                        )}
+                                            {isProtected ? (
+                                                <span className="text-xs text-[#B4B4BB] dark:text-[#555]">-</span>
+                                            ) : (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setConfirming(u)}
+                                                    className="inline-flex items-center gap-1.5 rounded-md border border-red-300/60 dark:border-red-500/30 px-3 py-1.5 text-xs font-medium text-red-600 dark:text-red-400 transition-colors hover:bg-red-50 dark:hover:bg-red-500/10"
+                                                    title="Hapus user"
+                                                >
+                                                    <Trash2 className="h-3.5 w-3.5" /> Hapus
+                                                </button>
+                                            )}
+                                        </div>
                                     </td>
                                 </tr>
                             );
@@ -189,6 +216,57 @@ export default function Users() {
                             </button>
                         </div>
                     </div>
+                </div>
+            )}
+
+            {editing && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => !editForm.processing && setEditing(null)} />
+                    <form onSubmit={saveEdit} className="relative w-full max-w-md rounded-2xl border border-[#E4E4E7] dark:border-[#222] bg-white dark:bg-[#111] p-6 shadow-xl">
+                        <h3 className="text-lg font-semibold text-[#18181B] dark:text-white">Edit user</h3>
+                        <p className="mt-1 text-sm text-[#71717A] dark:text-[#888]">Ubah nama & email akun ini.</p>
+
+                        <div className="mt-5 space-y-4">
+                            <div>
+                                <label className="mb-1.5 block text-xs font-medium text-[#52525B] dark:text-[#A1A1AA]">Nama</label>
+                                <input
+                                    type="text"
+                                    value={editForm.data.name}
+                                    onChange={(e) => editForm.setData('name', e.target.value)}
+                                    className="block w-full rounded-lg border border-[#D4D4D8] dark:border-[#333] bg-white dark:bg-[#0D0D0D] px-3 py-2 text-sm text-[#27272A] dark:text-[#EDEDED] focus:border-emerald-400/50 focus:outline-none focus:ring-1 focus:ring-emerald-400/30"
+                                />
+                                {editForm.errors.name && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{editForm.errors.name}</p>}
+                            </div>
+                            <div>
+                                <label className="mb-1.5 block text-xs font-medium text-[#52525B] dark:text-[#A1A1AA]">Email</label>
+                                <input
+                                    type="email"
+                                    value={editForm.data.email}
+                                    onChange={(e) => editForm.setData('email', e.target.value)}
+                                    className="block w-full rounded-lg border border-[#D4D4D8] dark:border-[#333] bg-white dark:bg-[#0D0D0D] px-3 py-2 text-sm text-[#27272A] dark:text-[#EDEDED] focus:border-emerald-400/50 focus:outline-none focus:ring-1 focus:ring-emerald-400/30"
+                                />
+                                {editForm.errors.email && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{editForm.errors.email}</p>}
+                            </div>
+                        </div>
+
+                        <div className="mt-6 flex justify-end gap-3">
+                            <button
+                                type="button"
+                                onClick={() => setEditing(null)}
+                                disabled={editForm.processing}
+                                className="rounded-lg border border-[#E4E4E7] dark:border-[#333] px-4 py-2 text-sm font-medium text-[#52525B] dark:text-[#A1A1AA] transition-colors hover:bg-[#EFEFF1] dark:hover:bg-[#1A1A1A] disabled:opacity-50"
+                            >
+                                Batal
+                            </button>
+                            <button
+                                type="submit"
+                                disabled={editForm.processing}
+                                className="inline-flex items-center gap-2 rounded-lg bg-emerald-400 px-4 py-2 text-sm font-semibold text-black transition-colors hover:bg-emerald-300 disabled:opacity-50"
+                            >
+                                {editForm.processing ? 'Menyimpan...' : 'Simpan'}
+                            </button>
+                        </div>
+                    </form>
                 </div>
             )}
         </StudioLayout>

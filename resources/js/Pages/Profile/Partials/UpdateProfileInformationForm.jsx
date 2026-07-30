@@ -10,7 +10,9 @@ export default function UpdateProfileInformation({
     status,
     className = '',
 }) {
-    const user = usePage().props.auth.user;
+    const page = usePage().props;
+    const user = page.auth.user;
+    const isAdmin = page.auth.isAdmin;
 
     const { data, setData, patch, errors, processing, recentlySuccessful } =
         useForm({
@@ -32,7 +34,9 @@ export default function UpdateProfileInformation({
                 </h2>
 
                 <p className="mt-1 text-sm text-gray-600">
-                    Update your account's profile information and email address.
+                    {isAdmin
+                        ? "Update your account's profile information and email address."
+                        : 'Nama dan email akun kamu hanya bisa diubah oleh admin. Hubungi admin jika ada yang perlu diperbaiki.'}
                 </p>
             </header>
 
@@ -42,11 +46,12 @@ export default function UpdateProfileInformation({
 
                     <TextInput
                         id="name"
-                        className="mt-1 block w-full"
+                        className="mt-1 block w-full disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500"
                         value={data.name}
                         onChange={(e) => setData('name', e.target.value)}
                         required
-                        isFocused
+                        isFocused={isAdmin}
+                        disabled={!isAdmin}
                         autoComplete="name"
                     />
 
@@ -59,10 +64,11 @@ export default function UpdateProfileInformation({
                     <TextInput
                         id="email"
                         type="email"
-                        className="mt-1 block w-full"
+                        className="mt-1 block w-full disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500"
                         value={data.email}
                         onChange={(e) => setData('email', e.target.value)}
                         required
+                        disabled={!isAdmin}
                         autoComplete="username"
                     />
 
@@ -92,21 +98,23 @@ export default function UpdateProfileInformation({
                     </div>
                 )}
 
-                <div className="flex items-center gap-4">
-                    <PrimaryButton disabled={processing}>Save</PrimaryButton>
+                {isAdmin && (
+                    <div className="flex items-center gap-4">
+                        <PrimaryButton disabled={processing}>Save</PrimaryButton>
 
-                    <Transition
-                        show={recentlySuccessful}
-                        enter="transition ease-in-out"
-                        enterFrom="opacity-0"
-                        leave="transition ease-in-out"
-                        leaveTo="opacity-0"
-                    >
-                        <p className="text-sm text-gray-600">
-                            Saved.
-                        </p>
-                    </Transition>
-                </div>
+                        <Transition
+                            show={recentlySuccessful}
+                            enter="transition ease-in-out"
+                            enterFrom="opacity-0"
+                            leave="transition ease-in-out"
+                            leaveTo="opacity-0"
+                        >
+                            <p className="text-sm text-gray-600">
+                                Saved.
+                            </p>
+                        </Transition>
+                    </div>
+                )}
             </form>
         </section>
     );

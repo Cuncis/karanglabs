@@ -137,6 +137,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/orders', [OrderController::class, 'index'])->name('admin.orders');
         Route::post('/orders/{order}/resend', [OrderController::class, 'resend'])->name('admin.orders.resend');
         Route::get('/users', [UserController::class, 'index'])->name('admin.users');
+        Route::patch('/users/{user}', [UserController::class, 'update'])->name('admin.users.update');
         Route::patch('/users/{user}/role', [UserController::class, 'updateRole'])->name('admin.users.role');
         Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('admin.users.destroy');
         Route::get('/whitelabel/download', WhitelabelController::class)->name('admin.whitelabel.download');

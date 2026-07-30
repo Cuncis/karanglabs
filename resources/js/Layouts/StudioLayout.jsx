@@ -1,7 +1,7 @@
 import { Link, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import {
-    LayoutDashboard, BookOpen, Puzzle, User, LogOut, Menu, X, ArrowLeft, Sun, Moon, Star, ShieldCheck, KeyRound, Users as UsersIcon,
+    LayoutDashboard, BookOpen, Puzzle, User, LogOut, Menu, X, Sun, Moon, Star, ShieldCheck, KeyRound, Users as UsersIcon, BarChart3,
 } from 'lucide-react';
 import { ENGINES, ACCENT } from '@/studioEngines';
 
@@ -132,6 +132,9 @@ export default function StudioLayout({ children }) {
                 <div className="space-y-1">
                     {auth?.isAdmin && (
                         <>
+                            <Link href={route('admin.traffic')} className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-[#52525B] dark:text-[#A1A1AA] transition-colors hover:bg-[#EFEFF1] dark:hover:bg-[#141414] hover:text-[#18181B] dark:hover:text-white">
+                                <BarChart3 className="h-4 w-4 text-[#8A8A93] dark:text-[#666]" /> Traffic
+                            </Link>
                             <Link href={route('admin.orders')} className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-[#52525B] dark:text-[#A1A1AA] transition-colors hover:bg-[#EFEFF1] dark:hover:bg-[#141414] hover:text-[#18181B] dark:hover:text-white">
                                 <ShieldCheck className="h-4 w-4 text-[#8A8A93] dark:text-[#666]" /> Orders
                             </Link>
@@ -143,11 +146,6 @@ export default function StudioLayout({ children }) {
                     <Link href={route('profile.edit')} className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-[#52525B] dark:text-[#A1A1AA] transition-colors hover:bg-[#EFEFF1] dark:hover:bg-[#141414] hover:text-[#18181B] dark:hover:text-white">
                         <User className="h-4 w-4 text-[#8A8A93] dark:text-[#666]" /> Akun
                     </Link>
-                    {auth?.isAdmin && (
-                        <Link href={route('home')} className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-[#52525B] dark:text-[#A1A1AA] transition-colors hover:bg-[#EFEFF1] dark:hover:bg-[#141414] hover:text-[#18181B] dark:hover:text-white">
-                            <ArrowLeft className="h-4 w-4 text-[#8A8A93] dark:text-[#666]" /> AI Tools Directory
-                        </Link>
-                    )}
                     <Link href={route('logout')} method="post" as="button" className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm text-[#52525B] dark:text-[#A1A1AA] transition-colors hover:bg-[#EFEFF1] dark:hover:bg-[#141414] hover:text-[#18181B] dark:hover:text-white">
                         <LogOut className="h-4 w-4 text-[#8A8A93] dark:text-[#666]" /> Log out
                     </Link>
@@ -197,7 +195,7 @@ export default function StudioLayout({ children }) {
                 </div>
             )}
 
-            <main className="lg:pl-64">
+            <main className="overflow-x-clip lg:pl-64">
                 <div className="mx-auto max-w-5xl px-5 py-8 lg:px-10 lg:py-12">
                     {children}
                 </div>
