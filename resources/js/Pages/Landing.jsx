@@ -178,8 +178,9 @@ const FAQS = [
     { q: 'Hosting-nya beneran gratis?', a: 'Ya, pakai Netlify/Vercel/GitHub Pages. Panduannya ada di dashboard. Domain sendiri opsional (±15rb-150rb/tahun).' },
     { q: 'Ada biaya bulanan?', a: 'Tidak. Rp 149.000 sekali, akses seumur hidup, tanpa limit.' },
     { q: 'Dapat update fitur baru?', a: 'Ya, engine & panduan baru otomatis masuk akunmu, selamanya.' },
+    { q: 'Bisa request engine atau tool baru?', a: 'Bisa banget. Kalau ada jenis engine atau tool yang kamu butuh tapi belum ada di Karanglabs Studio, request aja ke kami, nanti kami buatin dan otomatis masuk ke akunmu.' },
     { q: 'Cara akses setelah bayar?', a: 'Login pakai email yang kamu daftarkan, langsung masuk dashboard.' },
-    { q: 'Boleh dipakai bikinin website klien?', a: 'Boleh banget. Banyak user justru balik modal dari 1 proyek pertama.' },
+    { q: 'Boleh dipakai bikinin website orang lain?', a: 'Boleh banget. Pakai buat keluarga, teman, sampai klien berbayar. Sekali beli, akses selamanya, banyak user malah balik modal dari 1 proyek pertama.' },
     { q: 'Berapa banyak website yang bisa dibuat?', a: 'Unlimited. Generate sepuasnya.' },
     { q: 'Lisensi whitelabel itu gimana?', a: 'Kamu dapat seluruh file website ini, ganti jadi brand-mu, jual dengan hargamu, untung 100% milikmu.' },
 ];
@@ -428,6 +429,12 @@ export default function Landing() {
                                     Tanpa langganan, tanpa biaya hosting.
                                 </p>
 
+                                <p className="mt-5 rounded-lg border border-emerald-400/20 bg-emerald-400/[0.06] px-4 py-3 text-[15px] leading-relaxed text-[#EDEDED]">
+                                    Bukan cuma buat kamu sendiri. Bikinin juga buat keluarga, teman, sampai klien berbayar,
+                                    unlimited. <span className="font-semibold text-emerald-300">Beli sekali, akses selamanya,</span>{' '}
+                                    sekalian jadi ladang cuan tambahan.
+                                </p>
+
                                 <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                                     <a href="#harga" className="rounded-lg bg-emerald-400 px-6 py-3 text-center text-sm font-semibold text-black transition-colors hover:bg-emerald-300">
                                         Ambil Early Access
@@ -614,6 +621,14 @@ export default function Landing() {
                                         </ul>
                                     </div>
                                 ))}
+                            </div>
+
+                            <div className="mt-6 flex flex-col items-start gap-2 rounded-xl border border-emerald-400/20 bg-emerald-400/[0.06] p-6 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+                                <p className="text-sm leading-relaxed text-[#EDEDED]">
+                                    <span className="font-semibold text-emerald-300">Butuh engine atau tool yang belum ada?</span>{' '}
+                                    Request aja ke kami, nanti kami buatin dan otomatis masuk ke akunmu, tanpa biaya tambahan.
+                                </p>
+                                <span className="whitespace-nowrap text-xs font-medium uppercase tracking-wider text-emerald-400">Gratis, ikut update selamanya</span>
                             </div>
                         </div>
                     </section>
@@ -854,6 +869,7 @@ export default function Landing() {
                                             'Add-on: SMTP/form kontak · WA float · Analytics · Pixel · SEO · Maps',
                                             'Kompatibel semua AI (ChatGPT · Claude · Gemini · v0 · Lovable)',
                                             'Unlimited generate, tanpa kuota harian',
+                                            'Bebas dipakai bikinin website keluarga, teman, sampai klien berbayar - hasilnya 100% buat kamu',
                                             'Update engine & panduan baru, selamanya',
                                             'Akses dashboard via email kamu',
                                         ].map((f) => (
