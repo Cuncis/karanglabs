@@ -1,7 +1,7 @@
 import { Link, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import {
-    LayoutDashboard, BookOpen, Puzzle, User, LogOut, Menu, X, Sun, Moon, Star, ShieldCheck, KeyRound, Users as UsersIcon, BarChart3,
+    LayoutDashboard, BookOpen, Puzzle, User, LogOut, Menu, X, Sun, Moon, Star, ShieldCheck, KeyRound, Users as UsersIcon, BarChart3, Lightbulb,
 } from 'lucide-react';
 import { ENGINES, ACCENT } from '@/studioEngines';
 
@@ -140,6 +140,9 @@ export default function StudioLayout({ children }) {
                             </Link>
                             <Link href={route('admin.users')} className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-[#52525B] dark:text-[#A1A1AA] transition-colors hover:bg-[#EFEFF1] dark:hover:bg-[#141414] hover:text-[#18181B] dark:hover:text-white">
                                 <UsersIcon className="h-4 w-4 text-[#8A8A93] dark:text-[#666]" /> Users
+                            </Link>
+                            <Link href={route('admin.engine-requests')} className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-[#52525B] dark:text-[#A1A1AA] transition-colors hover:bg-[#EFEFF1] dark:hover:bg-[#141414] hover:text-[#18181B] dark:hover:text-white">
+                                <Lightbulb className="h-4 w-4 text-[#8A8A93] dark:text-[#666]" /> Request Engine
                             </Link>
                         </>
                     )}

@@ -1,8 +1,59 @@
-import { Head, Link, usePage } from '@inertiajs/react';
-import { Sparkles, FolderOpen, Layers, ArrowRight, Star } from 'lucide-react';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { Sparkles, FolderOpen, Layers, ArrowRight, Star, Lightbulb, Check } from 'lucide-react';
 import StudioLayout from '@/Layouts/StudioLayout';
 import VideoTutorialButton from '@/Components/VideoTutorialButton';
 import { ENGINES, ACCENT } from '@/studioEngines';
+
+function EngineRequestForm() {
+    const form = useForm({ message: '' });
+
+    const submit = (e) => {
+        e.preventDefault();
+        form.post(route('studio.engine-requests.store'), {
+            preserveScroll: true,
+            onSuccess: () => form.reset('message'),
+        });
+    };
+
+    return (
+        <div className="mt-12 rounded-xl border border-emerald-400/20 bg-emerald-400/[0.04] p-6">
+            <div className="flex items-center gap-2">
+                <Lightbulb className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                <h2 className="text-base font-semibold text-[#18181B] dark:text-white">Request engine atau tool baru</h2>
+            </div>
+            <p className="mt-1.5 text-sm text-[#52525B] dark:text-[#A1A1AA]">
+                Butuh jenis engine atau tool yang belum ada di Studio? Tulis di sini, nanti kami buatin dan otomatis masuk ke akunmu.
+            </p>
+
+            <form onSubmit={submit} className="mt-4">
+                <textarea
+                    value={form.data.message}
+                    onChange={(e) => form.setData('message', e.target.value)}
+                    rows={3}
+                    maxLength={2000}
+                    placeholder="Contoh: engine buat bikin katalog properti, atau tool generate caption Instagram..."
+                    className="w-full rounded-lg border border-[#E4E4E7] dark:border-[#222] bg-white dark:bg-[#0D0D0D] px-3.5 py-2.5 text-sm text-[#18181B] dark:text-[#EDEDED] placeholder:text-[#9CA3AF] dark:placeholder:text-[#555] focus:border-emerald-400 focus:outline-none focus:ring-1 focus:ring-emerald-400"
+                />
+                {form.errors.message && <p className="mt-1.5 text-xs text-rose-500">{form.errors.message}</p>}
+
+                <div className="mt-3 flex items-center gap-3">
+                    <button
+                        type="submit"
+                        disabled={form.processing || !form.data.message.trim()}
+                        className="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                        {form.processing ? 'Mengirim...' : 'Kirim Request'}
+                    </button>
+                    {form.recentlySuccessful && (
+                        <span className="inline-flex items-center gap-1.5 text-sm font-medium text-emerald-600 dark:text-emerald-400">
+                            <Check className="h-4 w-4" /> Request kamu sudah masuk, makasih!
+                        </span>
+                    )}
+                </div>
+            </form>
+        </div>
+    );
+}
 
 function timeAgo(dateString) {
     const diff = Math.floor((Date.now() - new Date(dateString).getTime()) / 1000);
@@ -101,6 +152,8 @@ export default function Dashboard() {
                     </div>
                 </div>
             )}
+
+            {!auth?.isAdmin && <EngineRequestForm />}
         </StudioLayout>
     );
 }

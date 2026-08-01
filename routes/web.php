@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\EngineRequestController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\TrafficController;
 use App\Http\Controllers\Admin\UserController;
@@ -125,6 +126,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/studio/license/download', [StudioController::class, 'download'])->name('studio.license.download');
         Route::post('/studio/projects', [StudioController::class, 'store'])->name('studio.projects.store');
         Route::delete('/studio/projects/{project}', [StudioController::class, 'destroy'])->name('studio.projects.destroy');
+        Route::post('/studio/engine-requests', [StudioController::class, 'storeEngineRequest'])->name('studio.engine-requests.store');
         Route::post('/studio/{engine}/random-brief', GenerateStudioBriefController::class)
             ->middleware('throttle:studio-random-brief')
             ->name('studio.random-brief');
@@ -140,6 +142,9 @@ Route::middleware('auth')->group(function () {
         Route::patch('/users/{user}', [UserController::class, 'update'])->name('admin.users.update');
         Route::patch('/users/{user}/role', [UserController::class, 'updateRole'])->name('admin.users.role');
         Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('admin.users.destroy');
+        Route::get('/engine-requests', [EngineRequestController::class, 'index'])->name('admin.engine-requests');
+        Route::patch('/engine-requests/{engineRequest}', [EngineRequestController::class, 'update'])->name('admin.engine-requests.update');
+        Route::delete('/engine-requests/{engineRequest}', [EngineRequestController::class, 'destroy'])->name('admin.engine-requests.destroy');
         Route::get('/whitelabel/download', WhitelabelController::class)->name('admin.whitelabel.download');
     });
 

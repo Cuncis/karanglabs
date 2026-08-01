@@ -107,4 +107,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(StudioProject::class);
     }
+
+    public function engineRequests()
+    {
+        return $this->hasMany(EngineRequest::class);
+    }
 }

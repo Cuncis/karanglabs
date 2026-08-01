@@ -61,6 +61,21 @@ class StudioController extends Controller
     }
 
     /**
+     * Submit a request for a new engine or tool. Members & resellers can ask
+     * for engines they need; requests surface in the admin dashboard.
+     */
+    public function storeEngineRequest(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'message' => ['required', 'string', 'max:2000'],
+        ]);
+
+        $request->user()->engineRequests()->create($validated);
+
+        return back()->with('success', 'Request kamu sudah masuk. Kami kabari kalau engine-nya siap.');
+    }
+
+    /**
      * Delete one of the current user's projects.
      */
     public function destroy(StudioProject $project): RedirectResponse

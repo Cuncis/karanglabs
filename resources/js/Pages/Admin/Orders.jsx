@@ -28,6 +28,7 @@ function SubNav({ active, hasPackage }) {
             <Link href={route('admin.traffic')} className={`${base} ${active === 'traffic' ? on : off}`}>Traffic</Link>
             <Link href={route('admin.orders')} className={`${base} ${active === 'orders' ? on : off}`}>Orders</Link>
             <Link href={route('admin.users')} className={`${base} ${active === 'users' ? on : off}`}>Users</Link>
+            <Link href={route('admin.engine-requests')} className={`${base} ${active === 'engine-requests' ? on : off}`}>Request Engine</Link>
             {hasPackage && (
                 <a href={route('admin.whitelabel.download')} className={`${base} ${off} ml-auto inline-flex items-center gap-1.5`}>
                     <Download className="h-4 w-4" /> Download Whitelabel
