@@ -150,12 +150,12 @@ const PERSONAS = [
     { tag: null, title: 'Reseller & Dropshipper', body: 'Katalog produk rapi tanpa biaya bulanan marketplace premium.' },
     { tag: null, title: 'Wedding Organizer & MUA', body: 'Bikinin undangan digital klien, tarif kamu yang atur.' },
     { tag: null, title: 'Mahasiswa & Job Seeker', body: 'CV online yang bikin HRD inget kamu.' },
-    { tag: null, title: 'Yang Mau Jualan Jasa Website', body: 'Modal 99rb, jasa bikin website-mu bisa dihargai ratusan ribu per proyek.' },
+    { tag: null, title: 'Yang Mau Jualan Jasa Website', body: 'Modal 149rb, jasa bikin website-mu bisa dihargai ratusan ribu per proyek.' },
 ];
 
 const COMPARE = [
     { label: 'Waktu jadi', dev: '1-4 minggu', ok: 'Di bawah 1 jam' },
-    { label: 'Biaya', dev: 'Rp 2-5 juta', ok: 'Sekali Rp 99rb' },
+    { label: 'Biaya', dev: 'Rp 2-5 juta', ok: 'Sekali Rp 149rb' },
     { label: 'Revisi', dev: 'Antri & bayar lagi', ok: 'Re-generate instan' },
     { label: 'Skill', dev: 'HTML/CSS/hosting', ok: 'Cuma isi form' },
     { label: 'Biaya bulanan', dev: 'Hosting + maintenance', ok: 'Rp 0' },
@@ -166,7 +166,7 @@ const TESTIMONIALS = [
     { quote: 'Undangan nikah adikku jadi dalam semalam, keluarga ngiranya bayar jasa ratusan ribu.', name: 'Dini', role: 'ibu rumah tangga' },
     { quote: 'Sekarang tiap klien foto dapet bonus mini-web galeri. Nilai jualku naik.', name: 'Fajar', role: 'fotografer' },
     { quote: 'Company profile usahaku jadi kelihatan jauh lebih kredibel di mata calon klien.', name: 'Rangga', role: 'pemilik jasa servis' },
-    { quote: 'Modal 99rb, proyek pertama bikinin undangan udah balik modal 3x lipat.', name: 'Sasha', role: 'wedding organizer' },
+    { quote: 'Modal 149rb, proyek pertama bikinin undangan udah balik modal 3x lipat.', name: 'Sasha', role: 'wedding organizer' },
     { quote: 'CV online-ku bikin HRD nge-chat duluan. Beda banget sama PDF biasa.', name: 'Bima', role: 'fresh graduate' },
     { quote: 'Katalog tokoku online tanpa bayar bulanan marketplace. Order langsung ke WA.', name: 'Nadia', role: 'reseller skincare' },
 ];
@@ -176,7 +176,7 @@ const FAQS = [
     { q: 'Aku gak bisa coding sama sekali, bisa?', a: 'Justru buat kamu. Isi form → copy → paste. Sisanya AI + panduan kami.' },
     { q: 'AI apa aja yang bisa dipakai?', a: 'ChatGPT, Claude, Gemini, v0, Lovable, termasuk versi gratisnya.' },
     { q: 'Hosting-nya beneran gratis?', a: 'Ya, pakai Netlify/Vercel/GitHub Pages. Panduannya ada di dashboard. Domain sendiri opsional (±15rb-150rb/tahun).' },
-    { q: 'Ada biaya bulanan?', a: 'Tidak. Rp 99.000 sekali, akses seumur hidup, tanpa limit.' },
+    { q: 'Ada biaya bulanan?', a: 'Tidak. Rp 149.000 sekali, akses seumur hidup, tanpa limit.' },
     { q: 'Dapat update fitur baru?', a: 'Ya, engine & panduan baru otomatis masuk akunmu, selamanya.' },
     { q: 'Cara akses setelah bayar?', a: 'Login pakai email yang kamu daftarkan, langsung masuk dashboard.' },
     { q: 'Boleh dipakai bikinin website klien?', a: 'Boleh banget. Banyak user justru balik modal dari 1 proyek pertama.' },
@@ -260,8 +260,11 @@ function useTypewriter(text, speed = 28) {
     return output;
 }
 
-function useCountdown(days = 5) {
-    const target = useMemo(() => Date.now() + days * 24 * 60 * 60 * 1000, [days]);
+function useCountdown(days = 0, hours = 0, minutes = 0) {
+    const target = useMemo(
+        () => Date.now() + ((days * 24 + hours) * 60 + minutes) * 60 * 1000,
+        [days, hours, minutes],
+    );
     const [now, setNow] = useState(Date.now());
 
     useEffect(() => {
@@ -284,8 +287,8 @@ function useCountdown(days = 5) {
 /* ----------------------------------------------------------------- page --- */
 
 const CHECKOUT_PLANS = {
-    'early-access': { title: 'Early Access', price: 'Rp 99.000' },
-    reseller: { title: 'Lisensi Reseller', price: 'Rp 390.000' },
+    'early-access': { title: 'Early Access', price: 'Rp 149.000' },
+    reseller: { title: 'Lisensi Reseller', price: 'Rp 490.000' },
 };
 
 export default function Landing() {
@@ -294,7 +297,7 @@ export default function Landing() {
     const [openFaq, setOpenFaq] = useState(0);
     const typed = useTypewriter(PROMPT_TEXT);
     const [copied, setCopied] = useState(false);
-    const countdown = useCountdown(5);
+    const countdown = useCountdown(1, 10, 55);
 
     const [checkout, setCheckout] = useState(null);
     const [form, setForm] = useState({ name: '', email: '', phone: '' });
@@ -412,10 +415,14 @@ export default function Landing() {
                                 </span>
 
                                 <h1 className="mt-6 text-4xl font-bold leading-[1.1] tracking-tight text-white sm:text-5xl">
-                                    Tanpa Coding, Tanpa Developer, Semua Orang Bisa Buat Website Profesional
+                                    Buat Website Sendiri, Tanpa Bantuan Siapa Pun
                                 </h1>
 
-                                <p className="mt-6 text-lg leading-relaxed text-[#A1A1AA]">
+                                <p className="mt-4 text-base font-semibold text-emerald-300">
+                                    Tanpa coding · tanpa developer · tanpa agensi.
+                                </p>
+
+                                <p className="mt-4 text-lg leading-relaxed text-[#A1A1AA]">
                                     Semua orang bisa buat website simpel dan cepat. Isi form, copy prompt-nya,
                                     paste ke ChatGPT / Claude / Gemini, website kamu jadi dan online hari ini juga.
                                     Tanpa langganan, tanpa biaya hosting.
@@ -687,6 +694,24 @@ export default function Landing() {
                                 </div>
                             ))}
                         </div>
+
+                        {/* Demo video: lihat langsung isi & cara pakainya. Ganti YOUTUBE_ID di bawah dengan ID video-mu. */}
+                        <div className="mx-auto mt-14 max-w-4xl">
+                            <p className="mb-5 text-center text-sm text-[#888]">Lihat langsung isinya dan cara pakainya dalam 1 menit.</p>
+                            <div className="overflow-hidden rounded-2xl border border-[#222] bg-[#111] shadow-2xl">
+                                <div className="relative aspect-video">
+                                    <iframe
+                                        className="absolute inset-0 h-full w-full"
+                                        src="https://www.youtube.com/embed/LebvrHFcXSc"
+                                        title="Cara pakai Karanglabs Studio"
+                                        loading="lazy"
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                        referrerPolicy="strict-origin-when-cross-origin"
+                                        allowFullScreen
+                                    />
+                                </div>
+                            </div>
+                        </div>
                     </section>
 
                     {/* ============================= 11 · DIFFERENTIATORS === */}
@@ -777,25 +802,46 @@ export default function Landing() {
                                 <p className="mx-auto mt-4 max-w-2xl text-lg text-[#A1A1AA]">
                                     Harga naik tiap batch. Begitu kuota batch ini penuh, harga naik ke Rp 499.000 dan tidak turun lagi.
                                 </p>
-                                <div className="mt-6 inline-flex items-center gap-2 rounded-lg border border-[#222] bg-[#111] px-4 py-2 font-mono text-sm text-[#EDEDED]">
-                                    <span className="text-amber-400">⚡ Harga naik dalam</span>
-                                    {[['HARI', countdown.d], ['JAM', countdown.h], ['MIN', countdown.m], ['DET', countdown.s]].map(([label, val]) => (
-                                        <span key={label} className="flex flex-col items-center">
-                                            <span className="text-base font-bold text-white">{val}</span>
-                                            <span className="text-[9px] tracking-widest text-[#666]">{label}</span>
-                                        </span>
-                                    ))}
+                                <div className="mx-auto mt-8 inline-flex max-w-full flex-col items-center gap-4 rounded-2xl border border-amber-400/30 bg-amber-400/[0.04] px-6 py-6 shadow-[0_0_40px_-12px_rgba(251,191,36,0.35)] sm:px-10">
+                                    <span className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-amber-300">
+                                        <span className="text-lg">⚡</span> Harga naik dalam
+                                    </span>
+                                    <div className="flex items-start gap-2 sm:gap-3">
+                                        {[['HARI', countdown.d], ['JAM', countdown.h], ['MENIT', countdown.m], ['DETIK', countdown.s]].map(([label, val], i, arr) => (
+                                            <div key={label} className="flex items-start gap-2 sm:gap-3">
+                                                <div className="flex flex-col items-center">
+                                                    <span className="flex min-w-[3.25rem] items-center justify-center rounded-xl border border-[#2a2a2a] bg-[#0D0D0D] px-2 py-2.5 font-mono text-3xl font-bold tabular-nums text-white sm:min-w-[4rem] sm:px-3 sm:text-5xl">
+                                                        {val}
+                                                    </span>
+                                                    <span className="mt-2 text-[10px] font-semibold uppercase tracking-widest text-[#888] sm:text-xs">{label}</span>
+                                                </div>
+                                                {i < arr.length - 1 && (
+                                                    <span className="pt-1 font-mono text-2xl font-bold text-[#3a3a3a] sm:pt-1.5 sm:text-4xl">:</span>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
 
                             <div className="mt-14 grid items-start gap-6 lg:grid-cols-2">
                                 {/* CARD 1 */}
                                 <div className="relative rounded-2xl border border-emerald-400/40 bg-[#111] p-8">
-                                    <span className="absolute -top-3 left-8 rounded-full bg-emerald-400 px-3 py-1 text-xs font-bold text-black">HEMAT 80%</span>
+                                    <span className="absolute -top-3 left-8 rounded-full bg-emerald-400 px-3 py-1 text-xs font-bold text-black">HEMAT 90%</span>
                                     <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-emerald-400">Karanglabs · Early Access</div>
-                                    <div className="mt-4 flex items-end gap-3">
-                                        <span className="text-4xl font-bold text-white">Rp 99.000</span>
-                                        <span className="mb-1 text-lg text-[#666] line-through">Rp 499.000</span>
+                                    <div className="mt-4 flex flex-col gap-1 text-lg leading-tight text-[#666]">
+                                        <span className="flex items-baseline gap-2">
+                                            <span className="line-through">Rp 1.500.000</span>
+                                            <span className="text-[11px] uppercase tracking-wide text-[#555]">harga normal</span>
+                                        </span>
+                                        <span className="flex items-baseline gap-2">
+                                            <span className="line-through decoration-amber-400/50">Rp 499.000</span>
+                                            <span className="rounded bg-amber-400/10 px-1.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-amber-300">harga batch 2 nanti</span>
+                                        </span>
+                                    </div>
+                                    <div className="mt-2 flex items-end gap-3">
+                                        <span className="text-4xl font-bold text-white">Rp 149.000</span>
+                                        <span className="mb-1 rounded-full bg-emerald-400/15 px-2.5 py-0.5 text-xs font-bold text-emerald-300">PROMO BATCH 1</span>
                                     </div>
                                     <p className="mt-1 text-sm text-[#888]">Sekali Bayar · Selamanya · tanpa langganan · tanpa biaya tersembunyi</p>
                                     <p className="mt-5 rounded-lg border border-[#222] bg-[#0D0D0D] p-4 text-sm italic text-[#A1A1AA]">
@@ -834,9 +880,19 @@ export default function Landing() {
                                 <div className="rounded-2xl border border-[#222] bg-[#111] p-8">
                                     <span className="inline-block rounded-full bg-amber-400/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-amber-300">PROFIT 100% · Lisensi Whitelabel · Hak Jual Kembali</span>
                                     <h3 className="mt-4 text-2xl font-bold text-white">Jual Ulang, Untung Penuh</h3>
-                                    <div className="mt-4 flex items-end gap-3">
-                                        <span className="text-4xl font-bold text-white">Rp 390.000</span>
-                                        <span className="mb-1 text-lg text-[#666] line-through">Rp 1.500.000</span>
+                                    <div className="mt-4 flex flex-col gap-1 text-lg leading-tight text-[#666]">
+                                        <span className="flex items-baseline gap-2">
+                                            <span className="line-through">Rp 5.000.000</span>
+                                            <span className="text-[11px] uppercase tracking-wide text-[#555]">harga normal</span>
+                                        </span>
+                                        <span className="flex items-baseline gap-2">
+                                            <span className="line-through decoration-amber-400/50">Rp 1.500.000</span>
+                                            <span className="rounded bg-amber-400/10 px-1.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-amber-300">harga batch 2 nanti</span>
+                                        </span>
+                                    </div>
+                                    <div className="mt-2 flex items-end gap-3">
+                                        <span className="text-4xl font-bold text-white">Rp 490.000</span>
+                                        <span className="mb-1 rounded-full bg-amber-400/15 px-2.5 py-0.5 text-xs font-bold text-amber-300">PROMO BATCH 1</span>
                                     </div>
                                     <p className="mt-1 text-sm text-[#888]">Sekali bayar · file + panduan lengkap · keuntungan 100% milikmu</p>
                                     <ul className="mt-6 space-y-3 text-sm text-[#EDEDED]">
@@ -854,7 +910,8 @@ export default function Landing() {
                                     <button type="button" onClick={() => openCheckout('reseller')} className="mt-7 block w-full rounded-lg border border-[#333] py-3 text-center text-sm font-semibold text-white transition-colors hover:border-[#555] hover:bg-[#161616]">
                                         Ambil Lisensi Reseller
                                     </button>
-                                    <p className="mt-3 text-center text-xs text-[#666]">Cocok untuk yang mau punya produk digital sendiri</p>
+                                    <p className="mt-3 text-center text-xs text-amber-400">⚡ Harga batch 1, jangan lewat, nanti keburu harga naik</p>
+                                    <p className="mt-2 text-center text-xs text-[#666]">Cocok untuk yang mau punya produk digital sendiri</p>
                                 </div>
                             </div>
                         </div>
@@ -895,7 +952,7 @@ export default function Landing() {
                                 Ambil early access sebelum kuota batch 1 habis, begitu penuh, harga naik dan gak turun lagi.
                             </p>
                             <button type="button" onClick={() => openCheckout('early-access')} className="relative mt-9 inline-block rounded-lg bg-emerald-400 px-8 py-4 text-base font-semibold text-black transition-colors hover:bg-emerald-300">
-                                Bayar Rp 99.000, Akses Selamanya
+                                Bayar Rp 149.000, Akses Selamanya
                             </button>
                             <p className="relative mt-4 text-xs text-[#666]">Akses instan setelah pembayaran</p>
                         </div>

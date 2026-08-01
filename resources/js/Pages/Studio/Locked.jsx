@@ -30,7 +30,7 @@ export default function Locked() {
                             href="/#harga"
                             className="mt-7 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-400 px-6 py-3 text-sm font-semibold text-black transition-colors hover:bg-emerald-300"
                         >
-                            Ambil Early Access, Rp 99.000 <ArrowRight className="h-4 w-4" />
+                            Ambil Early Access, Rp 149.000 <ArrowRight className="h-4 w-4" />
                         </a>
 
                         <p className="mt-4 text-xs text-[#8A8A93] dark:text-[#666]">

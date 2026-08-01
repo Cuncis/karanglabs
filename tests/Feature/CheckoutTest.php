@@ -51,7 +51,7 @@ class CheckoutTest extends TestCase
             'name' => 'Buyer',
             'phone' => '081234567890',
             'plan' => 'early-access',
-            'amount' => 99000,
+            'amount' => 149000,
             'status' => 'pending',
             'gateway_ref' => 'inv-abc-123',
         ]);

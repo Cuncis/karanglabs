@@ -22,7 +22,7 @@ class OrderFactory extends Factory
             'name' => fake()->name(),
             'phone' => fake()->numerify('08##########'),
             'plan' => 'early-access',
-            'amount' => 99000,
+            'amount' => 149000,
             'status' => 'pending',
             'gateway_ref' => fake()->uuid(),
         ];

@@ -64,8 +64,8 @@ export default function Terms() {
                             checkout. Pastikan alamat email yang kamu masukkan benar dan aktif.
                         </p>
                         <ul className="ml-5 list-disc space-y-1.5">
-                            <li>Early Access — Rp 99.000</li>
-                            <li>Lisensi Reseller — Rp 390.000</li>
+                            <li>Early Access — Rp 149.000</li>
+                            <li>Lisensi Reseller — Rp 490.000</li>
                         </ul>
                         <p>
                             Harga dapat berubah sewaktu-waktu. Harga yang berlaku adalah harga yang tercantum
