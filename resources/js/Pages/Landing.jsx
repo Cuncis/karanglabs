@@ -964,14 +964,7 @@ export default function Landing() {
                                     </button>
                                     <p className="mt-3 text-center text-xs text-[#666]">Transfer · QRIS · OVO · Gopay · Dana</p>
                                     <div className="mt-6 border-t border-[#222] pt-5">
-                                        <div className="flex items-center justify-between text-xs text-[#A1A1AA]">
-                                            <span>kuota batch 1</span>
-                                            <span className="font-semibold text-white">73/100 terisi</span>
-                                        </div>
-                                        <div className="mt-2 h-2 overflow-hidden rounded-full bg-[#222]">
-                                            <div className="h-full rounded-full bg-emerald-400" style={{ width: '73%' }} />
-                                        </div>
-                                        <p className="mt-2 text-xs text-amber-400">⚡ Harga batch 1, jangan lewat, nanti keburu harga naik</p>
+                                        <p className="text-center text-xs text-amber-400">⚡ Harga batch 1, jangan lewat, nanti keburu harga naik</p>
                                     </div>
                                 </div>
 
