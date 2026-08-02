@@ -971,7 +971,7 @@ export default function Landing() {
                                         <div className="mt-2 h-2 overflow-hidden rounded-full bg-[#222]">
                                             <div className="h-full rounded-full bg-emerald-400" style={{ width: '73%' }} />
                                         </div>
-                                        <p className="mt-2 text-xs text-amber-400">⚡ Sisa 27 slot · harga naik begitu penuh</p>
+                                        <p className="mt-2 text-xs text-amber-400">⚡ Harga batch 1, jangan lewat, nanti keburu harga naik</p>
                                     </div>
                                 </div>
 
