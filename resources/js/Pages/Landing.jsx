@@ -285,6 +285,85 @@ function useCountdown(days = 0, hours = 0, minutes = 0) {
     };
 }
 
+/* --- social proof: "baru saja beli" toast, top-left ---------------------- */
+
+const SALE_NAMES = [
+    'Rizky', 'Dewi', 'Bagus', 'Sari', 'Andi', 'Putri', 'Fajar', 'Ayu',
+    'Dimas', 'Intan', 'Rahmat', 'Nadia', 'Yoga', 'Citra', 'Bayu', 'Wulan',
+    'Arif', 'Mega', 'Hendra', 'Lina', 'Reza', 'Tika', 'Galih', 'Siti',
+    'Adit', 'Rani', 'Doni', 'Fitri', 'Ilham', 'Maya',
+];
+
+const SALE_CITIES = [
+    'Jakarta', 'Bandung', 'Surabaya', 'Yogyakarta', 'Medan', 'Semarang',
+    'Bekasi', 'Depok', 'Malang', 'Makassar', 'Bali', 'Bogor', 'Tangerang',
+];
+
+const SALE_PLANS = ['Early Access', 'Lisensi Reseller'];
+
+const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+function useRecentSale() {
+    const [sale, setSale] = useState(null);
+
+    useEffect(() => {
+        let hideTimer;
+        let showTimer;
+        const gaps = [10000, 30000, 45000, 60000];
+
+        const showOne = () => {
+            setSale({
+                id: Date.now(),
+                name: pick(SALE_NAMES),
+                city: pick(SALE_CITIES),
+                plan: pick(SALE_PLANS),
+                ago: 1 + Math.floor(Math.random() * 9),
+            });
+            hideTimer = setTimeout(() => setSale(null), 5000);
+            showTimer = setTimeout(showOne, pick(gaps));
+        };
+
+        showTimer = setTimeout(showOne, 4000);
+
+        return () => {
+            clearTimeout(hideTimer);
+            clearTimeout(showTimer);
+        };
+    }, []);
+
+    return sale;
+}
+
+function SalePopup() {
+    const sale = useRecentSale();
+
+    if (!sale) {
+        return null;
+    }
+
+    return (
+        <div
+            key={sale.id}
+            className="kl-sale fixed left-4 top-20 z-[60] flex max-w-[calc(100vw-2rem)] items-center gap-3 rounded-xl border border-[#222] bg-[#111]/95 px-4 py-3 shadow-2xl backdrop-blur sm:left-6 sm:top-24"
+        >
+            <div className="flex h-9 w-9 flex-none items-center justify-center rounded-full bg-emerald-400/15 text-sm font-bold text-emerald-300">
+                {sale.name.charAt(0)}
+            </div>
+            <div className="min-w-0 text-left">
+                <p className="text-[13px] leading-snug text-[#EDEDED]">
+                    <span className="font-semibold text-white">{sale.name}</span>
+                    <span className="text-[#A1A1AA]"> dari {sale.city} baru beli </span>
+                    <span className="font-semibold text-emerald-300">{sale.plan}</span>
+                </p>
+                <p className="mt-0.5 flex items-center gap-1.5 text-[11px] text-[#71717A]">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 kl-live" />
+                    {sale.ago} menit lalu
+                </p>
+            </div>
+        </div>
+    );
+}
+
 /* ----------------------------------------------------------------- page --- */
 
 const CHECKOUT_PLANS = {
@@ -349,9 +428,13 @@ export default function Landing() {
                 .kl-cursor { animation: kl-blink 1s step-end infinite; }
                 @keyframes kl-pulse-dot { 0%,100% { opacity: 1; } 50% { opacity: 0.35; } }
                 .kl-live { animation: kl-pulse-dot 1.4s ease-in-out infinite; }
+                @keyframes kl-sale-in { from { opacity: 0; transform: translateX(-16px); } to { opacity: 1; transform: translateX(0); } }
+                .kl-sale { animation: kl-sale-in 0.4s cubic-bezier(0.16,1,0.3,1); }
             `}</style>
 
             <div className="min-h-screen bg-[#0A0A0A] font-sans text-[#EDEDED] antialiased selection:bg-emerald-400 selection:text-black">
+
+                <SalePopup />
 
                 {/* ============================================= 1 · NAVBAR === */}
                 <header className="sticky top-0 z-50 border-b border-[#1a1a1a] bg-[#0A0A0A]/85 backdrop-blur-md">
