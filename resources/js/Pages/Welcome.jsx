@@ -64,6 +64,14 @@ export default function Welcome({ auth, laravelVersion, phpVersion, dynamicTools
             icon: `<svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" /></svg>`
         },
         {
+            title: 'HTML Snippet Converter',
+            description: 'Paste any full HTML file and instantly get a clean, self-contained snippet that pastes into Elementor (or any HTML widget) without errors — wrappers stripped, CSS scoped, Tailwind/CDN scripts kept working.',
+            color: 'teal',
+            category: 'Code & Data Lifesavers',
+            href: route('html-snippet'),
+            icon: `<svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>`
+        },
+        {
             title: 'Dork Hunter',
             description: 'Save Google-style search dorks and let them run automatically every 2 hours, pushing brand-new matches straight to your Telegram.',
             color: 'red',

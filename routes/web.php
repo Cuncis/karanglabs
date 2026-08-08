@@ -96,6 +96,10 @@ Route::middleware('auth')->group(function () {
         return Inertia::render('JobSeeker');
     })->name('jobseeker');
 
+    Route::get('/html-snippet', function () {
+        return Inertia::render('ElementorSnippet');
+    })->name('html-snippet');
+
     Route::get('/t/{slug}', function ($slug) {
         $tools = config('karangtools');
         if (! isset($tools[$slug])) {
