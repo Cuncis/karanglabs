@@ -6,7 +6,6 @@ use App\Http\Controllers\Admin\TrafficController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\WhitelabelController;
 use App\Http\Controllers\CheckoutController;
-use App\Http\Controllers\DorkHunterController;
 use App\Http\Controllers\GenerateChangelogController;
 use App\Http\Controllers\GenerateDynamicToolController;
 use App\Http\Controllers\GenerateJobSeekerController;
@@ -151,12 +150,6 @@ Route::middleware('auth')->group(function () {
         Route::delete('/engine-requests/{engineRequest}', [EngineRequestController::class, 'destroy'])->name('admin.engine-requests.destroy');
         Route::get('/whitelabel/download', WhitelabelController::class)->name('admin.whitelabel.download');
     });
-
-    Route::get('/dork-hunter', [DorkHunterController::class, 'index'])->name('dork-hunter.index');
-    Route::post('/dork-hunter', [DorkHunterController::class, 'store'])->name('dork-hunter.store');
-    Route::patch('/dork-hunter/{dork}', [DorkHunterController::class, 'update'])->name('dork-hunter.update');
-    Route::delete('/dork-hunter/{dork}', [DorkHunterController::class, 'destroy'])->name('dork-hunter.destroy');
-    Route::post('/dork-hunter/{dork}/run', [DorkHunterController::class, 'run'])->name('dork-hunter.run');
 
     Route::get('/terminal-converter', [TerminalSnippetController::class, 'index'])->name('terminal-converter.index');
     Route::post('/terminal-converter', [TerminalSnippetController::class, 'store'])->name('terminal-converter.store');
