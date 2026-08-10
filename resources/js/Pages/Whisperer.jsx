@@ -1,49 +1,19 @@
-import { useState, useEffect } from 'react';
-import { Head, Link } from '@inertiajs/react';
+import { useState } from 'react';
+import { Head, Link, router } from '@inertiajs/react';
 import axios from 'axios';
 import HelpModal from '@/Components/HelpModal';
 import AboutModal from '@/Components/AboutModal';
 
-export default function Whisperer() {
+export default function Whisperer({ history = [] }) {
     const [prompt, setPrompt] = useState('');
     const [type, setType] = useState('regex');
     const [isGenerating, setIsGenerating] = useState(false);
     const [error, setError] = useState(null);
-    const [result, setResult] = useState(() => {
-        if (typeof window !== 'undefined') {
-            try {
-                const saved = localStorage.getItem('whisperer_latest_result');
-                return saved ? JSON.parse(saved) : null;
-            } catch (e) { return null; }
-        }
-        return null;
-    });
-
-    const [history, setHistory] = useState(() => {
-        if (typeof window !== 'undefined') {
-            try {
-                const saved = localStorage.getItem('whisperer_history');
-                return saved ? JSON.parse(saved) : [];
-            } catch (e) { return []; }
-        }
-        return [];
-    });
+    const [result, setResult] = useState(() => history[0] ?? null);
 
     const [isCopied, setIsCopied] = useState(false);
     const [showHelp, setShowHelp] = useState(false);
     const [showAbout, setShowAbout] = useState(false);
-
-    useEffect(() => {
-        if (result) {
-            localStorage.setItem('whisperer_latest_result', JSON.stringify(result));
-        } else {
-            localStorage.removeItem('whisperer_latest_result');
-        }
-    }, [result]);
-
-    useEffect(() => {
-        localStorage.setItem('whisperer_history', JSON.stringify(history));
-    }, [history]);
 
     const handleGenerate = async (e) => {
         e.preventDefault();
@@ -51,27 +21,16 @@ export default function Whisperer() {
 
         setIsGenerating(true);
         setError(null);
-        
+
         try {
             const response = await axios.post('/api/generate-whisper', {
                 prompt: prompt,
                 type: type
             });
-            
-            const newResult = {
-                ...response.data,
-                id: Date.now(),
-                timestamp: new Date().toISOString(),
-                original_prompt: prompt.length > 50 ? prompt.substring(0, 50) + '...' : prompt,
-                type: type
-            };
 
-            setResult(newResult);
-            setHistory(prev => {
-                const updatedHistory = [newResult, ...prev].slice(0, 10);
-                return updatedHistory;
-            });
+            setResult({ ...response.data, type });
             setPrompt('');
+            router.reload({ only: ['history'] });
         } catch (err) {
             setError(err.response?.data?.error || 'Something went wrong while generating.');
         } finally {
@@ -84,9 +43,10 @@ export default function Whisperer() {
         setType(item.type || 'regex');
     };
 
-    const clearHistory = () => {
-        setHistory([]);
+    const clearHistory = async () => {
         setResult(null);
+        await axios.delete('/api/tool-history/whisperer');
+        router.reload({ only: ['history'] });
     };
 
     const formatDate = (dateString) => {

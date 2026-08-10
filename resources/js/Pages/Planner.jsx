@@ -1,78 +1,31 @@
-import { useState, useEffect } from 'react';
-import { Head, Link } from '@inertiajs/react';
+import { useState } from 'react';
+import { Head, Link, router } from '@inertiajs/react';
 import axios from 'axios';
 import StepWizard from '../Components/StepWizard';
 import OutputView from '../Components/OutputView';
 import HelpModal from '@/Components/HelpModal';
 import AboutModal from '@/Components/AboutModal';
 
-export default function Planner() {
+export default function Planner({ history = [] }) {
     const [isGenerating, setIsGenerating] = useState(false);
     const [error, setError] = useState(null);
     const [showHelp, setShowHelp] = useState(false);
     const [showAbout, setShowAbout] = useState(false);
-
-    // Initialize result from localStorage if it exists
-    const [result, setResult] = useState(() => {
-        if (typeof window !== 'undefined') {
-            try {
-                const saved = localStorage.getItem('planner_latest_result');
-                return saved ? JSON.parse(saved) : null;
-            } catch (e) {
-                return null;
-            }
-        }
-        return null;
-    });
-
-    // Initialize history from localStorage
-    const [history, setHistory] = useState(() => {
-        if (typeof window !== 'undefined') {
-            try {
-                const saved = localStorage.getItem('planner_history');
-                return saved ? JSON.parse(saved) : [];
-            } catch (e) {
-                return [];
-            }
-        }
-        return [];
-    });
-
-    // Keep localStorage in sync with result
-    useEffect(() => {
-        if (result) {
-            localStorage.setItem('planner_latest_result', JSON.stringify(result));
-        } else {
-            localStorage.removeItem('planner_latest_result');
-        }
-    }, [result]);
-
-    // Keep localStorage in sync with history
-    useEffect(() => {
-        localStorage.setItem('planner_history', JSON.stringify(history));
-    }, [history]);
+    const [result, setResult] = useState(() => history[0] ?? null);
 
     const handleGenerate = async (data) => {
         setIsGenerating(true);
         setError(null);
-        
+
         try {
             const response = await axios.post('/api/generate-plan', data);
-            
-            const newResult = {
+
+            setResult({
                 ...response.data,
-                id: Date.now(),
                 timestamp: new Date().toISOString(),
                 title: data.idea ? (data.idea.length > 50 ? data.idea.substring(0, 50) + '...' : data.idea) : 'New Plan'
-            };
-
-            setResult(newResult);
-            
-            setHistory(prev => {
-                const updatedHistory = [newResult, ...prev].slice(0, 10); // keep last 10 entries
-                return updatedHistory;
             });
-            
+            router.reload({ only: ['history'] });
         } catch (err) {
             setError(err.response?.data?.error || 'Something went wrong while generating the plan.');
         } finally {
@@ -84,9 +37,10 @@ export default function Planner() {
         setResult(item);
     };
 
-    const clearHistory = () => {
-        setHistory([]);
+    const clearHistory = async () => {
         setResult(null);
+        await axios.delete('/api/tool-history/planner');
+        router.reload({ only: ['history'] });
     };
 
     const formatDate = (dateString) => {

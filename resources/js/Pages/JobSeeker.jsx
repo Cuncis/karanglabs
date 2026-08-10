@@ -1,63 +1,33 @@
-import { useState, useEffect } from 'react';
-import { Head, Link, usePage } from '@inertiajs/react';
+import { useState } from 'react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import axios from 'axios';
 import HelpModal from '@/Components/HelpModal';
 import AboutModal from '@/Components/AboutModal';
 
-export default function JobSeeker() {
+export default function JobSeeker({ history = [] }) {
     const { auth } = usePage().props;
     const user = auth.user;
 
     const [name, setName] = useState(user?.name || '');
     const [email, setEmail] = useState(user?.email || '');
     const [background, setBackground] = useState(user?.job_background || '');
-    
+
     const [jobContext, setJobContext] = useState('');
 
     const [isGenerating, setIsGenerating] = useState(false);
     const [error, setError] = useState(null);
-    
+
     const [isSavingProfile, setIsSavingProfile] = useState(false);
     const [saveProfileMessage, setSaveProfileMessage] = useState('');
-    
+
     const [isShortening, setIsShortening] = useState(false);
 
-    const [result, setResult] = useState(() => {
-        if (typeof window !== 'undefined') {
-            try {
-                const saved = localStorage.getItem('jobseeker_latest_result');
-                return saved ? JSON.parse(saved) : null;
-            } catch (e) { return null; }
-        }
-        return null;
-    });
-    
-    const [history, setHistory] = useState(() => {
-        if (typeof window !== 'undefined') {
-            try {
-                const saved = localStorage.getItem('jobseeker_history');
-                return saved ? JSON.parse(saved) : [];
-            } catch (e) { return []; }
-        }
-        return [];
-    });
+    const [result, setResult] = useState(() => history[0] ?? null);
 
     const [activeTab, setActiveTab] = useState('resume');
     const [isCopied, setIsCopied] = useState(false);
     const [showHelp, setShowHelp] = useState(false);
     const [showAbout, setShowAbout] = useState(false);
-
-    useEffect(() => {
-        if (result) {
-            localStorage.setItem('jobseeker_latest_result', JSON.stringify(result));
-        } else {
-            localStorage.removeItem('jobseeker_latest_result');
-        }
-    }, [result]);
-
-    useEffect(() => {
-        localStorage.setItem('jobseeker_history', JSON.stringify(history));
-    }, [history]);
 
     const tabs = [
         { id: 'resume', label: 'Resume Content' },
@@ -71,17 +41,7 @@ export default function JobSeeker() {
             const response = await axios.post('/api/shorten-hr-message', {
                 message: result.message
             });
-            const newResult = { ...result, message: response.data.message };
-            setResult(newResult);
-            // Also update the latest in history
-            setHistory(prev => {
-                const newHistory = [...prev];
-                const index = newHistory.findIndex(h => h.id === result.id);
-                if (index !== -1) {
-                    newHistory[index] = newResult;
-                }
-                return newHistory;
-            });
+            setResult({ ...result, message: response.data.message });
         } catch (err) {
             console.error('Failed to shorten message:', err);
         } finally {
@@ -122,20 +82,10 @@ export default function JobSeeker() {
                 background: background,
                 job_context: jobContext
             });
-            
-            const newResult = {
-                ...response.data,
-                id: Date.now(),
-                timestamp: new Date().toISOString(),
-                original_prompt: background.length > 50 ? background.substring(0, 50) + '...' : background
-            };
 
-            setResult(newResult);
-            setHistory(prev => {
-                const updatedHistory = [newResult, ...prev].slice(0, 10);
-                return updatedHistory;
-            });
+            setResult(response.data);
             setActiveTab('resume');
+            router.reload({ only: ['history'] });
         } catch (err) {
             setError(err.response?.data?.error || 'Something went wrong while generating.');
         } finally {
@@ -148,9 +98,10 @@ export default function JobSeeker() {
         setActiveTab('resume');
     };
 
-    const clearHistory = () => {
-        setHistory([]);
+    const clearHistory = async () => {
         setResult(null);
+        await axios.delete('/api/tool-history/jobseeker');
+        router.reload({ only: ['history'] });
     };
 
     const formatDate = (dateString) => {

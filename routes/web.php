@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\TrafficController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\WhitelabelController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\ClearToolHistoryController;
 use App\Http\Controllers\GenerateChangelogController;
 use App\Http\Controllers\GenerateDynamicToolController;
 use App\Http\Controllers\GenerateJobSeekerController;
@@ -26,6 +27,7 @@ use App\Models\User;
 use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 
 Route::get('/', function () {
@@ -68,7 +70,19 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
 
     Route::get('/planner', function () {
-        return Inertia::render('Planner');
+        $history = ToolHistory::where('user_id', auth()->id())
+            ->where('tool_slug', 'planner')
+            ->latest()
+            ->take(10)
+            ->get()
+            ->map(fn ($item) => [
+                'id' => $item->id,
+                'timestamp' => $item->created_at->toISOString(),
+                'title' => Str::limit($item->inputs['idea'] ?? '', 50) ?: 'New Plan',
+                ...$item->outputs,
+            ]);
+
+        return Inertia::render('Planner', ['history' => $history]);
     })->name('planner');
 
     Route::get('/bundler', function () {
@@ -76,23 +90,85 @@ Route::middleware('auth')->group(function () {
     })->name('bundler');
 
     Route::get('/micro-copy', function () {
-        return Inertia::render('MicroCopy');
+        $history = ToolHistory::where('user_id', auth()->id())
+            ->where('tool_slug', 'micro-copy')
+            ->latest()
+            ->take(10)
+            ->get()
+            ->map(fn ($item) => [
+                'id' => $item->id,
+                'timestamp' => $item->created_at->toISOString(),
+                'original_prompt' => Str::limit($item->inputs['component_name'] ?? '', 50),
+                ...$item->outputs,
+            ]);
+
+        return Inertia::render('MicroCopy', ['history' => $history]);
     })->name('micro-copy');
 
     Route::get('/whisperer', function () {
-        return Inertia::render('Whisperer');
+        $history = ToolHistory::where('user_id', auth()->id())
+            ->where('tool_slug', 'whisperer')
+            ->latest()
+            ->take(10)
+            ->get()
+            ->map(fn ($item) => [
+                'id' => $item->id,
+                'timestamp' => $item->created_at->toISOString(),
+                'original_prompt' => Str::limit($item->inputs['prompt'] ?? '', 50),
+                'type' => $item->inputs['type'] ?? 'regex',
+                ...$item->outputs,
+            ]);
+
+        return Inertia::render('Whisperer', ['history' => $history]);
     })->name('whisperer');
 
     Route::get('/changelog', function () {
-        return Inertia::render('ChangelogGenerator');
+        $history = ToolHistory::where('user_id', auth()->id())
+            ->where('tool_slug', 'changelog')
+            ->latest()
+            ->take(10)
+            ->get()
+            ->map(fn ($item) => [
+                'id' => $item->id,
+                'timestamp' => $item->created_at->toISOString(),
+                'original_prompt' => Str::limit($item->inputs['commits'] ?? '', 50),
+                'audience' => $item->inputs['audience'] ?? 'users',
+                ...$item->outputs,
+            ]);
+
+        return Inertia::render('ChangelogGenerator', ['history' => $history]);
     })->name('changelog');
 
     Route::get('/socializer', function () {
-        return Inertia::render('Socializer');
+        $history = ToolHistory::where('user_id', auth()->id())
+            ->where('tool_slug', 'socializer')
+            ->latest()
+            ->take(10)
+            ->get()
+            ->map(fn ($item) => [
+                'id' => $item->id,
+                'timestamp' => $item->created_at->toISOString(),
+                'original_prompt' => Str::limit($item->inputs['content'] ?? '', 50),
+                ...$item->outputs,
+            ]);
+
+        return Inertia::render('Socializer', ['history' => $history]);
     })->name('socializer');
 
     Route::get('/jobseeker', function () {
-        return Inertia::render('JobSeeker');
+        $history = ToolHistory::where('user_id', auth()->id())
+            ->where('tool_slug', 'jobseeker')
+            ->latest()
+            ->take(10)
+            ->get()
+            ->map(fn ($item) => [
+                'id' => $item->id,
+                'timestamp' => $item->created_at->toISOString(),
+                'original_prompt' => Str::limit($item->inputs['background'] ?? '', 50),
+                ...$item->outputs,
+            ]);
+
+        return Inertia::render('JobSeeker', ['history' => $history]);
     })->name('jobseeker');
 
     Route::get('/html-snippet', function () {
@@ -190,6 +266,7 @@ Route::prefix('api')->middleware('auth')->group(function () {
     });
 
     Route::post('/tools/{slug}/generate', GenerateDynamicToolController::class);
+    Route::delete('/tool-history/{slug}', ClearToolHistoryController::class);
 });
 
 require __DIR__.'/auth.php';

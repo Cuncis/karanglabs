@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ToolHistory;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -88,6 +89,13 @@ EOT;
 
             return response()->json(['error' => 'Invalid JSON from AI. ('.$error_msg.')', 'raw' => $content], 500);
         }
+
+        ToolHistory::create([
+            'user_id' => $request->user()->id,
+            'tool_slug' => 'whisperer',
+            'inputs' => $validated,
+            'outputs' => $json,
+        ]);
 
         return response()->json($json);
     }
