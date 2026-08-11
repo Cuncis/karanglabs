@@ -33,7 +33,12 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        // Everyone lands on the Studio after login, including admins.
+        // Admins go straight to the internal tools directory; everyone else
+        // lands on the Studio.
+        if ($request->user()->isAdmin()) {
+            return redirect()->route('home');
+        }
+
         return redirect()->route('studio.index');
     }
 
