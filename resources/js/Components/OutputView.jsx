@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import MarkdownOutput from '@/Components/MarkdownOutput';
 
 export default function OutputView({ data }) {
     const [activeTab, setActiveTab] = useState('ai_prompt');
@@ -83,11 +84,7 @@ export default function OutputView({ data }) {
                                 {copiedTab === 'feature_map' ? 'Copied!' : 'Copy Features'}
                             </button>
                         </div>
-                        <div className="bg-gray-950 rounded-lg p-6 border border-gray-800">
-                            <pre className="text-gray-300 font-mono text-sm whitespace-pre-wrap overflow-x-auto">
-                                {data.feature_map}
-                            </pre>
-                        </div>
+                        <MarkdownOutput content={data.feature_map} color="#7C3AED" />
                     </div>
                 )}
 
@@ -102,11 +99,7 @@ export default function OutputView({ data }) {
                                 {copiedTab === 'prd' ? 'Copied!' : 'Copy PRD'}
                             </button>
                         </div>
-                        <div className="bg-gray-950 rounded-lg p-6 border border-gray-800">
-                            <pre className="text-gray-300 font-mono text-sm whitespace-pre-wrap overflow-x-auto">
-                                {data.prd}
-                            </pre>
-                        </div>
+                        <MarkdownOutput content={data.prd} color="#7C3AED" />
                     </div>
                 )}
             </div>

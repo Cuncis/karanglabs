@@ -3,6 +3,7 @@ import { Head, Link, router } from '@inertiajs/react';
 import axios from 'axios';
 import HelpModal from '@/Components/HelpModal';
 import AboutModal from '@/Components/AboutModal';
+import MarkdownOutput from '@/Components/MarkdownOutput';
 
 const SAMPLE_COMMITS = '- fixed the nasty auth bug\n- added stripe payments\n- updated tailwind config\n- refactored the navbar';
 
@@ -277,11 +278,7 @@ export default function ChangelogGenerator({ history = [] }) {
                                                 {copiedField === 'changelog' ? 'Copied!' : 'Copy'}
                                             </button>
                                         </div>
-                                        <div className="bg-gray-950 border border-gray-800 rounded-xl p-5">
-                                            <pre className="text-gray-300 font-mono text-sm whitespace-pre-wrap leading-relaxed">
-                                                {result.changelog}
-                                            </pre>
-                                        </div>
+                                        <MarkdownOutput content={result.changelog} color="#F59E0B" />
                                     </div>
 
                                     {/* Tweet Section */}

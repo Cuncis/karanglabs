@@ -3,6 +3,7 @@ import { Head, Link, router } from '@inertiajs/react';
 import axios from 'axios';
 import HelpModal from '@/Components/HelpModal';
 import AboutModal from '@/Components/AboutModal';
+import MarkdownOutput from '@/Components/MarkdownOutput';
 
 const SAMPLE_PROMPTS = {
     regex: 'A regex that matches phone numbers but only if they have a + country code',
@@ -294,16 +295,12 @@ export default function Whisperer({ history = [] }) {
                                     
                                     <div>
                                         <h4 className="text-sm font-semibold text-[#10B981] uppercase tracking-wider mb-3">Explanation</h4>
-                                        <div className="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap">
-                                            {result.explanation}
-                                        </div>
+                                        <MarkdownOutput content={result.explanation} color="#10B981" />
                                     </div>
 
                                     <div className="pt-6 border-t border-gray-800">
                                         <h4 className="text-sm font-semibold text-[#10B981] uppercase tracking-wider mb-3">Test Cases / Examples</h4>
-                                        <div className="bg-gray-950 rounded-lg p-4 border border-gray-800 text-gray-300 text-sm font-mono whitespace-pre-wrap">
-                                            {result.test_cases}
-                                        </div>
+                                        <MarkdownOutput content={result.test_cases} color="#10B981" />
                                     </div>
 
                                 </div>

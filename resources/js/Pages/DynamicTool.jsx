@@ -3,6 +3,7 @@ import { Head, Link, router, usePage } from '@inertiajs/react';
 import axios from 'axios';
 import HelpModal from '@/Components/HelpModal';
 import AboutModal from '@/Components/AboutModal';
+import MarkdownOutput from '@/Components/MarkdownOutput';
 
 export default function DynamicTool({ tool, slug, history = [] }) {
     const { auth } = usePage().props;
@@ -255,6 +256,8 @@ export default function DynamicTool({ tool, slug, history = [] }) {
                                                             {text}
                                                         </pre>
                                                     </div>
+                                                ) : out.type === 'markdown' ? (
+                                                    <MarkdownOutput content={text} color={theme.hex} />
                                                 ) : (
                                                     <div className="bg-gray-950 border border-gray-800 rounded-xl p-5 text-gray-300 text-sm whitespace-pre-wrap leading-relaxed font-mono">
                                                         {text}
