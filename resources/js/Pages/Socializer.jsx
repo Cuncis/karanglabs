@@ -4,6 +4,8 @@ import axios from 'axios';
 import HelpModal from '@/Components/HelpModal';
 import AboutModal from '@/Components/AboutModal';
 
+const SAMPLE_CONTENT = 'We just launched a new feature that lets users export their data to PDF in one click. It was hard to build but we finally did it. Check it out!';
+
 export default function Socializer({ history = [] }) {
     const [content, setContent] = useState('');
     const [isGenerating, setIsGenerating] = useState(false);
@@ -50,6 +52,10 @@ export default function Socializer({ history = [] }) {
     const loadFromHistory = (item) => {
         setResult(item);
         setActiveTab('instagram');
+    };
+
+    const handleFillRandom = () => {
+        setContent(SAMPLE_CONTENT);
     };
 
     const clearHistory = async () => {
@@ -138,6 +144,19 @@ export default function Socializer({ history = [] }) {
                     {/* Left Column: Form */}
                     <div className="lg:col-span-5 space-y-6">
                         <form onSubmit={handleGenerate} className="bg-gray-900/50 border border-gray-800 rounded-2xl p-6 shadow-xl">
+                            <div className="flex justify-end -mt-1 mb-3">
+                                <button
+                                    type="button"
+                                    onClick={handleFillRandom}
+                                    className="text-xs font-medium text-gray-400 hover:text-white flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-800/50 hover:bg-gray-800 border border-gray-700 transition-colors"
+                                    title="Fill the form with example values so you can see how this tool works"
+                                >
+                                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                    </svg>
+                                    Isi Acak
+                                </button>
+                            </div>
                             <div className="space-y-6">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-300 mb-2">

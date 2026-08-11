@@ -4,6 +4,13 @@ import axios from 'axios';
 import HelpModal from '@/Components/HelpModal';
 import AboutModal from '@/Components/AboutModal';
 
+const SAMPLE_PROFILE = {
+    name: 'Alex Rivera',
+    email: 'alex.rivera@example.com',
+    background: 'I worked at TechCorp for 3 years as a frontend developer using React. Increased page speed by 40% and led the redesign of the checkout flow.',
+    jobContext: "Company About: We're a B2B SaaS company helping teams collaborate.\nRole Overview: Looking for a Senior Frontend Developer.\nKey Responsibilities: Build React components, collaborate with design.\nRequirements: 3+ years React, strong TypeScript.",
+};
+
 export default function JobSeeker({ history = [] }) {
     const { auth } = usePage().props;
     const user = auth.user;
@@ -98,6 +105,13 @@ export default function JobSeeker({ history = [] }) {
         setActiveTab('resume');
     };
 
+    const handleFillRandom = () => {
+        setName(name.trim() || SAMPLE_PROFILE.name);
+        setEmail(email.trim() || SAMPLE_PROFILE.email);
+        setBackground(SAMPLE_PROFILE.background);
+        setJobContext(SAMPLE_PROFILE.jobContext);
+    };
+
     const clearHistory = async () => {
         setResult(null);
         await axios.delete('/api/tool-history/jobseeker');
@@ -187,7 +201,20 @@ export default function JobSeeker({ history = [] }) {
                             
                             {/* Static Profile Section */}
                             <div className="p-4 bg-gray-950 rounded-xl border border-gray-800 space-y-4">
-                                <h3 className="font-semibold text-gray-300">Your Profile</h3>
+                                <div className="flex items-center justify-between">
+                                    <h3 className="font-semibold text-gray-300">Your Profile</h3>
+                                    <button
+                                        type="button"
+                                        onClick={handleFillRandom}
+                                        className="text-xs font-medium text-gray-400 hover:text-white flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-900 hover:bg-gray-800 border border-gray-700 transition-colors"
+                                        title="Fill the form with example values so you can see how this tool works"
+                                    >
+                                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                        </svg>
+                                        Isi Acak
+                                    </button>
+                                </div>
                                 <p className="text-xs text-gray-500 mb-2">These fields save automatically to your account so they are filled next time you visit.</p>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>

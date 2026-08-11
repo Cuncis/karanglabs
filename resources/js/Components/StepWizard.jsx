@@ -1,6 +1,12 @@
 import { useState } from 'react';
 import axios from 'axios';
 
+const SAMPLE_IDEAS = [
+    'A productivity app for freelance writers that includes invoicing and time tracking.',
+    'A booking platform for local futsal courts with real-time availability.',
+    'A subscription box service for artisanal coffee with a recommendation quiz.',
+];
+
 const TECH_OPTIONS = {
     frontend: ['React', 'Vue', 'Svelte', 'Angular', 'Blade / HTML'],
     backend: ['Laravel (PHP)', 'Node.js', 'Python (Django/FastAPI)', 'Go', 'Ruby on Rails'],
@@ -94,6 +100,10 @@ export default function StepWizard({ onSubmit, isGenerating }) {
 
     const handlePrev = () => setStep(s => Math.max(1, s - 1));
 
+    const handleFillRandom = () => {
+        updateForm('idea', SAMPLE_IDEAS[Math.floor(Math.random() * SAMPLE_IDEAS.length)]);
+    };
+
     const handleSubmit = () => {
         let tech_stack = '';
         if (formData.techPreference === 'custom') {
@@ -154,9 +164,22 @@ export default function StepWizard({ onSubmit, isGenerating }) {
             {step === 1 && (
                 <div className="space-y-6 animate-fade-in">
                     <div>
-                        <label className="block text-lg font-medium text-white mb-3">
-                            What do you want to build?
-                        </label>
+                        <div className="flex items-center justify-between mb-3">
+                            <label className="block text-lg font-medium text-white">
+                                What do you want to build?
+                            </label>
+                            <button
+                                type="button"
+                                onClick={handleFillRandom}
+                                className="text-xs font-medium text-gray-400 hover:text-white flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-800/50 hover:bg-gray-800 border border-gray-700 transition-colors"
+                                title="Fill the idea field with an example so you can see how this tool works"
+                            >
+                                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                </svg>
+                                Isi Acak
+                            </button>
+                        </div>
                         <p className="text-sm text-gray-400 mb-4">Describe your project idea in free-form text.</p>
                         <textarea
                             value={formData.idea}

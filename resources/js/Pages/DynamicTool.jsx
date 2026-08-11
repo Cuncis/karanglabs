@@ -59,6 +59,19 @@ export default function DynamicTool({ tool, slug, history = [] }) {
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
+    const handleFillRandom = () => {
+        const filled = {};
+        tool.inputs.forEach(input => {
+            if (input.type === 'select') {
+                const options = input.options || [];
+                filled[input.name] = options[Math.floor(Math.random() * options.length)] || '';
+            } else {
+                filled[input.name] = input.placeholder || '';
+            }
+        });
+        setFormData(filled);
+    };
+
     const isSubmitDisabled = tool.inputs.some(input => !input.optional && !formData[input.name]?.trim());
 
     return (
@@ -128,8 +141,21 @@ export default function DynamicTool({ tool, slug, history = [] }) {
                     {/* Left Column: Form */}
                     <div className="lg:col-span-5 space-y-6">
                         <form onSubmit={handleGenerate} className="bg-gray-900/50 border border-gray-800 rounded-2xl p-6 shadow-xl flex flex-col min-h-[500px]">
+                            <div className="flex justify-end -mt-1 mb-3">
+                                <button
+                                    type="button"
+                                    onClick={handleFillRandom}
+                                    className="text-xs font-medium text-gray-400 hover:text-white flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-800/50 hover:bg-gray-800 border border-gray-700 transition-colors"
+                                    title="Fill the form with example values so you can see how this tool works"
+                                >
+                                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                    </svg>
+                                    Isi Acak
+                                </button>
+                            </div>
                             <div className="space-y-6 flex-1 flex flex-col">
-                                
+
                                 {tool.inputs.map((input, idx) => (
                                     <div key={idx} className={input.type === 'textarea' ? 'flex-1 flex flex-col' : ''}>
                                         <label className="block text-sm font-medium text-gray-300 mb-2">
