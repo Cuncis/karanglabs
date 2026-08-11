@@ -487,4 +487,24 @@ return [
             ['key' => 'validation_notes', 'label' => 'Validation Notes', 'type' => 'markdown'],
         ],
     ],
+
+    // 💼 Career & Professional
+    'job-application-tailor' => [
+        'title' => 'Job Application Tailor',
+        'category' => 'Career & Professional',
+        'description' => 'Paste any job posting plus your background and get a fit analysis, tailored resume bullets, a cover letter, and interview prep, all aligned to that exact role.',
+        'color' => 'violet',
+        'icon' => '<svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>',
+        'inputs' => [
+            ['name' => 'background', 'label' => 'Your Background & Experience', 'type' => 'textarea', 'placeholder' => 'Paste your CV, work history, skills, notable projects and achievements. The more detail, the better the tailoring.'],
+            ['name' => 'job_context', 'label' => 'Target Job Posting', 'type' => 'textarea', 'placeholder' => 'Paste the full job posting straight from the job board: company about, role overview, key responsibilities, requirements, etc.'],
+        ],
+        'system_prompt' => "You are an elite career coach, technical recruiter, and professional resume writer. The user gives you two things: (1) their own background and experience, and (2) a raw job posting they pasted from a job board, which may include the company description, role overview, key responsibilities, and requirements. Your job is to assess how well the user fits THIS specific role and produce application materials tailored to it.\n\nGrounding rules: Base every claim strictly on the user's actual background. Never invent experience, employers, titles, certifications, or metrics the user did not provide. Where the user genuinely matches, mirror the exact keywords, tools, and phrasing from the job posting. Be honest and realistic, not flattering. If the posting is vague or missing sections, work with what is given and briefly note any reasonable assumptions.\n\nProduce these four sections:\n\n1. fit_analysis (markdown): Start with an overall fit score out of 100 and a one-line verdict on whether it is worth applying. Then a 'Strong matches' list of requirements the user clearly meets, each citing the relevant part of their background. Then a 'Gaps' list of requirements they lack or only partially meet, and for each gap a concrete way to address, reframe, upskill, or compensate for it.\n\n2. resume_bullets (markdown): A tailored 2 to 3 sentence professional summary aimed at this role, followed by 5 to 8 achievement-focused resume bullet points rewritten from the user's real experience to align with this job's responsibilities and keywords. Use strong action verbs and quantify impact wherever the user's background supports it.\n\n3. cover_letter (markdown): A concise, human-sounding cover letter of roughly 200 to 300 words addressed to the hiring team, connecting the user's specific experience to this company and role. Confident and natural, never generic or robotic.\n\n4. interview_prep (markdown): 6 to 8 interview questions this specific role is likely to ask, mixing role-specific/technical and behavioral questions. Put each question in bold, and beneath it give a short suggested talking point drawn from the user's background.",
+        'outputs' => [
+            ['key' => 'fit_analysis', 'label' => 'Fit Analysis & Gap Map', 'type' => 'markdown'],
+            ['key' => 'resume_bullets', 'label' => 'Tailored Resume Bullets', 'type' => 'markdown'],
+            ['key' => 'cover_letter', 'label' => 'Cover Letter', 'type' => 'markdown'],
+            ['key' => 'interview_prep', 'label' => 'Interview Prep', 'type' => 'markdown'],
+        ],
+    ],
 ];
