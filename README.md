@@ -1,34 +1,50 @@
-# KarangLabs: AI Workflow Automations
+# KarangLabs Studio
 
 <p align="center">
   <img src="https://img.shields.io/badge/Laravel-FF2D20?style=for-the-badge&logo=laravel&logoColor=white" alt="Laravel"/>
   <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React"/>
+  <img src="https://img.shields.io/badge/Inertia.js-9553E9?style=for-the-badge&logo=inertia&logoColor=white" alt="Inertia"/>
   <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind"/>
-  <img src="https://img.shields.io/badge/Anthropic_AI-000000?style=for-the-badge&logo=anthropic&logoColor=white" alt="Anthropic"/>
 </p>
 
-A curated suite of **25 specialized, single-purpose AI tools** designed to eliminate boilerplate and automate development workflows. 
+**Studio turns a short brief into a ready-to-paste AI prompt for building a website — no coding required.**
 
-Built with a sleek, minimalist **Bento Grid UI** and powered by a **Dynamic AI Engine**, this application allows you to spin up new AI-powered tools instantly just by modifying a single PHP configuration file—no extra React components or Laravel controllers required.
-
----
-
-## ✨ Features
-
-- **Dynamic Tool Engine:** Add new tools by simply defining their inputs, prompts, and outputs in `config/karangtools.php`. The system dynamically generates the UI form, handles the API request, parses the AI response, and formats the output perfectly.
-- **Minimalist UI/UX:** A gorgeous black-and-white aesthetic with subtle color highlights, designed for maximum focus and zero distractions.
-- **Anthropic Claude 3.5 Integration:** Highly accurate, fast, and strict JSON-structured responses.
-- **25 Pre-built Tools** spread across 6 categories:
-  - ⚡ **Daily Productivity:** Context Bundlers, Regex Whisperers, and Changelog Generators.
-  - 🧑‍💻 **Code & Data Lifesavers:** SQL translators, Stack Trace Decoders, and JSON-to-Type converters.
-  - 🚀 **DevOps & Architecture:** Docker Compose Wizards, Nginx Builders, and GitHub Actions Scaffolders.
-  - 🎨 **Frontend & UI/UX:** SVG to React converters, Tailwind Palette generators, and Grid calculators.
-  - 📈 **Marketing & SEO:** SEO tag architects and Readme.md builders.
-  - 💼 **Business & Freelance:** Project Quote builders, Cold Pitch writers, and Persona generators.
+Pick a website type (landing page, online shop, company profile, portfolio, digital wedding invite, link-in-bio, F&B menu, or a services page), fill in a short form, and Studio assembles a detailed, well-structured prompt. Paste that prompt into Claude, ChatGPT, Gemini, v0, or Lovable, and the AI generates the full website. From there, the user drags the result onto `vercel.com/drop` and it's live for free.
 
 ---
 
-## 🚀 Installation
+## How it works
+
+1. **Pick an engine.** Each engine (`Landing Page`, `Toko Online`, `Company Profile`, `Portfolio`, `Undangan Digital`, `Link-in-Bio`, `Menu F&B`, `Halaman Jasa`, ...) has its own tailored brief form — brand name, visual style, color palette, typography, copy, optional add-ons (contact form, floating WhatsApp button, Google Analytics, Meta Pixel, basic SEO, Google Maps).
+2. **Fill the brief.** Every field maps into a prompt template. A "Isi Acak (AI)" button can also generate a realistic demo brief automatically, rate-limited per user.
+3. **Copy the generated prompt.** Studio composes a single, ready-to-use prompt from the brief and shows it live as the form is filled in.
+4. **Paste into an AI tool.** The user pastes the prompt into their AI of choice and gets back full website code.
+5. **Deploy for free.** Drag the AI's output onto `vercel.com/drop` (or connect a custom domain afterward) and the site is live.
+
+Projects (brief + generated prompt) can be saved per user and revisited later from the Studio dashboard.
+
+---
+
+## Access & licensing
+
+- **Early Access** — one-time purchase that unlocks the Studio dashboard and all engines.
+- **Reseller / Whitelabel license** — unlocks a downloadable whitelabel package plus a license key, so buyers can rebrand and resell Studio under their own name, pricing, and payment link, keeping 100% of what they charge.
+- Checkout and invoicing run through [Mayar](https://mayar.id/); a successful payment provisions Studio access for the buyer's email automatically.
+- In-app guides (`/studio/guides`) walk end users through the full flow, from pasting the prompt into an AI to deploying and connecting a custom domain — matched to what plays out in the tutorial video.
+
+---
+
+## Tech stack
+
+- **Backend:** Laravel 13 (PHP 8.4)
+- **Frontend:** Inertia.js v2 + React 18, Tailwind CSS v3
+- **Auth:** Laravel Breeze + Sanctum
+- **Payments:** Mayar
+- **Testing:** PHPUnit
+
+---
+
+## Installation
 
 1. **Clone the repository and install dependencies:**
    ```bash
@@ -38,71 +54,36 @@ Built with a sleek, minimalist **Bento Grid UI** and powered by a **Dynamic AI E
    npm install
    ```
 
-2. **Setup the Environment file:**
+2. **Set up the environment file:**
    ```bash
    cp .env.example .env
    php artisan key:generate
    ```
 
-3. **Configure the Database (SQLite default):**
+3. **Configure the database (SQLite by default):**
    ```bash
    touch database/database.sqlite
    php artisan migrate
    ```
 
-4. **Add your AI API Key:**
-   Open `.env` and add your Anthropic API Key:
+4. **Configure Studio in `.env`:**
    ```env
-   ANTHROPIC_API_KEY="sk-ant-api03-..."
+   ANTHROPIC_API_KEY="sk-ant-api03-..."   # powers the "Isi Acak (AI)" random brief generator
+   PLAN_EARLY_ACCESS_AMOUNT=149000
+   PLAN_RESELLER_AMOUNT=490000
+   ADMIN_EMAILS="you@example.com"
    ```
 
-5. **Build assets and run the development server:**
+5. **Run the dev servers:**
    ```bash
-   npm run dev
+   composer run dev
    ```
-   Open a new terminal and run:
-   ```bash
-   php artisan serve
-   ```
+   This runs the Laravel server, queue listener, and Vite dev server together. Alternatively, run `php artisan serve` and `npm run dev` in separate terminals.
 
 ---
 
-## 🛠 How to Add a New Tool
+## Testing
 
-You don't need to write any React code or create new routes to add a tool! Just open `config/karangtools.php` and add a new array entry.
-
-**Example:**
-```php
-'css-minifier' => [
-    'title' => 'CSS Minifier',
-    'category' => 'Frontend & UI/UX',
-    'description' => 'Paste raw CSS and instantly get the minified version.',
-    'color' => 'pink', // Adds a subtle pink hover glow to the icon
-    'icon' => '<svg>...</svg>', // Your raw SVG icon
-    'inputs' => [
-        ['name' => 'css', 'label' => 'Raw CSS', 'type' => 'textarea', 'placeholder' => 'body { ... }']
-    ],
-    'system_prompt' => "You are an expert developer. Minify the provided CSS perfectly. Return a JSON object with a 'code' key.",
-    'outputs' => [
-        ['key' => 'code', 'label' => 'Minified CSS', 'type' => 'code']
-    ]
-]
+```bash
+php artisan test --compact
 ```
-The **Dynamic AI Engine** will automatically:
-1. Put it on the homepage under the correct category.
-2. Generate a custom `/t/css-minifier` landing page with the textarea.
-3. Wire it up to the API endpoint.
-4. Render the output securely as a code block with a "Copy" button.
-
----
-
-## 💻 Tech Stack
-
-- **Backend:** Laravel 11, PHP 8.4
-- **Frontend:** React 18, Inertia.js v2
-- **Styling:** Tailwind CSS v3
-- **AI Integration:** Laravel HTTP Client -> Anthropic API (Claude 3.5 Sonnet)
-
-## 📄 License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT). This project's proprietary code belongs to KarangLabs.
