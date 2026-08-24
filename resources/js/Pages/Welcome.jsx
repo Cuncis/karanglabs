@@ -65,7 +65,7 @@ export default function Welcome({ auth, laravelVersion, phpVersion, dynamicTools
         },
         {
             title: 'HTML Snippet Converter',
-            description: 'Paste any full HTML file and instantly get a clean, self-contained snippet that pastes into Elementor (or any HTML widget) without errors — wrappers stripped, CSS scoped, Tailwind/CDN scripts kept working.',
+            description: 'Paste any full HTML file and instantly get a clean, self-contained snippet that pastes into Elementor (or any HTML widget) without errors: wrappers stripped, CSS scoped, Tailwind/CDN scripts kept working.',
             color: 'teal',
             category: 'Code & Data Lifesavers',
             href: route('html-snippet'),

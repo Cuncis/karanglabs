@@ -13,7 +13,7 @@ export default function CheckoutSuccess() {
 
     return (
         <div className="flex min-h-screen flex-col items-center justify-center bg-[#0A0A0A] px-5 font-sans text-[#EDEDED] antialiased selection:bg-emerald-400 selection:text-black">
-            <Head title="Pembayaran Berhasil — Karanglabs" />
+            <Head title="Pembayaran Berhasil | Karanglabs" />
 
             <div className="w-full max-w-md rounded-2xl border border-[#222] bg-[#111] p-8 text-center sm:p-10">
                 <img src={LOGO} alt="Karanglabs" className="mx-auto mb-6 h-10 w-10 rounded-md object-contain" />

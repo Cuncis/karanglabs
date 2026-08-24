@@ -28,6 +28,7 @@ class PdfImageExtractorTest extends TestCase
 
         $response = $this->actingAs($user)->post(route('pdf-image-extractor.store'), [
             'pdf' => UploadedFile::fake()->createWithContent('sample.pdf', $this->assemblePdf($jpeg)),
+            'mode' => 'extract',
         ]);
 
         $response->assertOk();
@@ -74,6 +75,7 @@ class PdfImageExtractorTest extends TestCase
 
         $response = $this->actingAs($user)->post(route('pdf-image-extractor.store'), [
             'pdf' => UploadedFile::fake()->createWithContent('sample.pdf', $this->assemblePdf($jpeg, includeXObjectType: false)),
+            'mode' => 'extract',
         ]);
 
         $response->assertOk();
@@ -129,6 +131,32 @@ class PdfImageExtractorTest extends TestCase
         File::deleteDirectory(dirname($zipPath));
     }
 
+    public function test_pages_mode_is_the_default_when_mode_is_omitted(): void
+    {
+        if (! trim((string) shell_exec('command -v pdftoppm'))) {
+            $this->markTestSkipped('poppler-utils (pdftoppm) is not installed.');
+        }
+
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)->post(route('pdf-image-extractor.store'), [
+            'pdf' => UploadedFile::fake()->createWithContent('sample.pdf', $this->assembleMultiPagePdf(2)),
+        ]);
+
+        $response->assertOk();
+
+        /** @var BinaryFileResponse $baseResponse */
+        $baseResponse = $response->baseResponse;
+        $zipPath = $baseResponse->getFile()->getPathname();
+
+        $zip = new ZipArchive;
+        $this->assertTrue($zip->open($zipPath));
+        $this->assertSame(2, $zip->numFiles);
+        $zip->close();
+
+        File::deleteDirectory(dirname($zipPath));
+    }
+
     public function test_extracted_files_are_named_after_the_uploaded_pdf(): void
     {
         $user = User::factory()->create();
@@ -144,6 +172,7 @@ class PdfImageExtractorTest extends TestCase
         // rather than passed straight into the zip entry name.
         $response = $this->actingAs($user)->post(route('pdf-image-extractor.store'), [
             'pdf' => UploadedFile::fake()->createWithContent('Q1 Report?!.pdf', $this->assemblePdf($jpeg)),
+            'mode' => 'extract',
         ]);
 
         $response->assertOk();
@@ -189,6 +218,7 @@ class PdfImageExtractorTest extends TestCase
 
         $response = $this->actingAs($user)->post(route('pdf-image-extractor.store'), [
             'pdf' => UploadedFile::fake()->createWithContent('empty.pdf', $this->assemblePdf(null)),
+            'mode' => 'extract',
         ]);
 
         $response->assertStatus(422);

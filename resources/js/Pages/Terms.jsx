@@ -16,7 +16,7 @@ function Section({ id, title, children }) {
 export default function Terms() {
     return (
         <div className="min-h-screen bg-[#0A0A0A] font-sans text-[#EDEDED] antialiased selection:bg-emerald-400 selection:text-black">
-            <Head title="Syarat Layanan & Kebijakan Pengembalian Dana — Karanglabs" />
+            <Head title="Syarat Layanan & Kebijakan Pengembalian Dana | Karanglabs" />
 
             <div className="mx-auto max-w-3xl px-6 py-14 sm:py-20">
                 {/* Header */}
@@ -44,7 +44,7 @@ export default function Terms() {
                     <Section id="tentang" title="1. Tentang Layanan">
                         <p>
                             Karanglabs (&ldquo;kami&rdquo;) adalah layanan perangkat lunak berbasis web
-                            (SaaS) yang menyediakan <strong className="text-white">Karanglabs Studio</strong> —
+                            (SaaS) yang menyediakan <strong className="text-white">Karanglabs Studio</strong>,
                             alat berbantuan AI untuk membuat brief dan menghasilkan website seperti landing
                             page, toko online, company profile, portofolio, dan undangan digital. Produk yang
                             kami jual sepenuhnya bersifat <strong className="text-white">digital</strong>;
@@ -64,8 +64,8 @@ export default function Terms() {
                             checkout. Pastikan alamat email yang kamu masukkan benar dan aktif.
                         </p>
                         <ul className="ml-5 list-disc space-y-1.5">
-                            <li>Early Access — Rp 149.000</li>
-                            <li>Lisensi Reseller — Rp 490.000</li>
+                            <li>Early Access: Rp 149.000</li>
+                            <li>Lisensi Reseller: Rp 490.000</li>
                         </ul>
                         <p>
                             Harga dapat berubah sewaktu-waktu. Harga yang berlaku adalah harga yang tercantum

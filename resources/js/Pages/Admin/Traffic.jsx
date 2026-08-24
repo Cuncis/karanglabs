@@ -76,7 +76,7 @@ export default function Traffic() {
 
     return (
         <StudioLayout>
-            <Head title="Traffic — Admin" />
+            <Head title="Traffic | Admin" />
 
             <SubNav active="traffic" hasPackage={hasPackage} />
 

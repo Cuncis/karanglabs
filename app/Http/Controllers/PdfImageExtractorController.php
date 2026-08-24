@@ -32,9 +32,18 @@ class PdfImageExtractorController extends Controller
 
     /**
      * Screen-quality resolution for whole-page rendering — high enough to
-     * read comfortably, without ballooning file size on large decks.
+     * read comfortably, without ballooning file size on large decks. Lower
+     * than JPEG_QUALITY/a naive 150 DPI would give, to land in the same
+     * ballpark as other "PDF to JPG" tools rather than needlessly large files.
      */
-    private const PAGE_RENDER_DPI = 150;
+    private const PAGE_RENDER_DPI = 120;
+
+    /**
+     * Full-page renders can afford to sit closer to the 70% floor than
+     * individual extracted photos — a whole page rendered at high quality is
+     * still large, and the visual difference at this level is negligible.
+     */
+    private const PAGE_RENDER_QUALITY = 75;
 
     /**
      * Nothing here touches the database — the PDF, extracted/rendered images,
@@ -47,7 +56,7 @@ class PdfImageExtractorController extends Controller
             'pdf' => ['required', 'file', 'mimes:pdf', 'max:30720'],
             'mode' => ['nullable', 'string', 'in:extract,pages'],
         ]);
-        $mode = $validated['mode'] ?? 'extract';
+        $mode = $validated['mode'] ?? 'pages';
 
         $workDir = storage_path('app/pdf-extractor/'.Str::uuid());
         File::ensureDirectoryExists($workDir);
@@ -117,7 +126,7 @@ class PdfImageExtractorController extends Controller
         $result = Process::timeout(120)->run([
             'pdftoppm',
             '-jpeg',
-            '-jpegopt', 'quality='.self::JPEG_QUALITY,
+            '-jpegopt', 'quality='.self::PAGE_RENDER_QUALITY,
             '-r', (string) self::PAGE_RENDER_DPI,
             $pdfPath,
             $prefix,

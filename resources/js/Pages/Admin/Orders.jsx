@@ -57,7 +57,7 @@ export default function Orders() {
 
     return (
         <StudioLayout>
-            <Head title="Orders — Admin" />
+            <Head title="Orders | Admin" />
 
             <SubNav active="orders" hasPackage={hasPackage} />
 

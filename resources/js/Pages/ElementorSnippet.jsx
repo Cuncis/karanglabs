@@ -316,7 +316,7 @@ export default function ElementorSnippet() {
                     onClose={() => setShowHelp(false)}
                     title="HTML Snippet Converter"
                     steps={[
-                        { title: 'Paste your HTML', description: 'Drop in a full HTML file — <!DOCTYPE>, <html>, <head>, <body> and all. Fragments work too.' },
+                        { title: 'Paste your HTML', description: 'Drop in a full HTML file: <!DOCTYPE>, <html>, <head>, <body> and all. Fragments work too.' },
                         { title: 'Pick your options', description: 'Scope CSS keeps the pasted styles from leaking into your theme. Minify compresses everything into one compact block. Tailwind/CDN scripts are carried over automatically.' },
                         { title: 'Copy & paste into Elementor', description: 'Hit Copy, then paste straight into an Elementor HTML widget. The snippet is self-contained, so it renders without missing-file errors.' },
                     ]}
@@ -326,7 +326,7 @@ export default function ElementorSnippet() {
                     show={showAbout}
                     onClose={() => setShowAbout(false)}
                     title="HTML Snippet Converter"
-                    description="Turns a complete HTML document into a paste-ready snippet for Elementor's HTML widget (or any embed box). It strips the document wrappers, moves head styles/scripts inline, optionally scopes the CSS so it can't restyle your whole page, keeps Tailwind/CDN scripts working, and can minify the output into a single clean block. Runs entirely in your browser — your code is never uploaded."
+                    description="Turns a complete HTML document into a paste-ready snippet for Elementor's HTML widget (or any embed box). It strips the document wrappers, moves head styles/scripts inline, optionally scopes the CSS so it can't restyle your whole page, keeps Tailwind/CDN scripts working, and can minify the output into a single clean block. Runs entirely in your browser, your code is never uploaded."
                     category="Code & Data Lifesavers"
                 />
 

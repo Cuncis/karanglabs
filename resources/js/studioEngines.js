@@ -147,7 +147,7 @@ export function buildPrompt(engine, values) {
             '- Awalnya tampilkan HANYA section Cover pembuka sebagai layar sambutan penuh (full-screen) dengan tombol "Buka Undangan". Sisa isi undangan (dan menu navigasi) belum terlihat.',
             '- Saat tombol "Buka Undangan" diklik: sembunyikan/geser cover, tampilkan seluruh isi undangan, dan MUNCULKAN menu navigasi mengambang (mis. dengan animasi fade/slide-up halus). Kalau ada musik latar, mulai putar di momen ini.',
             '- Buat menu navigasi MENGAMBANG (floating) yang menempel di BAGIAN BAWAH layar (fixed di bottom, mengambang di atas konten), BUKAN di header/atas.',
-            '- Menu berisi MAKSIMAL 5 item — pilih 5 section terpenting SETELAH cover (mis. Mempelai, Acara, Galeri, RSVP, Amplop); JANGAN masukkan cover ke menu.',
+            '- Menu berisi MAKSIMAL 5 item: pilih 5 section terpenting SETELAH cover (mis. Mempelai, Acara, Galeri, RSVP, Amplop); JANGAN masukkan cover ke menu.',
             '- Tiap item tampil sebagai ikon yang relevan dengan section-nya (mis. hati untuk mempelai, kalender untuk acara, foto untuk galeri, amplop untuk amplop digital, centang untuk RSVP) dengan NAMA/label kecil DI BAWAH ikon.',
             '- Menu mengambang tetap tersembunyi selama cover masih tampil, lalu selalu terlihat saat scroll setelah undangan dibuka, dengan latar semi-transparan + blur/shadow lembut dan sudut membulat (pill) agar tetap terbaca di atas konten.',
             '- Tiap item pakai anchor scroll ke id section terkait; saat diklik, halaman scroll SMOOTH (scroll-behavior: smooth) ke section tersebut, bukan reload atau loncat mendadak.',

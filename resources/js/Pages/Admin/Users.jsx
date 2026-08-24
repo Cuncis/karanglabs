@@ -83,7 +83,7 @@ export default function Users() {
 
     return (
         <StudioLayout>
-            <Head title="Users — Admin" />
+            <Head title="Users | Admin" />
 
             <SubNav active="users" hasPackage={hasPackage} />
 
