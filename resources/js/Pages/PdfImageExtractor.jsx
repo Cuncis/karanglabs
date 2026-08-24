@@ -39,8 +39,24 @@ async function readErrorMessage(error) {
     return data?.message || fallback;
 }
 
+const MODES = {
+    extract: {
+        label: 'Extract Photos',
+        button: 'Extract & Compress Images',
+        step: 'Extracting & compressing images',
+        filename: 'extracted-images.zip',
+    },
+    pages: {
+        label: 'One JPG per Page',
+        button: 'Render Pages to JPG',
+        step: 'Rendering pages to JPG',
+        filename: 'pdf-pages.zip',
+    },
+};
+
 export default function PdfImageExtractor() {
     const [file, setFile] = useState(null);
+    const [mode, setMode] = useState('extract');
     const [dragging, setDragging] = useState(false);
     const [status, setStatus] = useState('idle'); // idle | uploading | processing | done | error
     const [progress, setProgress] = useState(0);
@@ -93,6 +109,7 @@ export default function PdfImageExtractor() {
 
         const formData = new FormData();
         formData.append('pdf', file);
+        formData.append('mode', mode);
 
         try {
             const response = await axios.post(route('pdf-image-extractor.store'), formData, {
@@ -121,7 +138,7 @@ export default function PdfImageExtractor() {
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'extracted-images.zip';
+            a.download = MODES[mode].filename;
             document.body.appendChild(a);
             a.click();
             a.remove();
@@ -183,19 +200,42 @@ export default function PdfImageExtractor() {
                             </span>
                         </h1>
                         <p className="mt-4 text-lg text-gray-400">
-                            Drop a PDF, get back a ZIP of every embedded JPG/PNG image, compressed without a visible quality loss. Nothing is saved — the file is deleted the moment it's processed.
+                            {mode === 'extract'
+                                ? "Drop a PDF, get back a ZIP of every embedded JPG/PNG image, compressed without a visible quality loss. Nothing is saved — the file is deleted the moment it's processed."
+                                : "Drop a PDF, get back a ZIP with one JPG per page — a full rasterized snapshot of each page, not just its embedded photos. Nothing is saved — the file is deleted the moment it's processed."}
                         </p>
                     </div>
+                </div>
+
+                {/* Mode toggle */}
+                <div className="mx-auto mb-6 flex w-fit gap-1 rounded-xl border border-gray-800 bg-gray-900/60 p-1">
+                    {Object.entries(MODES).map(([key, m]) => (
+                        <button
+                            key={key}
+                            type="button"
+                            onClick={() => setMode(key)}
+                            disabled={busy}
+                            className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+                                mode === key ? 'bg-amber-400 text-black' : 'text-gray-400 hover:text-white'
+                            }`}
+                        >
+                            {m.label}
+                        </button>
+                    ))}
                 </div>
 
                 <HelpModal
                     show={showHelp}
                     onClose={() => setShowHelp(false)}
                     title="PDF Image Extractor"
-                    steps={[
+                    steps={mode === 'extract' ? [
                         { title: 'Drop your PDF', description: `Drag a PDF onto the box below, or click to browse. Max ${MAX_SIZE_MB}MB.` },
                         { title: 'Extract & Compress', description: 'The original embedded JPG/PNG images are pulled out of the PDF as-is (never a screenshot of the page) and re-compressed to a smaller file size with no visible quality loss.' },
                         { title: 'Download the ZIP', description: 'A ZIP of every extracted image downloads automatically. The PDF and images are deleted from the server right after — nothing is kept.' },
+                    ] : [
+                        { title: 'Drop your PDF', description: `Drag a PDF onto the box below, or click to browse. Max ${MAX_SIZE_MB}MB.` },
+                        { title: 'Switch to "One JPG per Page"', description: 'Use this mode when you want a picture of the whole page — text, diagrams, layout and all — not just the photos embedded inside it.' },
+                        { title: 'Download the ZIP', description: 'A ZIP with one JPG per page (page-001.jpg, page-002.jpg, …) downloads automatically. Nothing is kept on the server afterward.' },
                     ]}
                 />
 
@@ -203,7 +243,9 @@ export default function PdfImageExtractor() {
                     show={showAbout}
                     onClose={() => setShowAbout(false)}
                     title="PDF Image Extractor"
-                    description="Pulls the original embedded JPG/PNG images out of a PDF — not a screenshot of each page — and compresses them to a smaller file size without a visible quality loss. Everything happens in a single request: the PDF, extracted images, and the ZIP are all temporary and deleted immediately after your download starts. Nothing is stored in a database or kept on the server."
+                    description={mode === 'extract'
+                        ? 'Pulls the original embedded JPG/PNG images out of a PDF — not a screenshot of each page — and compresses them to a smaller file size without a visible quality loss. Everything happens in a single request: the PDF, extracted images, and the ZIP are all temporary and deleted immediately after your download starts. Nothing is stored in a database or kept on the server.'
+                        : "Renders every page of a PDF as its own full-page JPG, using the actual page layout (text, diagrams, everything) rather than only the photos embedded inside it — useful when a page's content isn't a discrete embedded image at all, or when you just want one picture per page. Everything happens in a single request: the PDF and rendered pages are temporary and deleted immediately after your download starts. Nothing is stored in a database or kept on the server."}
                     category="Code & Data Lifesavers"
                 />
 
@@ -260,7 +302,7 @@ export default function PdfImageExtractor() {
                                     state={status === 'uploading' ? 'active' : 'done'}
                                 />
                                 <StepRow
-                                    label="Extracting & compressing images"
+                                    label={MODES[mode].step}
                                     state={status === 'processing' ? 'active' : status === 'done' ? 'done' : 'pending'}
                                 />
                                 <StepRow
@@ -284,7 +326,7 @@ export default function PdfImageExtractor() {
                                 onClick={extract}
                                 className="mt-5 flex w-full items-center justify-center gap-2 rounded-lg bg-amber-400 px-4 py-3 text-sm font-semibold text-black transition-colors hover:bg-amber-300"
                             >
-                                Extract & Compress Images
+                                {MODES[mode].button}
                             </button>
                         )}
                     </div>

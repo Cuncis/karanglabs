@@ -6,7 +6,9 @@ use GdImage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Str;
+use RuntimeException;
 use Smalot\PdfParser\Element\ElementArray;
 use Smalot\PdfParser\Parser;
 use Smalot\PdfParser\PDFObject;
@@ -29,15 +31,23 @@ class PdfImageExtractorController extends Controller
     private const UNSUPPORTED_FILTERS = ['DCTDecode', 'CCITTFaxDecode', 'JBIG2Decode', 'JPXDecode'];
 
     /**
-     * Nothing here touches the database — the PDF, extracted images, and zip
-     * all live in a per-request temp directory that's deleted once the
-     * response has been sent.
+     * Screen-quality resolution for whole-page rendering — high enough to
+     * read comfortably, without ballooning file size on large decks.
+     */
+    private const PAGE_RENDER_DPI = 150;
+
+    /**
+     * Nothing here touches the database — the PDF, extracted/rendered images,
+     * and zip all live in a per-request temp directory that's deleted once
+     * the response has been sent.
      */
     public function __invoke(Request $request): BinaryFileResponse|JsonResponse
     {
-        $request->validate([
+        $validated = $request->validate([
             'pdf' => ['required', 'file', 'mimes:pdf', 'max:30720'],
+            'mode' => ['nullable', 'string', 'in:extract,pages'],
         ]);
+        $mode = $validated['mode'] ?? 'extract';
 
         $workDir = storage_path('app/pdf-extractor/'.Str::uuid());
         File::ensureDirectoryExists($workDir);
@@ -57,14 +67,19 @@ class PdfImageExtractorController extends Controller
 
         try {
             $pdfPath = $workDir.'/source.pdf';
+            $baseName = $this->baseFilename($request->file('pdf')->getClientOriginalName());
             $request->file('pdf')->move($workDir, 'source.pdf');
 
-            $images = $this->extractImages($pdfPath, $workDir);
+            $images = $mode === 'pages'
+                ? $this->renderPages($pdfPath, $workDir, $baseName)
+                : $this->extractImages($pdfPath, $workDir, $baseName);
 
             if ($images === []) {
-                return response()->json([
-                    'message' => 'No embedded JPG/PNG images were found in this PDF.',
-                ], 422);
+                $message = $mode === 'pages'
+                    ? 'Could not render any pages from this PDF.'
+                    : 'No embedded JPG/PNG images were found in this PDF.';
+
+                return response()->json(['message' => $message], 422);
             }
 
             $zipPath = $workDir.'/extracted-images.zip';
@@ -88,9 +103,65 @@ class PdfImageExtractorController extends Controller
     }
 
     /**
+     * Render every page as its own JPG via Poppler's pdftoppm — a real page
+     * rasterization (text, vector art, layout and all), unlike extractImages()
+     * which only pulls out already-embedded photo objects. Requires the
+     * poppler-utils package to be installed on the server.
+     *
      * @return list<array{path: string, name: string}>
      */
-    private function extractImages(string $pdfPath, string $workDir): array
+    private function renderPages(string $pdfPath, string $workDir, string $baseName): array
+    {
+        $prefix = $workDir.'/render';
+
+        $result = Process::timeout(120)->run([
+            'pdftoppm',
+            '-jpeg',
+            '-jpegopt', 'quality='.self::JPEG_QUALITY,
+            '-r', (string) self::PAGE_RENDER_DPI,
+            $pdfPath,
+            $prefix,
+        ]);
+
+        if ($result->failed()) {
+            throw new RuntimeException('PDF page rendering is not available on this server: '.$result->errorOutput());
+        }
+
+        $rendered = glob($prefix.'-*.jpg') ?: [];
+        natsort($rendered);
+
+        $saved = [];
+        $index = 0;
+
+        foreach ($rendered as $path) {
+            $index++;
+            $filename = sprintf('%s-%03d.jpg', $baseName, $index);
+            $target = $workDir.'/'.$filename;
+            rename($path, $target);
+            $saved[] = ['path' => $target, 'name' => $filename];
+        }
+
+        return $saved;
+    }
+
+    /**
+     * Strip the .pdf extension and anything that isn't safe as a filename
+     * (path separators, control characters, …) from the uploaded file's own
+     * name, so extracted files are named after it instead of generically.
+     */
+    private function baseFilename(string $originalName): string
+    {
+        $name = pathinfo($originalName, PATHINFO_FILENAME);
+        $name = preg_replace('/[^A-Za-z0-9 _-]+/', '-', $name) ?? '';
+        $name = trim(preg_replace('/-+/', '-', $name) ?? '', '- ');
+
+        return $name !== '' ? $name : 'pdf';
+    }
+
+    /**
+     * @return list<array{path: string, name: string}>
+     */
+    private function extractImages(string $pdfPath, string $workDir, string $baseName): array
     {
         $document = (new Parser)->parseFile($pdfPath);
 
@@ -105,26 +176,35 @@ class PdfImageExtractorController extends Controller
                 && $object->get('Subtype')->getContent() === 'Image'
         );
 
+        // A soft mask (/SMask) is another image's alpha channel, not content
+        // of its own — extracting it as a standalone "image" would just be a
+        // meaningless grayscale silhouette, so skip anything referenced that
+        // way.
+        $maskObjectIds = [];
+        foreach ($objects as $object) {
+            if ($object->has('SMask')) {
+                $maskObjectIds[spl_object_id($object->get('SMask'))] = true;
+            }
+        }
+
         $saved = [];
         $index = 0;
 
         foreach ($objects as $object) {
-            $bytes = $this->rasterize($object);
-            if ($bytes === null) {
+            if (isset($maskObjectIds[spl_object_id($object)])) {
                 continue;
             }
 
-            $info = @getimagesizefromstring($bytes);
-            if ($info === false || ! in_array($info['mime'], ['image/jpeg', 'image/png'], true)) {
+            $jpeg = $this->rasterize($object);
+            if ($jpeg === null || @getimagesizefromstring($jpeg) === false) {
                 continue;
             }
 
             $index++;
-            $extension = $info['mime'] === 'image/png' ? 'png' : 'jpg';
-            $filename = sprintf('image-%03d.%s', $index, $extension);
+            $filename = sprintf('%s-%03d.jpg', $baseName, $index);
             $path = $workDir.'/'.$filename;
 
-            file_put_contents($path, $this->compress($bytes, $info['mime']));
+            file_put_contents($path, $this->compress($jpeg));
             $saved[] = ['path' => $path, 'name' => $filename];
         }
 
@@ -132,17 +212,18 @@ class PdfImageExtractorController extends Controller
     }
 
     /**
-     * Turn a PDF image XObject into standalone JPEG/PNG bytes, or null if it
-     * can't be reconstructed.
+     * Turn a PDF image XObject into standalone JPEG bytes, or null if it
+     * can't be reconstructed. Every extracted image comes out as JPG, source
+     * PNG/raw-sample images included, for one uniform output format.
      *
      * A DCTDecode-filtered stream already *is* a raw JPEG file, so that's a
      * straight passthrough — this is how the vast majority of photos end up
-     * embedded in a PDF. Anything filtered with FlateDecode/LZW/etc. is just
-     * raw pixel samples with no file header at all, so it's rebuilt by hand
-     * from Width/Height/ColorSpace/BitsPerComponent — only the common 8-bit
-     * DeviceGray/DeviceRGB and 1-bit DeviceGray cases are supported.
-     * Encodings with no available decoder (CCITT fax, JBIG2, JPEG2000) are
-     * skipped rather than misread as raw samples.
+     * embedded in a PDF. A literal embedded PNG, or FlateDecode/LZW-encoded
+     * raw pixel samples with no file header at all, gets decoded/rebuilt and
+     * then re-encoded as JPEG. Raw-sample rebuilding only supports the common
+     * 8-bit DeviceGray/DeviceRGB and 1-bit DeviceGray cases. Encodings with no
+     * available decoder (CCITT fax, JBIG2, JPEG2000) are skipped rather than
+     * misread as raw samples.
      */
     private function rasterize(PDFObject $object): ?string
     {
@@ -160,15 +241,20 @@ class PdfImageExtractorController extends Controller
             return $content;
         }
 
-        if (str_starts_with($content, "\x89PNG\r\n\x1a\n")) {
-            return $content;
-        }
+        $image = str_starts_with($content, "\x89PNG\r\n\x1a\n")
+            ? @imagecreatefromstring($content)
+            : $this->rebuildRaster($object, $content);
 
-        if (! $this->hasDecodableFilter($object)) {
+        if ($image === false || $image === null) {
             return null;
         }
 
-        return $this->rebuildRaster($object, $content);
+        ob_start();
+        imagejpeg($image, null, self::JPEG_QUALITY);
+        $jpeg = ob_get_clean();
+        imagedestroy($image);
+
+        return $jpeg !== false && $jpeg !== '' ? $jpeg : null;
     }
 
     private function hasDecodableFilter(PDFObject $object): bool
@@ -185,8 +271,12 @@ class PdfImageExtractorController extends Controller
         return array_intersect($names, self::UNSUPPORTED_FILTERS) === [];
     }
 
-    private function rebuildRaster(PDFObject $object, string $samples): ?string
+    private function rebuildRaster(PDFObject $object, string $samples): ?GdImage
     {
+        if (! $this->hasDecodableFilter($object)) {
+            return null;
+        }
+
         $width = (int) $object->get('Width')->getContent();
         $height = (int) $object->get('Height')->getContent();
         $bitsPerComponent = $object->has('BitsPerComponent')
@@ -221,12 +311,7 @@ class PdfImageExtractorController extends Controller
             return null;
         }
 
-        ob_start();
-        imagepng($image, null, 9);
-        $png = ob_get_clean();
-        imagedestroy($image);
-
-        return $png !== false && $png !== '' ? $png : null;
+        return $image;
     }
 
     private function fillRgb8(GdImage $image, string $samples, int $width, int $height): bool
@@ -289,10 +374,10 @@ class PdfImageExtractorController extends Controller
     }
 
     /**
-     * Re-encode at a size-conscious setting with no visible quality loss.
-     * Never keep a "compressed" result that's bigger than what came in.
+     * Re-encode the JPEG at a size-conscious quality. Never keep a
+     * "compressed" result that's bigger than what came in.
      */
-    private function compress(string $bytes, string $mime): string
+    private function compress(string $bytes): string
     {
         $image = @imagecreatefromstring($bytes);
         if ($image === false) {
@@ -300,12 +385,7 @@ class PdfImageExtractorController extends Controller
         }
 
         ob_start();
-        if ($mime === 'image/jpeg') {
-            imagejpeg($image, null, self::JPEG_QUALITY);
-        } else {
-            imagesavealpha($image, true);
-            imagepng($image, null, 9);
-        }
+        imagejpeg($image, null, self::JPEG_QUALITY);
         $recompressed = ob_get_clean();
         imagedestroy($image);
 
