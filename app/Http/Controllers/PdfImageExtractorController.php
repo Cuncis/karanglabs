@@ -31,12 +31,13 @@ class PdfImageExtractorController extends Controller
     private const UNSUPPORTED_FILTERS = ['DCTDecode', 'CCITTFaxDecode', 'JBIG2Decode', 'JPXDecode'];
 
     /**
-     * Screen-quality resolution for whole-page rendering — high enough to
-     * read comfortably, without ballooning file size on large decks. Lower
-     * than JPEG_QUALITY/a naive 150 DPI would give, to land in the same
-     * ballpark as other "PDF to JPG" tools rather than needlessly large files.
+     * Screen-quality resolution for whole-page rendering. 120 DPI was tried
+     * first for a smaller file but visibly blurred small text and diagram
+     * labels; 150 DPI keeps those legible while optimize/progressive JPEG
+     * encoding (see renderPages()) still keeps the file smaller than a naive
+     * 150 DPI render would.
      */
-    private const PAGE_RENDER_DPI = 120;
+    private const PAGE_RENDER_DPI = 150;
 
     /**
      * Full-page renders can afford to sit closer to the 70% floor than
@@ -126,7 +127,7 @@ class PdfImageExtractorController extends Controller
         $result = Process::timeout(120)->run([
             'pdftoppm',
             '-jpeg',
-            '-jpegopt', 'quality='.self::PAGE_RENDER_QUALITY,
+            '-jpegopt', 'quality='.self::PAGE_RENDER_QUALITY.',optimize=y,progressive=y',
             '-r', (string) self::PAGE_RENDER_DPI,
             $pdfPath,
             $prefix,
