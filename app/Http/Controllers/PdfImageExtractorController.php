@@ -184,9 +184,12 @@ class PdfImageExtractorController extends Controller
             : 8;
         $colorSpace = $object->has('ColorSpace') ? (string) $object->get('ColorSpace') : 'DeviceGray';
 
-        // Guard against missing dimensions and pathologically large images —
-        // a corrupt/adversarial PDF shouldn't be able to force a huge alloc.
-        if ($width <= 0 || $height <= 0 || $width * $height > 40_000_000) {
+        // Guard against missing dimensions and large images. The reconstruction
+        // below is a pure-PHP per-pixel loop (no fast raw-buffer blit exists in
+        // GD without Imagick), so anything past a few megapixels risks running
+        // past max_execution_time and truncating the response mid-stream —
+        // skip it rather than let that happen.
+        if ($width <= 0 || $height <= 0 || $width * $height > 4_000_000) {
             return null;
         }
 

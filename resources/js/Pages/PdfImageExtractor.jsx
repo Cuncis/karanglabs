@@ -17,7 +17,15 @@ function formatBytes(bytes) {
 
 async function readErrorMessage(error) {
     const fallback = 'Something went wrong while processing this PDF.';
-    const data = error.response?.data;
+
+    // No `response` at all means the connection failed before the server sent
+    // anything back — most commonly the server rejecting/resetting an upload
+    // that's bigger than its configured post size limit.
+    if (!error.response) {
+        return 'Upload failed before reaching the server — the file may be too large for the server to accept right now.';
+    }
+
+    const data = error.response.data;
 
     if (data instanceof Blob) {
         try {
@@ -100,6 +108,14 @@ export default function PdfImageExtractor() {
                     }
                 },
             });
+
+            const contentType = response.headers?.['content-type'] || '';
+            if (!contentType.includes('zip') || !(response.data instanceof Blob) || response.data.size === 0) {
+                // A 200 response that isn't actually a zip (unexpected body shape,
+                // an empty stream, etc.) — surface it as an error instead of
+                // silently downloading it as a corrupt "zip" file.
+                throw { response: { status: response.status, data: response.data } };
+            }
 
             const blob = new Blob([response.data], { type: 'application/zip' });
             const url = URL.createObjectURL(blob);
