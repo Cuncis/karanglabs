@@ -93,7 +93,17 @@ class PdfImageExtractorController extends Controller
     private function extractImages(string $pdfPath, string $workDir): array
     {
         $document = (new Parser)->parseFile($pdfPath);
-        $objects = $document->getObjectsByType('XObject', 'Image');
+
+        // Not getObjectsByType('XObject', 'Image'): that requires an explicit
+        // /Type /XObject key, which plenty of real-world PDF generators omit
+        // on image objects even though /Subtype /Image is present (and is all
+        // the PDF spec's imaging model actually needs to identify one).
+        $objects = array_filter(
+            $document->getObjects(),
+            static fn ($object) => $object instanceof PDFObject
+                && $object->has('Subtype')
+                && $object->get('Subtype')->getContent() === 'Image'
+        );
 
         $saved = [];
         $index = 0;
