@@ -17,6 +17,7 @@ use App\Http\Controllers\GenerateSocializerController;
 use App\Http\Controllers\GenerateStudioBriefController;
 use App\Http\Controllers\GenerateWhispererController;
 use App\Http\Controllers\MayarNotificationController;
+use App\Http\Controllers\PdfImageExtractorController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ResellerDownloadController;
 use App\Http\Controllers\ShortenHrMessageController;
@@ -174,6 +175,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/html-snippet', function () {
         return Inertia::render('ElementorSnippet');
     })->name('html-snippet');
+
+    Route::get('/pdf-image-extractor', function () {
+        return Inertia::render('PdfImageExtractor');
+    })->name('pdf-image-extractor');
+    Route::post('/pdf-image-extractor', PdfImageExtractorController::class)->name('pdf-image-extractor.store');
 
     Route::get('/t/{slug}', function ($slug) {
         $tools = config('karangtools');

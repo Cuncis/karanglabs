@@ -72,6 +72,14 @@ export default function Welcome({ auth, laravelVersion, phpVersion, dynamicTools
             icon: `<svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>`
         },
         {
+            title: 'PDF Image Extractor',
+            description: 'Drop a PDF and get back a ZIP of every embedded JPG/PNG image, extracted at original resolution and compressed with no visible quality loss.',
+            color: 'amber',
+            category: 'Code & Data Lifesavers',
+            href: route('pdf-image-extractor'),
+            icon: `<svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-6 4h6m2 4H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>`
+        },
+        {
             title: 'Job Finder Pro',
             description: 'Turn your messy background details into a perfect, human-sounding resume and a compelling email for HR to help you land your dream job.',
             color: 'blue',
