@@ -149,6 +149,22 @@ class MayarNotificationTest extends TestCase
         Mail::assertNothingSent();
     }
 
+    public function test_a_mail_failure_still_finalizes_the_order_without_a_500(): void
+    {
+        $this->fakeInvoiceStatus('paid');
+        $order = Order::factory()->create(['email' => 'new@buyer.com']);
+
+        // The Resend transport throwing must not break the webhook, or Mayar's
+        // retry hits isPaid() and never re-sends.
+        Mail::shouldReceive('to->send')->andThrow(new \RuntimeException('Resend rejected the message'));
+
+        $this->notify($this->payload($order))->assertOk();
+
+        // Access is still provisioned; the admin can re-send from the orders panel.
+        $this->assertDatabaseHas('orders', ['id' => $order->id, 'status' => 'paid']);
+        $this->assertTrue(User::where('email', 'new@buyer.com')->first()->hasStudioAccess());
+    }
+
     public function test_an_unpaid_invoice_leaves_the_order_pending(): void
     {
         $this->fakeInvoiceStatus('unpaid');

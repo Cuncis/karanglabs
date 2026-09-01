@@ -8,6 +8,7 @@ use App\Services\StudioAccountService;
 use App\Support\WhitelabelPackage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -88,6 +89,35 @@ class UserController extends Controller
         $this->accounts->assignRole($user, $validated['role']);
 
         return back()->with('success', "Role {$user->email} diperbarui jadi {$validated['role']}.");
+    }
+
+    /**
+     * Manually set (or auto-generate) a user's password. This is the fallback
+     * when the credentials email never reached the buyer: the admin sets a
+     * password here and hands the plaintext to them directly. The plaintext is
+     * flashed back one time so it can be copied, and never stored.
+     */
+    public function updatePassword(Request $request, User $user): RedirectResponse
+    {
+        $validated = $request->validate([
+            'password' => ['nullable', 'string', 'min:8', 'max:255'],
+        ]);
+
+        $password = $validated['password'] ?? null;
+
+        if ($password !== null && $password !== '') {
+            $user->forceFill([
+                'password' => Hash::make($password),
+                'has_studio_access' => true,
+                'studio_access_granted_at' => $user->studio_access_granted_at ?? now(),
+            ])->save();
+        } else {
+            $password = $this->accounts->resetPassword($user);
+        }
+
+        return back()
+            ->with('success', "Password {$user->email} berhasil diperbarui.")
+            ->with('credential', ['email' => $user->email, 'password' => $password]);
     }
 
     /**

@@ -39,6 +39,13 @@ class HandleInertiaRequests extends Middleware
                 'isAdmin' => $user?->isAdmin() ?? false,
                 'isReseller' => $user?->isReseller() ?? false,
             ],
+            'flash' => [
+                'success' => fn () => $request->session()->get('success'),
+                'error' => fn () => $request->session()->get('error'),
+                // One-time plaintext credential shown to an admin after a manual
+                // password set / failed resend, so they can hand it over.
+                'credential' => fn () => $request->session()->get('credential'),
+            ],
         ];
     }
 }

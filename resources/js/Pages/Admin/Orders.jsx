@@ -2,6 +2,7 @@ import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import { ShoppingBag, CheckCircle2, Wallet, Send, Check, Download } from 'lucide-react';
 import StudioLayout from '@/Layouts/StudioLayout';
+import CredentialModal from '@/Components/CredentialModal';
 
 const rupiah = (n) => 'Rp ' + new Intl.NumberFormat('id-ID').format(n || 0);
 
@@ -41,13 +42,26 @@ function SubNav({ active, hasPackage }) {
 export default function Orders() {
     const { orders, stats, hasPackage } = usePage().props;
     const [resentId, setResentId] = useState(null);
+    const [failedId, setFailedId] = useState(null);
     const [sendingId, setSendingId] = useState(null);
+    const [credential, setCredential] = useState(null);
 
     const resend = (order) => {
         setSendingId(order.id);
+        setFailedId(null);
         router.post(route('admin.orders.resend', { order: order.id }), {}, {
             preserveScroll: true,
-            onSuccess: () => {
+            onSuccess: (page) => {
+                // The redirect is a 200 even when the send failed, so branch on the flash.
+                if (page.props.flash?.error) {
+                    setFailedId(order.id);
+                    setTimeout(() => setFailedId(null), 6000);
+                    if (page.props.flash?.credential) {
+                        setCredential(page.props.flash.credential);
+                    }
+
+                    return;
+                }
                 setResentId(order.id);
                 setTimeout(() => setResentId(null), 3000);
             },
@@ -117,6 +131,16 @@ export default function Orders() {
                                     {o.status === 'paid' ? (
                                         resentId === o.id ? (
                                             <span className="inline-flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400"><Check className="h-3.5 w-3.5" /> Terkirim</span>
+                                        ) : failedId === o.id ? (
+                                            <button
+                                                type="button"
+                                                onClick={() => resend(o)}
+                                                disabled={sendingId === o.id}
+                                                className="inline-flex items-center gap-1.5 rounded-md border border-red-300/60 dark:border-red-500/30 px-3 py-1.5 text-xs font-medium text-red-600 dark:text-red-400 transition-colors hover:bg-red-50 dark:hover:bg-red-500/10 disabled:opacity-50"
+                                                title="Gagal kirim email. Cek konfigurasi Resend. Klik untuk coba lagi."
+                                            >
+                                                <Send className="h-3.5 w-3.5" /> Gagal, coba lagi
+                                            </button>
                                         ) : (
                                             <button
                                                 type="button"
@@ -137,6 +161,8 @@ export default function Orders() {
                     </tbody>
                 </table>
             </div>
+
+            <CredentialModal credential={credential} onClose={() => setCredential(null)} />
         </StudioLayout>
     );
 }

@@ -1,7 +1,8 @@
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { useState } from 'react';
-import { Users as UsersIcon, ShieldCheck, KeyRound, UserRound, Check, Download, Trash2, AlertTriangle, Pencil } from 'lucide-react';
+import { Users as UsersIcon, ShieldCheck, KeyRound, UserRound, Check, Download, Trash2, AlertTriangle, Pencil, Lock } from 'lucide-react';
 import StudioLayout from '@/Layouts/StudioLayout';
+import CredentialModal from '@/Components/CredentialModal';
 
 function formatDate(value) {
     if (!value) return '-';
@@ -41,8 +42,30 @@ export default function Users() {
     const [confirming, setConfirming] = useState(null);
     const [deleting, setDeleting] = useState(false);
     const [editing, setEditing] = useState(null);
+    const [pwUser, setPwUser] = useState(null);
+    const [credential, setCredential] = useState(null);
 
     const editForm = useForm({ name: '', email: '' });
+    const pwForm = useForm({ password: '' });
+
+    const openPassword = (user) => {
+        pwForm.clearErrors();
+        pwForm.setData('password', '');
+        setPwUser(user);
+    };
+
+    const savePassword = (e) => {
+        e.preventDefault();
+        pwForm.patch(route('admin.users.password', { user: pwUser.id }), {
+            preserveScroll: true,
+            onSuccess: (page) => {
+                setPwUser(null);
+                if (page.props.flash?.credential) {
+                    setCredential(page.props.flash.credential);
+                }
+            },
+        });
+    };
 
     const openEdit = (user) => {
         editForm.clearErrors();
@@ -162,6 +185,14 @@ export default function Users() {
                                             >
                                                 <Pencil className="h-3.5 w-3.5" /> Edit
                                             </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => openPassword(u)}
+                                                className="inline-flex items-center gap-1.5 rounded-md border border-[#D4D4D8] dark:border-[#333] px-3 py-1.5 text-xs font-medium text-[#27272A] dark:text-[#EDEDED] transition-colors hover:border-[#A1A1AA] dark:hover:border-[#555] hover:bg-[#EFEFF1] dark:hover:bg-[#1A1A1A]"
+                                                title="Set / ganti password"
+                                            >
+                                                <Lock className="h-3.5 w-3.5" /> Password
+                                            </button>
                                             {isProtected ? (
                                                 <span className="text-xs text-[#B4B4BB] dark:text-[#555]">-</span>
                                             ) : (
@@ -270,6 +301,59 @@ export default function Users() {
                     </form>
                 </div>
             )}
+
+            {pwUser && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => !pwForm.processing && setPwUser(null)} />
+                    <form onSubmit={savePassword} className="relative w-full max-w-md rounded-2xl border border-[#E4E4E7] dark:border-[#222] bg-white dark:bg-[#111] p-6 shadow-xl">
+                        <div className="flex items-start gap-4">
+                            <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-500/15">
+                                <Lock className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                            </div>
+                            <div className="min-w-0">
+                                <h3 className="text-lg font-semibold text-[#18181B] dark:text-white">Set password</h3>
+                                <p className="mt-1 text-sm text-[#71717A] dark:text-[#888]">
+                                    Untuk <span className="font-medium text-[#18181B] dark:text-white">{pwUser.email}</span>. Kosongkan untuk generate password acak.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="mt-5">
+                            <label className="mb-1.5 block text-xs font-medium text-[#52525B] dark:text-[#A1A1AA]">Password baru (opsional)</label>
+                            <input
+                                type="text"
+                                value={pwForm.data.password}
+                                onChange={(e) => pwForm.setData('password', e.target.value)}
+                                placeholder="Kosongkan = generate acak"
+                                autoComplete="off"
+                                className="block w-full rounded-lg border border-[#D4D4D8] dark:border-[#333] bg-white dark:bg-[#0D0D0D] px-3 py-2 text-sm text-[#27272A] dark:text-[#EDEDED] focus:border-emerald-400/50 focus:outline-none focus:ring-1 focus:ring-emerald-400/30"
+                            />
+                            {pwForm.errors.password && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{pwForm.errors.password}</p>}
+                            <p className="mt-1.5 text-xs text-[#9CA3AF] dark:text-[#666]">Minimal 8 karakter. Password ditampilkan sekali setelah disimpan supaya bisa dikasih ke user.</p>
+                        </div>
+
+                        <div className="mt-6 flex justify-end gap-3">
+                            <button
+                                type="button"
+                                onClick={() => setPwUser(null)}
+                                disabled={pwForm.processing}
+                                className="rounded-lg border border-[#E4E4E7] dark:border-[#333] px-4 py-2 text-sm font-medium text-[#52525B] dark:text-[#A1A1AA] transition-colors hover:bg-[#EFEFF1] dark:hover:bg-[#1A1A1A] disabled:opacity-50"
+                            >
+                                Batal
+                            </button>
+                            <button
+                                type="submit"
+                                disabled={pwForm.processing}
+                                className="inline-flex items-center gap-2 rounded-lg bg-emerald-400 px-4 py-2 text-sm font-semibold text-black transition-colors hover:bg-emerald-300 disabled:opacity-50"
+                            >
+                                {pwForm.processing ? 'Menyimpan...' : (pwForm.data.password ? 'Set password' : 'Generate & set')}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            )}
+
+            <CredentialModal credential={credential} onClose={() => setCredential(null)} />
         </StudioLayout>
     );
 }

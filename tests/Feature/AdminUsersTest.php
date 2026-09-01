@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
 use Inertia\Testing\AssertableInertia;
 use Tests\TestCase;
 
@@ -117,6 +118,66 @@ class AdminUsersTest extends TestCase
         $this->actingAs($admin)
             ->patch(route('admin.users.role', $member), ['role' => 'superuser'])
             ->assertSessionHasErrors('role');
+    }
+
+    public function test_an_admin_can_set_a_specific_password_for_a_user(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $member = User::factory()->create(['email' => 'buyer@example.com']);
+
+        $this->actingAs($admin)
+            ->patch(route('admin.users.password', $member), ['password' => 'super-secret-123'])
+            ->assertSessionHasNoErrors()
+            ->assertRedirect()
+            ->assertSessionHas('credential', ['email' => 'buyer@example.com', 'password' => 'super-secret-123']);
+
+        $member->refresh();
+        $this->assertTrue(Hash::check('super-secret-123', $member->password));
+        $this->assertTrue($member->hasStudioAccess());
+    }
+
+    public function test_an_admin_can_generate_a_random_password_when_none_is_given(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $member = User::factory()->create(['email' => 'buyer@example.com']);
+        $originalHash = $member->password;
+
+        $response = $this->actingAs($admin)
+            ->patch(route('admin.users.password', $member), [])
+            ->assertSessionHasNoErrors()
+            ->assertRedirect()
+            ->assertSessionHas('credential');
+
+        $credential = session('credential');
+        $this->assertSame('buyer@example.com', $credential['email']);
+        $this->assertNotEmpty($credential['password']);
+
+        $member->refresh();
+        $this->assertNotSame($originalHash, $member->password);
+        $this->assertTrue(Hash::check($credential['password'], $member->password));
+    }
+
+    public function test_setting_a_password_rejects_a_too_short_value(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $member = User::factory()->create();
+
+        $this->actingAs($admin)
+            ->patch(route('admin.users.password', $member), ['password' => 'short'])
+            ->assertSessionHasErrors('password');
+    }
+
+    public function test_a_non_admin_cannot_set_a_password(): void
+    {
+        $member = User::factory()->create();
+        $victim = User::factory()->create();
+        $victimHash = $victim->password;
+
+        $this->actingAs($member)
+            ->patch(route('admin.users.password', $victim), ['password' => 'hijacked-123'])
+            ->assertForbidden();
+
+        $this->assertSame($victimHash, $victim->fresh()->password);
     }
 
     public function test_an_admin_can_delete_a_user(): void

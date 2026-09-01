@@ -70,6 +70,21 @@ class AdminOrdersTest extends TestCase
         Mail::assertSent(StudioAccessMail::class, fn (StudioAccessMail $m) => $m->hasTo('buyer@paid.com') && $m->password !== null);
     }
 
+    public function test_resend_reports_an_error_and_hands_back_the_password_when_mail_fails(): void
+    {
+        $order = Order::factory()->paid()->create(['email' => 'buyer@paid.com']);
+
+        // Simulate the production Resend transport throwing at send time.
+        Mail::shouldReceive('to->send')->andThrow(new \RuntimeException('Resend rejected the message'));
+
+        $this->actingAs($this->admin())
+            ->from(route('admin.orders'))
+            ->post(route('admin.orders.resend', $order))
+            ->assertRedirect(route('admin.orders'))
+            ->assertSessionHas('error')
+            ->assertSessionHas('credential');
+    }
+
     public function test_resend_is_blocked_for_an_unpaid_order(): void
     {
         Mail::fake();

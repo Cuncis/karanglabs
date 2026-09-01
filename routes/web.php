@@ -226,6 +226,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/users', [UserController::class, 'index'])->name('admin.users');
         Route::patch('/users/{user}', [UserController::class, 'update'])->name('admin.users.update');
         Route::patch('/users/{user}/role', [UserController::class, 'updateRole'])->name('admin.users.role');
+        Route::patch('/users/{user}/password', [UserController::class, 'updatePassword'])->name('admin.users.password');
         Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('admin.users.destroy');
         Route::get('/engine-requests', [EngineRequestController::class, 'index'])->name('admin.engine-requests');
         Route::patch('/engine-requests/{engineRequest}', [EngineRequestController::class, 'update'])->name('admin.engine-requests.update');
