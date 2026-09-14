@@ -18,19 +18,20 @@ return [
             ['key' => 'explanation', 'label' => 'Explanation', 'type' => 'markdown'],
         ],
     ],
-    'sql-to-eloquent' => [
-        'title' => 'SQL ↔ Eloquent',
-        'category' => 'Code & Data Lifesavers',
-        'description' => 'Translate raw SQL queries into Laravel Eloquent ORM syntax.',
-        'color' => 'red',
-        'icon' => '<svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" /></svg>',
+    'text-simplifier' => [
+        'title' => 'Text Simplifier',
+        'category' => 'Daily Productivity',
+        'description' => 'Rewrite any text, from a sentence to a full cover letter, into simple, casual language that reads nothing like AI wrote it.',
+        'color' => 'teal',
+        'icon' => '<svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h10M4 18h6" /></svg>',
         'inputs' => [
-            ['name' => 'query', 'label' => 'SQL Query or Eloquent Code', 'type' => 'textarea', 'placeholder' => 'SELECT * FROM users WHERE active = 1'],
+            ['name' => 'text', 'label' => 'Your Text', 'type' => 'textarea', 'placeholder' => 'Pursuant to our previous correspondence, I am writing to formally express my enthusiasm regarding the aforementioned employment opportunity and to reiterate my qualifications, which I believe align seamlessly with the requisite competencies outlined in the job description.'],
+            ['name' => 'shorten_level', 'label' => 'How Much Shorter?', 'type' => 'radio', 'options' => ['Keep the Same Length', 'A Bit Shorter', 'Much Shorter'], 'default' => 'Keep the Same Length'],
         ],
-        'system_prompt' => "You are a Laravel expert. If the user provides SQL, convert it to Eloquent. If they provide Eloquent, convert to SQL. Return a JSON object with 'code' (the snippet) and 'explanation' (markdown).",
+        'system_prompt' => "You are an editor who rewrites text so it sounds like a real person wrote it, not an AI. The user will give you any piece of writing: a sentence, a paragraph, an email, a cover letter, a full document, anything. Rewrite it so it is:\n- Super simple and easy to understand for readers of any age or reading level, including kids and non-native speakers.\n- Casual and conversational, not formal, stiff, or corporate.\n- Free of typical AI-sounding phrasing: no words like 'leverage', 'utilize', 'delve', 'seamless', 'robust', 'furthermore', 'moreover', 'in today's world', 'it's important to note', or similar stock AI phrases. Write like a normal person texting a friend, not a press release.\n- Short, plain sentences using common everyday words instead of fancy or technical ones, unless a technical word is truly necessary to keep the meaning.\n- The exact same meaning and intent as the original. Never add facts, opinions, or claims that were not in the original text. Never drop information the user needs (like a cover letter's job title, dates, or key qualifications) unless the shortening level explicitly asks for a shorter version.\n\nThe user will also tell you how much shorter they want it:\n- 'Keep the Same Length': simplify the language and tone only, keep roughly the same length and level of detail.\n- 'A Bit Shorter': trim filler words and repeated ideas, aim for about 25 percent shorter.\n- 'Much Shorter': cut it down to only the essential point, aim for about half the length or less.\n\nReturn a JSON object with 'simplified' (the rewritten text as plain text, no markdown formatting) and 'changes' (a short markdown bulleted list, 2 to 4 bullets, summarizing what you changed and why).",
         'outputs' => [
-            ['key' => 'code', 'label' => 'Translated Query', 'type' => 'code'],
-            ['key' => 'explanation', 'label' => 'Explanation', 'type' => 'markdown'],
+            ['key' => 'simplified', 'label' => 'Simplified Text', 'type' => 'text'],
+            ['key' => 'changes', 'label' => 'What Changed', 'type' => 'markdown'],
         ],
     ],
     'cron-translator' => [

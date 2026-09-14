@@ -7,7 +7,9 @@ import MarkdownOutput from '@/Components/MarkdownOutput';
 
 export default function DynamicTool({ tool, slug, history = [] }) {
     const { auth } = usePage().props;
-    const [formData, setFormData] = useState({});
+    const [formData, setFormData] = useState(() =>
+        Object.fromEntries(tool.inputs.filter(i => i.default).map(i => [i.name, i.default]))
+    );
     const [isGenerating, setIsGenerating] = useState(false);
     const [error, setError] = useState(null);
     const [result, setResult] = useState(null);
@@ -63,7 +65,7 @@ export default function DynamicTool({ tool, slug, history = [] }) {
     const handleFillRandom = () => {
         const filled = {};
         tool.inputs.forEach(input => {
-            if (input.type === 'select') {
+            if (input.type === 'select' || input.type === 'radio') {
                 const options = input.options || [];
                 filled[input.name] = options[Math.floor(Math.random() * options.length)] || '';
             } else {
@@ -184,6 +186,27 @@ export default function DynamicTool({ tool, slug, history = [] }) {
                                                     <option key={opt} value={opt}>{opt}</option>
                                                 ))}
                                             </select>
+                                        ) : input.type === 'radio' ? (
+                                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                                {input.options.map(opt => {
+                                                    const selected = formData[input.name] === opt;
+                                                    return (
+                                                        <button
+                                                            key={opt}
+                                                            type="button"
+                                                            onClick={() => handleInputChange(input.name, opt)}
+                                                            className={`text-sm font-medium px-3 py-3 rounded-xl border text-center transition-all ${
+                                                                selected
+                                                                    ? 'text-white border-transparent'
+                                                                    : 'bg-gray-950 border-gray-700 text-gray-400 hover:border-gray-600 hover:text-gray-200'
+                                                            }`}
+                                                            style={selected ? { backgroundColor: theme.hex, boxShadow: `0 10px 15px -3px ${theme.hex}40` } : {}}
+                                                        >
+                                                            {opt}
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
                                         ) : (
                                             <input
                                                 type="text"
