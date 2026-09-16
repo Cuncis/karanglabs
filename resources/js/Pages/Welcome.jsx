@@ -13,6 +13,7 @@ export default function Welcome({ auth, laravelVersion, phpVersion, dynamicTools
             color: 'indigo',
             category: 'Daily Productivity',
             href: route('planner'),
+            needsApiToken: true,
             icon: `<svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>`
         },
         {
@@ -21,6 +22,7 @@ export default function Welcome({ auth, laravelVersion, phpVersion, dynamicTools
             color: 'pink',
             category: 'Daily Productivity',
             href: route('bundler'),
+            needsApiToken: false,
             icon: `<svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>`
         },
         {
@@ -29,6 +31,7 @@ export default function Welcome({ auth, laravelVersion, phpVersion, dynamicTools
             color: 'cyan',
             category: 'Daily Productivity',
             href: route('micro-copy'),
+            needsApiToken: true,
             icon: `<svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>`
         },
         {
@@ -37,6 +40,7 @@ export default function Welcome({ auth, laravelVersion, phpVersion, dynamicTools
             color: 'emerald',
             category: 'Daily Productivity',
             href: route('whisperer'),
+            needsApiToken: true,
             icon: `<svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>`
         },
         {
@@ -45,6 +49,7 @@ export default function Welcome({ auth, laravelVersion, phpVersion, dynamicTools
             color: 'orange',
             category: 'Daily Productivity',
             href: route('changelog'),
+            needsApiToken: true,
             icon: `<svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" /></svg>`
         },
         {
@@ -53,6 +58,7 @@ export default function Welcome({ auth, laravelVersion, phpVersion, dynamicTools
             color: 'slate',
             category: 'Code & Data Lifesavers',
             href: route('terminal-converter.index'),
+            needsApiToken: true,
             icon: `<svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>`
         },
         {
@@ -61,6 +67,7 @@ export default function Welcome({ auth, laravelVersion, phpVersion, dynamicTools
             color: 'rose',
             category: 'Marketing & SEO',
             href: route('socializer'),
+            needsApiToken: true,
             icon: `<svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" /></svg>`
         },
         {
@@ -69,6 +76,7 @@ export default function Welcome({ auth, laravelVersion, phpVersion, dynamicTools
             color: 'teal',
             category: 'Code & Data Lifesavers',
             href: route('html-snippet'),
+            needsApiToken: false,
             icon: `<svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>`
         },
         {
@@ -77,6 +85,7 @@ export default function Welcome({ auth, laravelVersion, phpVersion, dynamicTools
             color: 'amber',
             category: 'Code & Data Lifesavers',
             href: route('pdf-image-extractor'),
+            needsApiToken: false,
             icon: `<svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-6 4h6m2 4H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>`
         },
         {
@@ -85,6 +94,7 @@ export default function Welcome({ auth, laravelVersion, phpVersion, dynamicTools
             color: 'blue',
             category: 'Career & Professional',
             href: route('jobseeker'),
+            needsApiToken: true,
             icon: `<svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>`
         }
     ];
@@ -96,7 +106,8 @@ export default function Welcome({ auth, laravelVersion, phpVersion, dynamicTools
             allTools.push({
                 ...tool,
                 icon: tool.icon.replace('w-6 h-6', 'w-4 h-4'), // Shrink SVGs slightly for minimalist look
-                href: route('dynamic-tool', { slug })
+                href: route('dynamic-tool', { slug }),
+                needsApiToken: true // every dynamic tool calls Claude via GenerateDynamicToolController
             });
         });
     }
@@ -261,8 +272,15 @@ export default function Welcome({ auth, laravelVersion, phpVersion, dynamicTools
                                                     setShowLoginModal(true);
                                                 }
                                             }}
-                                            className="group flex flex-col p-5 rounded-xl border border-[#222] bg-[#111] hover:bg-[#1A1A1A] hover:border-[#444] transition-all duration-200"
+                                            className="group relative flex flex-col overflow-hidden p-5 rounded-xl border border-[#222] bg-[#111] hover:bg-[#1A1A1A] hover:border-[#444] transition-all duration-200"
                                         >
+                                            {tool.needsApiToken && (
+                                                <div className="pointer-events-none absolute -right-9 -top-9 h-[72px] w-[72px]">
+                                                    <span className="absolute bottom-2.5 left-0 w-[100px] rotate-45 bg-amber-500 py-0.5 text-center text-[9px] font-bold uppercase tracking-wider text-black shadow">
+                                                        VIP
+                                                    </span>
+                                                </div>
+                                            )}
                                             <div className="flex items-center gap-3 mb-3">
                                                 <div 
                                                     className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${iconStyle}`}
