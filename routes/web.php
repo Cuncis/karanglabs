@@ -66,6 +66,34 @@ Route::get('/ai-tools', function (Request $request) {
     ]);
 })->middleware('auth')->name('home');
 
+// AI Tools — its own site on a separate subdomain (aitools.karanglabs.cloud in
+// production, aitools.localhost locally), not merged with Studio's pricing or
+// domain. Other routes below (planner, bundler, micro-copy, etc.) carry no
+// domain constraint, so they already resolve correctly on this host too.
+Route::domain(config('aitools.domain'))->group(function () {
+    Route::get('/', function () {
+        return Inertia::render('AiTools/Landing', [
+            'mainSiteUrl' => config('app.url'),
+        ]);
+    })->name('aitools.landing');
+
+    Route::middleware('auth')->group(function () {
+        Route::get('/tools', function (Request $request) {
+            if (! $request->user()->isAdmin()) {
+                return redirect()->route('aitools.landing');
+            }
+
+            return Inertia::render('Welcome', [
+                'canLogin' => Route::has('login'),
+                'canRegister' => Route::has('register'),
+                'laravelVersion' => Application::VERSION,
+                'phpVersion' => PHP_VERSION,
+                'dynamicTools' => config('karangtools'),
+            ]);
+        })->name('aitools.index');
+    });
+});
+
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
