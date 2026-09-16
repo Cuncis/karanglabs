@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\TrafficController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\WhitelabelController;
+use App\Http\Controllers\AiToolsCheckoutController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\ClearToolHistoryController;
 use App\Http\Controllers\GenerateChangelogController;
@@ -77,9 +78,14 @@ Route::domain(config('aitools.domain'))->group(function () {
         ]);
     })->name('aitools.landing');
 
+    // Subscription checkout (Mayar Membership) — public, same pattern as
+    // Studio's /checkout: collect buyer details, enroll them with Mayar, then
+    // wait for the webhook to actually grant access once it's paid.
+    Route::post('/subscribe', [AiToolsCheckoutController::class, 'store'])->name('aitools.subscribe');
+
     Route::middleware('auth')->group(function () {
         Route::get('/tools', function (Request $request) {
-            if (! $request->user()->isAdmin()) {
+            if (! $request->user()->isAdmin() && ! $request->user()->hasActiveAiToolsSubscription()) {
                 return redirect()->route('aitools.landing');
             }
 
@@ -91,6 +97,8 @@ Route::domain(config('aitools.domain'))->group(function () {
                 'dynamicTools' => config('karangtools'),
             ]);
         })->name('aitools.index');
+
+        Route::post('/subscription/cancel', [AiToolsCheckoutController::class, 'cancel'])->name('aitools.subscription.cancel');
     });
 });
 
@@ -98,107 +106,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
 
-    Route::get('/planner', function () {
-        $history = ToolHistory::where('user_id', auth()->id())
-            ->where('tool_slug', 'planner')
-            ->latest()
-            ->take(10)
-            ->get()
-            ->map(fn ($item) => [
-                'id' => $item->id,
-                'timestamp' => $item->created_at->toISOString(),
-                'title' => Str::limit($item->inputs['idea'] ?? '', 50) ?: 'New Plan',
-                ...$item->outputs,
-            ]);
-
-        return Inertia::render('Planner', ['history' => $history]);
-    })->name('planner');
-
+    // No AI call involved — free for any logged-in user, no subscription needed.
     Route::get('/bundler', function () {
         return Inertia::render('ContextBundler');
     })->name('bundler');
-
-    Route::get('/micro-copy', function () {
-        $history = ToolHistory::where('user_id', auth()->id())
-            ->where('tool_slug', 'micro-copy')
-            ->latest()
-            ->take(10)
-            ->get()
-            ->map(fn ($item) => [
-                'id' => $item->id,
-                'timestamp' => $item->created_at->toISOString(),
-                'original_prompt' => Str::limit($item->inputs['component_name'] ?? '', 50),
-                ...$item->outputs,
-            ]);
-
-        return Inertia::render('MicroCopy', ['history' => $history]);
-    })->name('micro-copy');
-
-    Route::get('/whisperer', function () {
-        $history = ToolHistory::where('user_id', auth()->id())
-            ->where('tool_slug', 'whisperer')
-            ->latest()
-            ->take(10)
-            ->get()
-            ->map(fn ($item) => [
-                'id' => $item->id,
-                'timestamp' => $item->created_at->toISOString(),
-                'original_prompt' => Str::limit($item->inputs['prompt'] ?? '', 50),
-                'type' => $item->inputs['type'] ?? 'regex',
-                ...$item->outputs,
-            ]);
-
-        return Inertia::render('Whisperer', ['history' => $history]);
-    })->name('whisperer');
-
-    Route::get('/changelog', function () {
-        $history = ToolHistory::where('user_id', auth()->id())
-            ->where('tool_slug', 'changelog')
-            ->latest()
-            ->take(10)
-            ->get()
-            ->map(fn ($item) => [
-                'id' => $item->id,
-                'timestamp' => $item->created_at->toISOString(),
-                'original_prompt' => Str::limit($item->inputs['commits'] ?? '', 50),
-                'audience' => $item->inputs['audience'] ?? 'users',
-                ...$item->outputs,
-            ]);
-
-        return Inertia::render('ChangelogGenerator', ['history' => $history]);
-    })->name('changelog');
-
-    Route::get('/socializer', function () {
-        $history = ToolHistory::where('user_id', auth()->id())
-            ->where('tool_slug', 'socializer')
-            ->latest()
-            ->take(10)
-            ->get()
-            ->map(fn ($item) => [
-                'id' => $item->id,
-                'timestamp' => $item->created_at->toISOString(),
-                'original_prompt' => Str::limit($item->inputs['content'] ?? '', 50),
-                ...$item->outputs,
-            ]);
-
-        return Inertia::render('Socializer', ['history' => $history]);
-    })->name('socializer');
-
-    Route::get('/jobseeker', function () {
-        $history = ToolHistory::where('user_id', auth()->id())
-            ->where('tool_slug', 'jobseeker')
-            ->latest()
-            ->take(10)
-            ->get()
-            ->map(fn ($item) => [
-                'id' => $item->id,
-                'timestamp' => $item->created_at->toISOString(),
-                'original_prompt' => Str::limit($item->inputs['background'] ?? '', 50),
-                ...$item->outputs,
-            ]);
-
-        return Inertia::render('JobSeeker', ['history' => $history]);
-    })->name('jobseeker');
 
     Route::get('/html-snippet', function () {
         return Inertia::render('ElementorSnippet');
@@ -209,24 +120,131 @@ Route::middleware('auth')->group(function () {
     })->name('pdf-image-extractor');
     Route::post('/pdf-image-extractor', PdfImageExtractorController::class)->name('pdf-image-extractor.store');
 
-    Route::get('/t/{slug}', function ($slug) {
-        $tools = config('karangtools');
-        if (! isset($tools[$slug])) {
-            abort(404);
-        }
+    // Everything below calls Claude per generation, so it's metered behind an
+    // active AI Tools subscription (either tier). Admins always pass through.
+    Route::middleware('subscribed')->group(function () {
+        Route::get('/planner', function () {
+            $history = ToolHistory::where('user_id', auth()->id())
+                ->where('tool_slug', 'planner')
+                ->latest()
+                ->take(10)
+                ->get()
+                ->map(fn ($item) => [
+                    'id' => $item->id,
+                    'timestamp' => $item->created_at->toISOString(),
+                    'title' => Str::limit($item->inputs['idea'] ?? '', 50) ?: 'New Plan',
+                    ...$item->outputs,
+                ]);
 
-        $history = ToolHistory::where('user_id', auth()->id())
-            ->where('tool_slug', $slug)
-            ->latest()
-            ->take(10)
-            ->get();
+            return Inertia::render('Planner', ['history' => $history]);
+        })->name('planner');
 
-        return Inertia::render('DynamicTool', [
-            'tool' => $tools[$slug],
-            'slug' => $slug,
-            'history' => $history,
-        ]);
-    })->name('dynamic-tool');
+        Route::get('/micro-copy', function () {
+            $history = ToolHistory::where('user_id', auth()->id())
+                ->where('tool_slug', 'micro-copy')
+                ->latest()
+                ->take(10)
+                ->get()
+                ->map(fn ($item) => [
+                    'id' => $item->id,
+                    'timestamp' => $item->created_at->toISOString(),
+                    'original_prompt' => Str::limit($item->inputs['component_name'] ?? '', 50),
+                    ...$item->outputs,
+                ]);
+
+            return Inertia::render('MicroCopy', ['history' => $history]);
+        })->name('micro-copy');
+
+        Route::get('/whisperer', function () {
+            $history = ToolHistory::where('user_id', auth()->id())
+                ->where('tool_slug', 'whisperer')
+                ->latest()
+                ->take(10)
+                ->get()
+                ->map(fn ($item) => [
+                    'id' => $item->id,
+                    'timestamp' => $item->created_at->toISOString(),
+                    'original_prompt' => Str::limit($item->inputs['prompt'] ?? '', 50),
+                    'type' => $item->inputs['type'] ?? 'regex',
+                    ...$item->outputs,
+                ]);
+
+            return Inertia::render('Whisperer', ['history' => $history]);
+        })->name('whisperer');
+
+        Route::get('/changelog', function () {
+            $history = ToolHistory::where('user_id', auth()->id())
+                ->where('tool_slug', 'changelog')
+                ->latest()
+                ->take(10)
+                ->get()
+                ->map(fn ($item) => [
+                    'id' => $item->id,
+                    'timestamp' => $item->created_at->toISOString(),
+                    'original_prompt' => Str::limit($item->inputs['commits'] ?? '', 50),
+                    'audience' => $item->inputs['audience'] ?? 'users',
+                    ...$item->outputs,
+                ]);
+
+            return Inertia::render('ChangelogGenerator', ['history' => $history]);
+        })->name('changelog');
+
+        Route::get('/socializer', function () {
+            $history = ToolHistory::where('user_id', auth()->id())
+                ->where('tool_slug', 'socializer')
+                ->latest()
+                ->take(10)
+                ->get()
+                ->map(fn ($item) => [
+                    'id' => $item->id,
+                    'timestamp' => $item->created_at->toISOString(),
+                    'original_prompt' => Str::limit($item->inputs['content'] ?? '', 50),
+                    ...$item->outputs,
+                ]);
+
+            return Inertia::render('Socializer', ['history' => $history]);
+        })->name('socializer');
+
+        Route::get('/jobseeker', function () {
+            $history = ToolHistory::where('user_id', auth()->id())
+                ->where('tool_slug', 'jobseeker')
+                ->latest()
+                ->take(10)
+                ->get()
+                ->map(fn ($item) => [
+                    'id' => $item->id,
+                    'timestamp' => $item->created_at->toISOString(),
+                    'original_prompt' => Str::limit($item->inputs['background'] ?? '', 50),
+                    ...$item->outputs,
+                ]);
+
+            return Inertia::render('JobSeeker', ['history' => $history]);
+        })->name('jobseeker');
+
+        Route::get('/t/{slug}', function ($slug) {
+            $tools = config('karangtools');
+            if (! isset($tools[$slug])) {
+                abort(404);
+            }
+
+            $history = ToolHistory::where('user_id', auth()->id())
+                ->where('tool_slug', $slug)
+                ->latest()
+                ->take(10)
+                ->get();
+
+            return Inertia::render('DynamicTool', [
+                'tool' => $tools[$slug],
+                'slug' => $slug,
+                'history' => $history,
+            ]);
+        })->name('dynamic-tool');
+
+        Route::get('/terminal-converter', [TerminalSnippetController::class, 'index'])->name('terminal-converter.index');
+        Route::post('/terminal-converter', [TerminalSnippetController::class, 'store'])->name('terminal-converter.store');
+        Route::get('/terminal-converter/{terminalSnippet}', [TerminalSnippetController::class, 'show'])->name('terminal-converter.show');
+        Route::delete('/terminal-converter/{terminalSnippet}', [TerminalSnippetController::class, 'destroy'])->name('terminal-converter.destroy');
+    });
 
     // Karanglabs Studio — the member product (gated by purchase).
     Route::get('/studio/locked', [StudioController::class, 'locked'])->name('studio.locked');
@@ -261,14 +279,10 @@ Route::middleware('auth')->group(function () {
         Route::delete('/engine-requests/{engineRequest}', [EngineRequestController::class, 'destroy'])->name('admin.engine-requests.destroy');
         Route::get('/whitelabel/download', WhitelabelController::class)->name('admin.whitelabel.download');
     });
-
-    Route::get('/terminal-converter', [TerminalSnippetController::class, 'index'])->name('terminal-converter.index');
-    Route::post('/terminal-converter', [TerminalSnippetController::class, 'store'])->name('terminal-converter.store');
-    Route::get('/terminal-converter/{terminalSnippet}', [TerminalSnippetController::class, 'show'])->name('terminal-converter.show');
-    Route::delete('/terminal-converter/{terminalSnippet}', [TerminalSnippetController::class, 'destroy'])->name('terminal-converter.destroy');
 });
 
-Route::prefix('api')->middleware('auth')->group(function () {
+// Metered AI generation endpoints — same subscription gate as their pages above.
+Route::prefix('api')->middleware(['auth', 'subscribed'])->group(function () {
     Route::post('/generate-questions', GenerateQuestionsController::class);
     Route::post('/generate-plan', GeneratePlanController::class);
     Route::post('/generate-micro-copy', GenerateMicroCopyController::class);
@@ -277,7 +291,10 @@ Route::prefix('api')->middleware('auth')->group(function () {
     Route::post('/generate-socializer', GenerateSocializerController::class);
     Route::post('/generate-job-seeker', GenerateJobSeekerController::class);
     Route::post('/shorten-hr-message', ShortenHrMessageController::class);
+    Route::post('/tools/{slug}/generate', GenerateDynamicToolController::class);
+});
 
+Route::prefix('api')->middleware('auth')->group(function () {
     Route::post('/save-job-profile', function (Request $request) {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -300,7 +317,6 @@ Route::prefix('api')->middleware('auth')->group(function () {
         return response()->json(['message' => 'Profile saved successfully']);
     });
 
-    Route::post('/tools/{slug}/generate', GenerateDynamicToolController::class);
     Route::delete('/tool-history/{slug}', ClearToolHistoryController::class);
 });
 

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Subscription;
 use App\Models\ToolHistory;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -12,6 +13,14 @@ use Tests\TestCase;
 class JobApplicationTailorTest extends TestCase
 {
     use RefreshDatabase;
+
+    private function subscribedUser(): User
+    {
+        $user = User::factory()->create();
+        Subscription::factory()->active()->create(['user_id' => $user->id]);
+
+        return $user;
+    }
 
     public function test_the_tool_is_registered_with_the_expected_shape(): void
     {
@@ -29,7 +38,7 @@ class JobApplicationTailorTest extends TestCase
 
     public function test_an_authenticated_user_can_view_the_tool_page(): void
     {
-        $this->actingAs(User::factory()->create())
+        $this->actingAs($this->subscribedUser())
             ->get(route('dynamic-tool', ['slug' => 'job-application-tailor']))
             ->assertOk()
             ->assertInertia(fn (AssertableInertia $page) => $page
@@ -53,7 +62,7 @@ class JobApplicationTailorTest extends TestCase
             ], 200),
         ]);
 
-        $user = User::factory()->create();
+        $user = $this->subscribedUser();
 
         $this->actingAs($user)
             ->postJson('/api/tools/job-application-tailor/generate', [

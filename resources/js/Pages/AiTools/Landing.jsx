@@ -1,4 +1,5 @@
 import { Head, Link, usePage } from '@inertiajs/react';
+import { useState } from 'react';
 
 const LOGO = 'https://cdn.libradigital.id/logo-01%20(1)%20(1).png';
 
@@ -13,6 +14,7 @@ const FLAGSHIP_TOOLS = [
 
 const PLANS = [
     {
+        tier: 'tools',
         name: 'AI Tools',
         price: 'Rp 49.000',
         period: '/bulan',
@@ -25,6 +27,7 @@ const PLANS = [
         ],
     },
     {
+        tier: 'bundle',
         name: 'AI Tools + Studio',
         price: 'Rp 69.000',
         period: '/bulan',
@@ -39,7 +42,36 @@ const PLANS = [
 ];
 
 export default function AiToolsLanding({ mainSiteUrl }) {
-    const { auth } = usePage().props;
+    const { auth, flash } = usePage().props;
+
+    const [checkoutTier, setCheckoutTier] = useState(null);
+    const [form, setForm] = useState({ name: '', email: '', phone: '' });
+    const [submitting, setSubmitting] = useState(false);
+    const [checkoutError, setCheckoutError] = useState('');
+    const [registered, setRegistered] = useState(false);
+
+    const openCheckout = (tier) => {
+        setForm({ name: '', email: '', phone: '' });
+        setCheckoutError('');
+        setRegistered(false);
+        setCheckoutTier(tier);
+    };
+
+    const closeCheckout = () => setCheckoutTier(null);
+
+    const submitCheckout = async (e) => {
+        e.preventDefault();
+        setSubmitting(true);
+        setCheckoutError('');
+        try {
+            await window.axios.post(route('aitools.subscribe'), { ...form, tier: checkoutTier });
+            setRegistered(true);
+        } catch (err) {
+            setCheckoutError(err?.response?.data?.message || 'Terjadi kesalahan. Coba lagi sebentar lagi.');
+        } finally {
+            setSubmitting(false);
+        }
+    };
 
     return (
         <>
@@ -71,12 +103,18 @@ export default function AiToolsLanding({ mainSiteUrl }) {
                     </div>
                 </header>
 
+                {flash?.error && (
+                    <div className="border-b border-amber-400/20 bg-amber-400/[0.06] px-6 py-3 text-center text-sm text-amber-300">
+                        {flash.error}
+                    </div>
+                )}
+
                 <main>
                     <section className="relative overflow-hidden border-b border-[#141414]">
                         <div className="pointer-events-none absolute -top-40 left-1/2 h-[500px] w-[800px] -translate-x-1/2 rounded-full bg-white/[0.03] blur-[120px]" />
                         <div className="relative mx-auto max-w-3xl px-6 py-24 text-center">
                             <span className="inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-xs font-medium tracking-wide text-emerald-300">
-                                Segera hadir
+                                Langganan bulanan
                             </span>
 
                             <h1 className="mt-6 text-4xl font-bold leading-[1.1] tracking-tight text-white sm:text-5xl">
@@ -92,7 +130,7 @@ export default function AiToolsLanding({ mainSiteUrl }) {
 
                     <section className="mx-auto max-w-6xl px-6 py-20">
                         <h2 className="text-center text-2xl font-bold tracking-tight text-white">
-                            Sebagian tools yang akan tersedia
+                            Sebagian tools yang tersedia
                         </h2>
                         <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                             {FLAGSHIP_TOOLS.map((tool) => (
@@ -116,7 +154,7 @@ export default function AiToolsLanding({ mainSiteUrl }) {
                             <div className="mt-12 grid gap-6 sm:grid-cols-2">
                                 {PLANS.map((plan) => (
                                     <div
-                                        key={plan.name}
+                                        key={plan.tier}
                                         className={`relative flex flex-col rounded-2xl border p-8 ${
                                             plan.tag
                                                 ? 'border-emerald-400/40 bg-emerald-400/[0.04]'
@@ -148,18 +186,14 @@ export default function AiToolsLanding({ mainSiteUrl }) {
 
                                         <button
                                             type="button"
-                                            disabled
-                                            className="mt-8 w-full cursor-not-allowed rounded-lg border border-[#333] py-2.5 text-sm font-semibold text-[#777]"
+                                            onClick={() => openCheckout(plan.tier)}
+                                            className="mt-8 w-full rounded-lg bg-emerald-400 py-2.5 text-sm font-semibold text-black transition-colors hover:bg-emerald-300"
                                         >
-                                            Segera Hadir
+                                            Langganan
                                         </button>
                                     </div>
                                 ))}
                             </div>
-
-                            <p className="mt-8 text-center text-xs text-[#666]">
-                                Langganan belum bisa diaktifkan. Halaman ini tampilkan rencana harga sebelum checkout dibuka.
-                            </p>
                         </div>
                     </section>
                 </main>
@@ -168,6 +202,85 @@ export default function AiToolsLanding({ mainSiteUrl }) {
                     <a href={mainSiteUrl} className="hover:text-white">← Kembali ke Karanglabs Studio</a>
                 </footer>
             </div>
+
+            {checkoutTier && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
+                    <div className="w-full max-w-md rounded-2xl border border-[#222] bg-[#111] p-6 text-[#EDEDED] shadow-2xl">
+                        {registered ? (
+                            <>
+                                <h3 className="text-lg font-semibold text-white">Pendaftaran diterima</h3>
+                                <p className="mt-3 text-sm leading-relaxed text-[#A1A1AA]">
+                                    Cek email kamu untuk instruksi pembayaran dari Mayar. Akses langganan otomatis
+                                    aktif begitu pembayaran pertama selesai.
+                                </p>
+                                <button
+                                    type="button"
+                                    onClick={closeCheckout}
+                                    className="mt-6 w-full rounded-lg bg-emerald-400 py-2.5 text-sm font-semibold text-black hover:bg-emerald-300"
+                                >
+                                    Tutup
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <div className="flex items-center justify-between">
+                                    <h3 className="text-lg font-semibold text-white">
+                                        Langganan {PLANS.find((p) => p.tier === checkoutTier)?.name}
+                                    </h3>
+                                    <button type="button" onClick={closeCheckout} className="text-[#666] hover:text-white">✕</button>
+                                </div>
+
+                                <form onSubmit={submitCheckout} className="mt-5 space-y-4">
+                                    <div>
+                                        <label className="block text-xs text-[#888]">Nama</label>
+                                        <input
+                                            type="text"
+                                            value={form.name}
+                                            onChange={(e) => setForm({ ...form, name: e.target.value })}
+                                            className="mt-1 w-full rounded-md border border-[#333] bg-[#0A0A0A] px-3 py-2 text-sm text-white focus:border-emerald-400 focus:outline-none"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs text-[#888]">Email</label>
+                                        <input
+                                            type="email"
+                                            required
+                                            value={form.email}
+                                            onChange={(e) => setForm({ ...form, email: e.target.value })}
+                                            className="mt-1 w-full rounded-md border border-[#333] bg-[#0A0A0A] px-3 py-2 text-sm text-white focus:border-emerald-400 focus:outline-none"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs text-[#888]">No. HP</label>
+                                        <input
+                                            type="tel"
+                                            required
+                                            value={form.phone}
+                                            onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                                            placeholder="08xxxxxxxxxx"
+                                            className="mt-1 w-full rounded-md border border-[#333] bg-[#0A0A0A] px-3 py-2 text-sm text-white focus:border-emerald-400 focus:outline-none"
+                                        />
+                                    </div>
+
+                                    {checkoutError && (
+                                        <p className="rounded-md border border-rose-400/30 bg-rose-400/10 px-3 py-2 text-sm text-rose-300">
+                                            {checkoutError}
+                                        </p>
+                                    )}
+
+                                    <button
+                                        type="submit"
+                                        disabled={submitting}
+                                        className="w-full rounded-lg bg-emerald-400 py-2.5 text-sm font-semibold text-black transition-colors hover:bg-emerald-300 disabled:opacity-60"
+                                    >
+                                        {submitting ? 'Memproses...' : 'Lanjutkan'}
+                                    </button>
+                                </form>
+                            </>
+                        )}
+                    </div>
+                </div>
+            )}
         </>
     );
 }

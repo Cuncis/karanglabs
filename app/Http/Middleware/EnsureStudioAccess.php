@@ -12,8 +12,8 @@ class EnsureStudioAccess
      * Handle an incoming request.
      *
      * Only buyers who have been granted Studio access may enter. Admins always
-     * pass through. Everyone else is sent to the "locked" screen explaining how
-     * to unlock the Studio.
+     * pass through, as do active AI Tools "Bundle" subscribers. Everyone else
+     * is sent to the "locked" screen explaining how to unlock the Studio.
      *
      * @param  Closure(Request): (Response)  $next
      */
@@ -21,7 +21,7 @@ class EnsureStudioAccess
     {
         $user = $request->user();
 
-        if (! $user || (! $user->isAdmin() && ! $user->hasStudioAccess())) {
+        if (! $user || (! $user->isAdmin() && ! $user->hasStudioAccess() && ! $user->hasActiveBundleSubscription())) {
             return redirect()->route('studio.locked');
         }
 

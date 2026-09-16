@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\EnsureAdmin;
+use App\Http\Middleware\EnsureAiToolsSubscription;
 use App\Http\Middleware\EnsureStudioAccess;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\TrackPageVisit;
@@ -28,6 +29,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'studio.access' => EnsureStudioAccess::class,
             'admin' => EnsureAdmin::class,
+            'subscribed' => EnsureAiToolsSubscription::class,
         ]);
 
         // Mayar posts its payment webhook server-to-server (no CSRF token).

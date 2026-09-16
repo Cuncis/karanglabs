@@ -59,6 +59,29 @@ class User extends Authenticatable
     }
 
     /**
+     * Whether the user has an active AI Tools subscription (either tier).
+     */
+    public function hasActiveAiToolsSubscription(): bool
+    {
+        return $this->subscriptions()
+            ->whereIn('tier', [Subscription::TIER_TOOLS, Subscription::TIER_BUNDLE])
+            ->where('status', Subscription::STATUS_ACTIVE)
+            ->exists();
+    }
+
+    /**
+     * Whether the user's Studio access comes from an active Bundle
+     * subscription rather than a lifetime Studio purchase.
+     */
+    public function hasActiveBundleSubscription(): bool
+    {
+        return $this->subscriptions()
+            ->where('tier', Subscription::TIER_BUNDLE)
+            ->where('status', Subscription::STATUS_ACTIVE)
+            ->exists();
+    }
+
+    /**
      * Whether this user is an owner/admin. True for the `admin` role, or for any
      * email listed in ADMIN_EMAILS (bootstrap override for the owner).
      */
@@ -111,5 +134,10 @@ class User extends Authenticatable
     public function engineRequests()
     {
         return $this->hasMany(EngineRequest::class);
+    }
+
+    public function subscriptions()
+    {
+        return $this->hasMany(Subscription::class);
     }
 }

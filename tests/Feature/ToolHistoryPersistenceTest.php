@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Subscription;
 use App\Models\ToolHistory;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -24,9 +25,17 @@ class ToolHistoryPersistenceTest extends TestCase
         ]);
     }
 
-    public function test_micro_copy_generation_is_saved_to_history_and_visible_on_any_device(): void
+    private function subscribedUser(): User
     {
         $user = User::factory()->create();
+        Subscription::factory()->active()->create(['user_id' => $user->id]);
+
+        return $user;
+    }
+
+    public function test_micro_copy_generation_is_saved_to_history_and_visible_on_any_device(): void
+    {
+        $user = $this->subscribedUser();
         $outputs = [
             'professional' => ['title' => 'Are you sure?'],
             'playful' => ['title' => 'Whoa, hold up!'],
@@ -56,7 +65,7 @@ class ToolHistoryPersistenceTest extends TestCase
 
     public function test_whisperer_generation_is_saved_to_history(): void
     {
-        $user = User::factory()->create();
+        $user = $this->subscribedUser();
         $this->fakeAnthropicResponse([
             'code_snippet' => '/^\\+\\d+$/',
             'language' => 'regex',
@@ -85,7 +94,7 @@ class ToolHistoryPersistenceTest extends TestCase
 
     public function test_changelog_generation_is_saved_to_history(): void
     {
-        $user = User::factory()->create();
+        $user = $this->subscribedUser();
         $this->fakeAnthropicResponse([
             'changelog' => '## v1.1.0\n- Fixed auth bug',
             'tweet' => 'We just shipped a fix! #buildinpublic',
@@ -111,7 +120,7 @@ class ToolHistoryPersistenceTest extends TestCase
 
     public function test_socializer_generation_is_saved_to_history(): void
     {
-        $user = User::factory()->create();
+        $user = $this->subscribedUser();
         $this->fakeAnthropicResponse([
             'instagram' => 'Big news! We shipped PDF export.',
             'twitter' => 'PDF export is live.',
@@ -140,7 +149,7 @@ class ToolHistoryPersistenceTest extends TestCase
 
     public function test_job_seeker_generation_is_saved_to_history(): void
     {
-        $user = User::factory()->create();
+        $user = $this->subscribedUser();
         $this->fakeAnthropicResponse([
             'resume' => 'Frontend Developer with 3 years of React experience.',
             'message' => 'Hi, I would love to join your team.',
@@ -167,7 +176,7 @@ class ToolHistoryPersistenceTest extends TestCase
 
     public function test_planner_generation_is_saved_to_history(): void
     {
-        $user = User::factory()->create();
+        $user = $this->subscribedUser();
         $this->fakeAnthropicResponse([
             'summary' => 'A productivity app for freelancers.',
             'feature_map' => '## Phase 1\n- Invoicing',
@@ -195,8 +204,8 @@ class ToolHistoryPersistenceTest extends TestCase
 
     public function test_history_does_not_leak_between_different_users(): void
     {
-        $owner = User::factory()->create();
-        $other = User::factory()->create();
+        $owner = $this->subscribedUser();
+        $other = $this->subscribedUser();
 
         ToolHistory::create([
             'user_id' => $owner->id,

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Subscription;
 use App\Models\ToolHistory;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -24,9 +25,17 @@ class DynamicToolTest extends TestCase
         ]);
     }
 
-    public function test_sql_to_eloquent_tool_was_removed(): void
+    private function subscribedUser(): User
     {
         $user = User::factory()->create();
+        Subscription::factory()->active()->create(['user_id' => $user->id]);
+
+        return $user;
+    }
+
+    public function test_sql_to_eloquent_tool_was_removed(): void
+    {
+        $user = $this->subscribedUser();
 
         $this->actingAs($user)->get(route('dynamic-tool', ['slug' => 'sql-to-eloquent']))
             ->assertNotFound();
@@ -34,7 +43,7 @@ class DynamicToolTest extends TestCase
 
     public function test_text_simplifier_page_renders_with_its_radio_input(): void
     {
-        $user = User::factory()->create();
+        $user = $this->subscribedUser();
 
         $this->actingAs($user)->get(route('dynamic-tool', ['slug' => 'text-simplifier']))
             ->assertInertia(fn (AssertableInertia $page) => $page
@@ -48,7 +57,7 @@ class DynamicToolTest extends TestCase
 
     public function test_text_simplifier_generation_saves_the_chosen_shorten_level_to_history(): void
     {
-        $user = User::factory()->create();
+        $user = $this->subscribedUser();
         $outputs = [
             'simplified' => 'This is easy to read now.',
             'changes' => '- Shortened it a lot\n- Simpler words',
