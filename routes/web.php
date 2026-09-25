@@ -120,6 +120,10 @@ Route::middleware('auth')->group(function () {
     })->name('pdf-image-extractor');
     Route::post('/pdf-image-extractor', PdfImageExtractorController::class)->name('pdf-image-extractor.store');
 
+    Route::get('/case-converter', function () {
+        return Inertia::render('CaseConverter');
+    })->name('case-converter');
+
     // Everything below calls Claude per generation, so it's metered behind an
     // active AI Tools subscription (either tier). Admins always pass through.
     Route::middleware('subscribed')->group(function () {

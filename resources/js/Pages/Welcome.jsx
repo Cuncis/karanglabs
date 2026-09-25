@@ -89,6 +89,15 @@ export default function Welcome({ auth, laravelVersion, phpVersion, dynamicTools
             icon: `<svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-6 4h6m2 4H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>`
         },
         {
+            title: 'Case Converter',
+            description: 'Convert text between Sentence case, lower case, UPPER CASE, Capitalized Case, aLtErNaTiNg cAsE, Title Case, InVeRsE CaSe, and KBBI Case (Indonesian title rules), instantly.',
+            color: 'purple',
+            category: 'Daily Productivity',
+            href: route('case-converter'),
+            needsApiToken: false,
+            icon: `<svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h10" /></svg>`
+        },
+        {
             title: 'Job Finder Pro',
             description: 'Turn your messy background details into a perfect, human-sounding resume and a compelling email for HR to help you land your dream job.',
             color: 'blue',
