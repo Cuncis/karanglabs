@@ -23,13 +23,13 @@ Return your response as a JSON object with exactly one key:
 Each question object must have:
 - "id": A unique string identifier (e.g. "q1", "q2", etc.)
 - "question": The question text
-- "type": Either "single" (radio select, pick one) or "multi" (multi-select, pick several) or "text" (free text input only)
+- "type": Either "multi" (checkbox multi-select, pick one or more) or "text" (free text input only). Every option-based question is a checkbox, never a single-select/radio question, so always use "multi" for option-based questions.
 - "options": An array of 4-6 short answer options (strings). Always include "Other" as the last option. For "text" type, set this to an empty array [].
 
-Guidelines for questions:
+Guidelines for questions (all "multi" type unless noted):
 1. First question should be about the target audience / who needs this
 2. Second question should be about the single most important user action
-3. Third question should ask which core features are must-haves (use "multi" type)
+3. Third question should ask which core features are must-haves
 4. Fourth question should explore the key advantage or differentiator
 5. Fifth question should focus on user retention / what brings users back
 

@@ -46,10 +46,6 @@ export default function StepWizard({ onSubmit, isGenerating }) {
         }));
     };
 
-    const handleSingleAnswer = (questionId, value) => {
-        setAnswers(prev => ({ ...prev, [questionId]: value }));
-    };
-
     const handleMultiAnswer = (questionId, value) => {
         setAnswers(prev => {
             const current = prev[questionId] || [];
@@ -76,10 +72,11 @@ export default function StepWizard({ onSubmit, isGenerating }) {
                 idea: formData.idea,
             });
             setQuestions(response.data.questions);
-            // Initialize answers for each question
+            // Initialize answers for each question — every option-based question
+            // is a checkbox (array), only free-text questions start as a string.
             const initialAnswers = {};
             response.data.questions.forEach(q => {
-                initialAnswers[q.id] = q.type === 'multi' ? [] : '';
+                initialAnswers[q.id] = q.type === 'text' ? '' : [];
             });
             setAnswers(initialAnswers);
             setOtherTexts({});
@@ -110,21 +107,22 @@ export default function StepWizard({ onSubmit, isGenerating }) {
             tech_stack = formData.techStack.custom;
         } else if (formData.techPreference === 'layer') {
             tech_stack = `Frontend: ${formData.techStack.frontend}, Backend: ${formData.techStack.backend}, Database: ${formData.techStack.database}, Deployment: ${formData.techStack.deployment}`;
+        } else if (formData.techPreference === 'vercel-demo') {
+            tech_stack = 'Frontend: React (Vite), Backend: Node.js serverless API routes (Vercel Functions), Database: SQLite for local/demo data (swap to Turso/LibSQL or Vercel Postgres if data needs to persist across deployments, since Vercel\'s filesystem is ephemeral), Deployment: Vercel. Prioritize a minimal, fast setup with a one-click deploy that is easy to spin up for a client demo.';
         }
 
-        // Compile answers with question text for context
+        // Compile answers with question text for context — every option-based
+        // question is answered as a checkbox array, only "text" stays a string.
         const answersArray = questions.map(q => {
             const answer = answers[q.id];
             const otherText = otherTexts[q.id] || '';
 
             let answerStr = '';
-            if (q.type === 'multi') {
-                const selected = (answer || []).map(a => a === 'Other' ? otherText : a).filter(Boolean);
-                answerStr = selected.join(', ');
-            } else if (q.type === 'text') {
+            if (q.type === 'text') {
                 answerStr = answer || '';
             } else {
-                answerStr = answer === 'Other' ? otherText : (answer || '');
+                const selected = (answer || []).map(a => a === 'Other' ? otherText : a).filter(Boolean);
+                answerStr = selected.join(', ');
             }
 
             return `${q.question} → ${answerStr || '(skipped)'}`;
@@ -138,12 +136,7 @@ export default function StepWizard({ onSubmit, isGenerating }) {
         });
     };
 
-    const isOptionSelected = (questionId, option, type) => {
-        if (type === 'multi') {
-            return (answers[questionId] || []).includes(option);
-        }
-        return answers[questionId] === option;
-    };
+    const isOptionSelected = (questionId, option) => (answers[questionId] || []).includes(option);
 
     return (
         <div className="w-full max-w-2xl mx-auto mt-8 bg-gray-900 rounded-xl shadow-xl border border-gray-800 p-6 md:p-8">
@@ -201,12 +194,13 @@ export default function StepWizard({ onSubmit, isGenerating }) {
                         <div className="space-y-3">
                             {[
                                 { id: 'auto', label: 'Let AI decide (Recommended)' },
+                                { id: 'vercel-demo', label: 'Vercel-Ready Demo', description: 'React + Node.js API routes + SQLite. A simple, fast stack for a client demo, one-click deploy to Vercel.' },
                                 { id: 'layer', label: 'Choose per layer' },
                                 { id: 'custom', label: 'I\'ll specify myself' },
                             ].map((option) => (
                                 <label
                                     key={option.id}
-                                    className={`flex items-center p-4 border rounded-lg cursor-pointer transition-colors ${
+                                    className={`flex items-start p-4 border rounded-lg cursor-pointer transition-colors ${
                                         formData.techPreference === option.id
                                             ? 'bg-[#7C3AED]/10 border-[#7C3AED]'
                                             : 'bg-gray-950 border-gray-700 hover:border-gray-500'
@@ -218,9 +212,14 @@ export default function StepWizard({ onSubmit, isGenerating }) {
                                         value={option.id}
                                         checked={formData.techPreference === option.id}
                                         onChange={(e) => updateForm('techPreference', e.target.value)}
-                                        className="text-[#7C3AED] focus:ring-[#7C3AED] bg-gray-900 border-gray-700"
+                                        className="mt-1 text-[#7C3AED] focus:ring-[#7C3AED] bg-gray-900 border-gray-700"
                                     />
-                                    <span className="ml-3 text-white font-medium">{option.label}</span>
+                                    <span className="ml-3">
+                                        <span className="block text-white font-medium">{option.label}</span>
+                                        {option.description && (
+                                            <span className="block text-xs text-gray-500 mt-0.5">{option.description}</span>
+                                        )}
+                                    </span>
                                 </label>
                             ))}
                         </div>
@@ -321,30 +320,34 @@ export default function StepWizard({ onSubmit, isGenerating }) {
                                     ) : (
                                         <>
                                             <div className="flex flex-wrap gap-2">
-                                                {q.options.map(opt => (
-                                                    <button
-                                                        key={opt}
-                                                        type="button"
-                                                        onClick={() =>
-                                                            q.type === 'multi'
-                                                                ? handleMultiAnswer(q.id, opt)
-                                                                : handleSingleAnswer(q.id, opt)
-                                                        }
-                                                        className={`px-4 py-2 rounded-full border text-sm transition-colors ${
-                                                            isOptionSelected(q.id, opt, q.type)
-                                                                ? 'bg-[#7C3AED] border-[#7C3AED] text-white'
-                                                                : 'bg-gray-950 border-gray-700 text-gray-400 hover:border-gray-500'
-                                                        }`}
-                                                    >
-                                                        {opt}
-                                                    </button>
-                                                ))}
+                                                {q.options.map(opt => {
+                                                    const selected = isOptionSelected(q.id, opt);
+
+                                                    return (
+                                                        <button
+                                                            key={opt}
+                                                            type="button"
+                                                            onClick={() => handleMultiAnswer(q.id, opt)}
+                                                            className={`flex items-center gap-2 px-4 py-2 rounded-full border text-sm transition-colors ${
+                                                                selected
+                                                                    ? 'bg-[#7C3AED] border-[#7C3AED] text-white'
+                                                                    : 'bg-gray-950 border-gray-700 text-gray-400 hover:border-gray-500'
+                                                            }`}
+                                                        >
+                                                            <span className={`flex h-4 w-4 flex-shrink-0 items-center justify-center rounded border ${selected ? 'border-white bg-white/20' : 'border-gray-600'}`}>
+                                                                {selected && (
+                                                                    <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                                                    </svg>
+                                                                )}
+                                                            </span>
+                                                            {opt}
+                                                        </button>
+                                                    );
+                                                })}
                                             </div>
                                             {/* Show "Other" text input when Other is selected */}
-                                            {(q.type === 'multi'
-                                                ? (answers[q.id] || []).includes('Other')
-                                                : answers[q.id] === 'Other'
-                                            ) && (
+                                            {(answers[q.id] || []).includes('Other') && (
                                                 <input
                                                     type="text"
                                                     value={otherTexts[q.id] || ''}
