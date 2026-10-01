@@ -47,25 +47,16 @@ function formatDate(value) {
     return new Date(value).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
-function initials(name) {
-    if (!name) return '?';
-    const parts = name.trim().split(/\s+/).filter(Boolean);
-    const first = parts[0]?.[0] || '';
-    const second = parts.length > 1 ? parts[1][0] : '';
-    return (first + second).toUpperCase();
-}
-
 export default function SalesNavigatorLeads() {
     const { leads, stats, filters, perPageOptions, hasPackage, flash } = usePage().props;
     const [savingId, setSavingId] = useState(null);
     const [savedId, setSavedId] = useState(null);
-    const [selectedLeadId, setSelectedLeadId] = useState(null);
+    const [expandedId, setExpandedId] = useState(null);
     const [confirming, setConfirming] = useState(null);
     const [deleting, setDeleting] = useState(false);
     const [showImport, setShowImport] = useState(false);
 
     const importForm = useForm({ html: '' });
-    const selectedLead = leads.data.find((l) => l.id === selectedLeadId) ?? null;
 
     const updateQuery = (changes) => {
         const next = { ...filters, ...changes };
@@ -115,10 +106,7 @@ export default function SalesNavigatorLeads() {
         setDeleting(true);
         router.delete(route('admin.sales-navigator-leads.destroy', { salesNavigatorLead: confirming.id }), {
             preserveScroll: true,
-            onSuccess: () => {
-                setConfirming(null);
-                setSelectedLeadId(null);
-            },
+            onSuccess: () => setConfirming(null),
             onFinish: () => setDeleting(false),
         });
     };
@@ -244,24 +232,95 @@ export default function SalesNavigatorLeads() {
                 </div>
             ) : (
                 <div className="mt-4 overflow-hidden rounded-xl border border-[#E4E4E7] dark:border-[#222] bg-white dark:bg-[#111]">
-                    <div className="divide-y divide-[#EBEBEE] dark:divide-[#1a1a1a]">
-                        {leads.data.map((lead, i) => (
-                            <button
-                                key={lead.id}
-                                type="button"
-                                onClick={() => setSelectedLeadId(lead.id)}
-                                className="flex w-full items-center gap-3 px-4 py-2.5 text-left transition-colors hover:bg-[#EFEFF1] dark:hover:bg-[#161616]"
-                            >
-                                <span className="w-7 flex-shrink-0 text-right text-xs text-[#9CA3AF] dark:text-[#555]">{leads.from + i}</span>
-                                <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-emerald-400/15 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
-                                    {initials(lead.name)}
-                                </span>
-                                <span className="min-w-0 flex-1 truncate text-sm font-medium text-[#18181B] dark:text-white">{lead.name}</span>
-                                <span className="flex-shrink-0 rounded-full border border-[#D4D4D8] px-2 py-0.5 text-[10px] font-medium text-[#71717A] dark:border-[#333] dark:text-[#888]">
-                                    {lead.connection_degree || '-'}
-                                </span>
-                            </button>
-                        ))}
+                    <div className="overflow-x-auto">
+                        <table className="w-full min-w-[960px] text-left text-sm">
+                            <thead className="border-b border-[#E4E4E7] dark:border-[#222] text-xs uppercase tracking-wider text-[#9CA3AF] dark:text-[#666]">
+                                <tr>
+                                    <th className="px-5 py-3 text-right font-medium">#</th>
+                                    <th className="px-5 py-3 font-medium">Lead</th>
+                                    <th className="px-5 py-3 font-medium">Company</th>
+                                    <th className="px-5 py-3 font-medium">Location</th>
+                                    <th className="px-5 py-3 font-medium">Status</th>
+                                    <th className="px-5 py-3 font-medium">Last contacted</th>
+                                    <th className="px-5 py-3 text-right font-medium">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-[#EBEBEE] dark:divide-[#1a1a1a]">
+                                {leads.data.map((lead, i) => (
+                                    <>
+                                        <tr key={lead.id} className="transition-colors hover:bg-[#EFEFF1] dark:hover:bg-[#161616]">
+                                            <td className="px-5 py-4 text-right text-xs text-[#9CA3AF] dark:text-[#555]">{leads.from + i}</td>
+                                            <td className="px-5 py-4">
+                                                <div className="font-medium text-[#18181B] dark:text-white">
+                                                    {lead.name}
+                                                    {lead.connection_degree && (
+                                                        <span className="ml-2 text-xs text-[#9CA3AF] dark:text-[#666]">{lead.connection_degree}</span>
+                                                    )}
+                                                </div>
+                                                <div className="text-xs text-[#9CA3AF] dark:text-[#666]">{lead.title || '-'}</div>
+                                                {lead.about && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setExpandedId(expandedId === lead.id ? null : lead.id)}
+                                                        className="mt-1 text-xs text-emerald-600 underline decoration-dotted dark:text-emerald-400"
+                                                    >
+                                                        {expandedId === lead.id ? 'Hide about' : 'Show about'}
+                                                    </button>
+                                                )}
+                                            </td>
+                                            <td className="px-5 py-4 text-[#52525B] dark:text-[#A1A1AA]">
+                                                {lead.company_url ? (
+                                                    <a href={lead.company_url} target="_blank" rel="noreferrer" className="hover:underline">{lead.company}</a>
+                                                ) : (lead.company || '-')}
+                                            </td>
+                                            <td className="px-5 py-4 text-xs text-[#71717A] dark:text-[#888]">{lead.location || '-'}</td>
+                                            <td className="px-5 py-4">
+                                                <div className="flex items-center gap-2">
+                                                    <select
+                                                        value={lead.status}
+                                                        disabled={savingId === lead.id}
+                                                        onChange={(e) => changeStatus(lead, e.target.value)}
+                                                        className={`rounded-md border px-2.5 py-1.5 text-xs font-medium focus:outline-none focus:ring-1 focus:ring-emerald-400/30 disabled:opacity-50 ${STATUS_BADGE[lead.status]}`}
+                                                    >
+                                                        {Object.entries(STATUS_LABELS).map(([value, label]) => (
+                                                            <option key={value} value={value}>{label}</option>
+                                                        ))}
+                                                    </select>
+                                                    {savedId === lead.id && <Check className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />}
+                                                </div>
+                                            </td>
+                                            <td className="px-5 py-4 text-xs text-[#71717A] dark:text-[#888]">{formatDate(lead.last_contacted_at)}</td>
+                                            <td className="px-5 py-4">
+                                                <div className="flex items-center justify-end gap-2">
+                                                    <a
+                                                        href={lead.profile_url}
+                                                        target="_blank"
+                                                        rel="noreferrer"
+                                                        className="inline-flex items-center gap-1.5 rounded-md border border-[#D4D4D8] dark:border-[#333] px-3 py-1.5 text-xs font-medium text-[#27272A] dark:text-[#EDEDED] transition-colors hover:border-[#A1A1AA] dark:hover:border-[#555] hover:bg-[#EFEFF1] dark:hover:bg-[#1A1A1A]"
+                                                    >
+                                                        <ExternalLink className="h-3.5 w-3.5" /> View Profile
+                                                    </a>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setConfirming(lead)}
+                                                        className="inline-flex items-center gap-1.5 rounded-md border border-red-300/60 dark:border-red-500/30 px-3 py-1.5 text-xs font-medium text-red-600 dark:text-red-400 transition-colors hover:bg-red-50 dark:hover:bg-red-500/10"
+                                                    >
+                                                        <Trash2 className="h-3.5 w-3.5" />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {expandedId === lead.id && lead.about && (
+                                            <tr key={`${lead.id}-about`}>
+                                                <td colSpan={7} className="bg-[#FAFAFA] px-5 py-4 text-xs leading-relaxed text-[#52525B] dark:bg-[#0D0D0D] dark:text-[#A1A1AA]">
+                                                    {lead.about}
+                                                </td>
+                                            </tr>
+                                        )}
+                                    </>
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
 
                     <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#E4E4E7] px-4 py-3 text-xs text-[#71717A] dark:border-[#222] dark:text-[#888]">
@@ -285,82 +344,6 @@ export default function SalesNavigatorLeads() {
                                 )
                             )}
                         </div>
-                    </div>
-                </div>
-            )}
-
-            {selectedLead && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setSelectedLeadId(null)} />
-                    <div className="relative w-full max-w-xs rounded-xl border border-[#E4E4E7] dark:border-[#222] bg-white dark:bg-[#111] p-4 shadow-xl">
-                        <div className="flex items-center gap-3">
-                            <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-emerald-400/15 text-sm font-semibold text-emerald-700 dark:text-emerald-300">
-                                {initials(selectedLead.name)}
-                            </span>
-                            <div className="min-w-0">
-                                <p className="truncate text-sm font-semibold text-[#18181B] dark:text-white">{selectedLead.name}</p>
-                                <p className="truncate text-xs text-[#71717A] dark:text-[#888]">{selectedLead.title || '-'}</p>
-                            </div>
-                        </div>
-
-                        <div className="mt-3 space-y-1 text-xs text-[#52525B] dark:text-[#A1A1AA]">
-                            <p className="truncate">
-                                {selectedLead.company_url ? (
-                                    <a href={selectedLead.company_url} target="_blank" rel="noreferrer" className="hover:underline">{selectedLead.company}</a>
-                                ) : (selectedLead.company || '-')}
-                            </p>
-                            <p className="truncate">{selectedLead.location || '-'}</p>
-                            <p>Last contacted: {formatDate(selectedLead.last_contacted_at)}</p>
-                        </div>
-
-                        {selectedLead.about && (
-                            <p className="mt-3 max-h-24 overflow-y-auto rounded-md bg-[#FAFAFA] p-2 text-[11px] leading-relaxed text-[#52525B] dark:bg-[#0D0D0D] dark:text-[#A1A1AA]">
-                                {selectedLead.about}
-                            </p>
-                        )}
-
-                        <div className="mt-3">
-                            <label className="mb-1 block text-[10px] font-medium uppercase tracking-wider text-[#9CA3AF] dark:text-[#666]">Status</label>
-                            <div className="flex items-center gap-2">
-                                <select
-                                    value={selectedLead.status}
-                                    disabled={savingId === selectedLead.id}
-                                    onChange={(e) => changeStatus(selectedLead, e.target.value)}
-                                    className={`w-full rounded-md border px-2 py-1.5 text-xs font-medium focus:outline-none focus:ring-1 focus:ring-emerald-400/30 disabled:opacity-50 ${STATUS_BADGE[selectedLead.status]}`}
-                                >
-                                    {Object.entries(STATUS_LABELS).map(([value, label]) => (
-                                        <option key={value} value={value}>{label}</option>
-                                    ))}
-                                </select>
-                                {savedId === selectedLead.id && <Check className="h-3.5 w-3.5 flex-shrink-0 text-emerald-600 dark:text-emerald-400" />}
-                            </div>
-                        </div>
-
-                        <div className="mt-4 flex items-center justify-between gap-2">
-                            <a
-                                href={selectedLead.profile_url}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="inline-flex items-center gap-1.5 rounded-md border border-[#D4D4D8] dark:border-[#333] px-2.5 py-1.5 text-xs font-medium text-[#27272A] dark:text-[#EDEDED] transition-colors hover:border-[#A1A1AA] dark:hover:border-[#555] hover:bg-[#EFEFF1] dark:hover:bg-[#1A1A1A]"
-                            >
-                                <ExternalLink className="h-3.5 w-3.5" /> Profile
-                            </a>
-                            <button
-                                type="button"
-                                onClick={() => setConfirming(selectedLead)}
-                                className="inline-flex items-center gap-1.5 rounded-md border border-red-300/60 dark:border-red-500/30 px-2.5 py-1.5 text-xs font-medium text-red-600 dark:text-red-400 transition-colors hover:bg-red-50 dark:hover:bg-red-500/10"
-                            >
-                                <Trash2 className="h-3.5 w-3.5" /> Remove
-                            </button>
-                        </div>
-
-                        <button
-                            type="button"
-                            onClick={() => setSelectedLeadId(null)}
-                            className="mt-3 w-full rounded-md border border-[#E4E4E7] px-3 py-1.5 text-xs font-medium text-[#52525B] transition-colors hover:bg-[#EFEFF1] dark:border-[#333] dark:text-[#A1A1AA] dark:hover:bg-[#1A1A1A]"
-                        >
-                            Close
-                        </button>
                     </div>
                 </div>
             )}

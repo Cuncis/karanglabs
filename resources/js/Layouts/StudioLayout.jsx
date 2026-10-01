@@ -27,6 +27,7 @@ export default function StudioLayout({ children, fullWidth = false }) {
     const { auth } = usePage().props;
     const currentUrl = usePage().url;
     const [open, setOpen] = useState(false);
+    const [showAccountMenu, setShowAccountMenu] = useState(false);
     const [theme, setTheme] = useState(
         () => (typeof document !== 'undefined' && document.documentElement.classList.contains('dark')) ? 'dark' : 'light',
     );
@@ -117,9 +118,13 @@ export default function StudioLayout({ children, fullWidth = false }) {
                 </div>
             </nav>
 
-            <div className="border-t border-[#EBEBEE] dark:border-[#1a1a1a] px-3 py-4">
-                <div className="mb-3 flex items-center gap-3 rounded-lg bg-white dark:bg-[#111] px-3 py-2.5">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-400/15 text-sm font-semibold text-emerald-700 dark:text-emerald-300">
+            <div className="relative border-t border-[#EBEBEE] dark:border-[#1a1a1a] px-3 py-4">
+                <button
+                    type="button"
+                    onClick={() => setShowAccountMenu((v) => !v)}
+                    className="flex w-full items-center gap-3 rounded-lg bg-white dark:bg-[#111] px-3 py-2.5 text-left transition-colors hover:bg-[#F0F0F0] dark:hover:bg-[#161616]"
+                >
+                    <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-emerald-400/15 text-sm font-semibold text-emerald-700 dark:text-emerald-300">
                         {auth?.user?.name?.charAt(0)?.toUpperCase() || 'U'}
                     </div>
                     <div className="min-w-0 flex-1">
@@ -128,38 +133,46 @@ export default function StudioLayout({ children, fullWidth = false }) {
                             <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /> {auth?.role || 'Member'} aktif
                         </div>
                     </div>
-                </div>
-                <div className="space-y-1">
-                    {auth?.isAdmin && (
-                        <>
-                            <Link href={route('admin.traffic')} className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-[#52525B] dark:text-[#A1A1AA] transition-colors hover:bg-[#EFEFF1] dark:hover:bg-[#141414] hover:text-[#18181B] dark:hover:text-white">
-                                <BarChart3 className="h-4 w-4 text-[#8A8A93] dark:text-[#666]" /> Traffic
-                            </Link>
-                            <Link href={route('admin.orders')} className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-[#52525B] dark:text-[#A1A1AA] transition-colors hover:bg-[#EFEFF1] dark:hover:bg-[#141414] hover:text-[#18181B] dark:hover:text-white">
-                                <ShieldCheck className="h-4 w-4 text-[#8A8A93] dark:text-[#666]" /> Orders
-                            </Link>
-                            <Link href={route('admin.users')} className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-[#52525B] dark:text-[#A1A1AA] transition-colors hover:bg-[#EFEFF1] dark:hover:bg-[#141414] hover:text-[#18181B] dark:hover:text-white">
-                                <UsersIcon className="h-4 w-4 text-[#8A8A93] dark:text-[#666]" /> Users
-                            </Link>
-                            <Link href={route('admin.engine-requests')} className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-[#52525B] dark:text-[#A1A1AA] transition-colors hover:bg-[#EFEFF1] dark:hover:bg-[#141414] hover:text-[#18181B] dark:hover:text-white">
-                                <Lightbulb className="h-4 w-4 text-[#8A8A93] dark:text-[#666]" /> Request Engine
-                            </Link>
+                </button>
 
-                            <div className="mt-3 mb-1 px-3 text-[10px] font-semibold uppercase tracking-wider text-[#B4B4BB] dark:text-[#555]">
-                                Admin Area
-                            </div>
-                            <Link href={route('admin.sales-navigator-leads')} className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-[#52525B] dark:text-[#A1A1AA] transition-colors hover:bg-[#EFEFF1] dark:hover:bg-[#141414] hover:text-[#18181B] dark:hover:text-white">
-                                <Contact className="h-4 w-4 text-[#8A8A93] dark:text-[#666]" /> Sales Navigator Leads
+                {showAccountMenu && (
+                    <>
+                        <div className="fixed inset-0 z-40" onClick={() => setShowAccountMenu(false)} />
+                        <div className="absolute inset-x-3 bottom-full z-50 mb-2 overflow-hidden rounded-lg border border-[#EBEBEE] dark:border-[#1a1a1a] bg-white dark:bg-[#111] p-1.5 shadow-lg">
+                            {auth?.isAdmin && (
+                                <>
+                                    <Link href={route('admin.traffic')} className="flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-xs text-[#52525B] dark:text-[#A1A1AA] transition-colors hover:bg-[#EFEFF1] dark:hover:bg-[#1A1A1A] hover:text-[#18181B] dark:hover:text-white">
+                                        <BarChart3 className="h-3.5 w-3.5 text-[#8A8A93] dark:text-[#666]" /> Traffic
+                                    </Link>
+                                    <Link href={route('admin.orders')} className="flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-xs text-[#52525B] dark:text-[#A1A1AA] transition-colors hover:bg-[#EFEFF1] dark:hover:bg-[#1A1A1A] hover:text-[#18181B] dark:hover:text-white">
+                                        <ShieldCheck className="h-3.5 w-3.5 text-[#8A8A93] dark:text-[#666]" /> Orders
+                                    </Link>
+                                    <Link href={route('admin.users')} className="flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-xs text-[#52525B] dark:text-[#A1A1AA] transition-colors hover:bg-[#EFEFF1] dark:hover:bg-[#1A1A1A] hover:text-[#18181B] dark:hover:text-white">
+                                        <UsersIcon className="h-3.5 w-3.5 text-[#8A8A93] dark:text-[#666]" /> Users
+                                    </Link>
+                                    <Link href={route('admin.engine-requests')} className="flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-xs text-[#52525B] dark:text-[#A1A1AA] transition-colors hover:bg-[#EFEFF1] dark:hover:bg-[#1A1A1A] hover:text-[#18181B] dark:hover:text-white">
+                                        <Lightbulb className="h-3.5 w-3.5 text-[#8A8A93] dark:text-[#666]" /> Request Engine
+                                    </Link>
+
+                                    <div className="mt-1.5 mb-1 px-2.5 text-[9px] font-semibold uppercase tracking-wider text-[#B4B4BB] dark:text-[#555]">
+                                        Admin Area
+                                    </div>
+                                    <Link href={route('admin.sales-navigator-leads')} className="flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-xs text-[#52525B] dark:text-[#A1A1AA] transition-colors hover:bg-[#EFEFF1] dark:hover:bg-[#1A1A1A] hover:text-[#18181B] dark:hover:text-white">
+                                        <Contact className="h-3.5 w-3.5 text-[#8A8A93] dark:text-[#666]" /> Sales Navigator Leads
+                                    </Link>
+
+                                    <div className="my-1.5 border-t border-[#EBEBEE] dark:border-[#1a1a1a]" />
+                                </>
+                            )}
+                            <Link href={route('profile.edit')} className="flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-xs text-[#52525B] dark:text-[#A1A1AA] transition-colors hover:bg-[#EFEFF1] dark:hover:bg-[#1A1A1A] hover:text-[#18181B] dark:hover:text-white">
+                                <User className="h-3.5 w-3.5 text-[#8A8A93] dark:text-[#666]" /> Akun
                             </Link>
-                        </>
-                    )}
-                    <Link href={route('profile.edit')} className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-[#52525B] dark:text-[#A1A1AA] transition-colors hover:bg-[#EFEFF1] dark:hover:bg-[#141414] hover:text-[#18181B] dark:hover:text-white">
-                        <User className="h-4 w-4 text-[#8A8A93] dark:text-[#666]" /> Akun
-                    </Link>
-                    <Link href={route('logout')} method="post" as="button" className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm text-[#52525B] dark:text-[#A1A1AA] transition-colors hover:bg-[#EFEFF1] dark:hover:bg-[#141414] hover:text-[#18181B] dark:hover:text-white">
-                        <LogOut className="h-4 w-4 text-[#8A8A93] dark:text-[#666]" /> Log out
-                    </Link>
-                </div>
+                            <Link href={route('logout')} method="post" as="button" className="flex w-full items-center gap-2.5 rounded-md px-2.5 py-1.5 text-left text-xs text-[#52525B] dark:text-[#A1A1AA] transition-colors hover:bg-[#EFEFF1] dark:hover:bg-[#1A1A1A] hover:text-[#18181B] dark:hover:text-white">
+                                <LogOut className="h-3.5 w-3.5 text-[#8A8A93] dark:text-[#666]" /> Log out
+                            </Link>
+                        </div>
+                    </>
+                )}
             </div>
         </div>
     );
