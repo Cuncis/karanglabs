@@ -14,25 +14,44 @@ use Inertia\Response;
 
 class SalesNavigatorLeadController extends Controller
 {
-    /**
-     * List every tracked LinkedIn Sales Navigator lead.
-     */
-    public function index(): Response
-    {
-        $leads = SalesNavigatorLead::latest()->get();
+    private const PER_PAGE_OPTIONS = [10, 25, 50];
 
+    private const DEFAULT_PER_PAGE = 25;
+
+    /**
+     * List every tracked LinkedIn Sales Navigator lead, paginated.
+     */
+    public function index(Request $request): Response
+    {
+        $perPage = (int) $request->query('per_page', self::DEFAULT_PER_PAGE);
+        if (! in_array($perPage, self::PER_PAGE_OPTIONS, true)) {
+            $perPage = self::DEFAULT_PER_PAGE;
+        }
+
+        $status = $request->query('status');
+        $status = in_array($status, SalesNavigatorLead::STATUSES, true) ? $status : null;
+
+        $leads = SalesNavigatorLead::query()
+            ->when($status, fn ($query) => $query->where('status', $status))
+            ->latest()
+            ->paginate($perPage)
+            ->withQueryString();
+
+        // Stats always reflect every lead, not just the current filter/page.
         return Inertia::render('Admin/SalesNavigatorLeads', [
             'leads' => $leads,
+            'filters' => ['status' => $status, 'per_page' => $perPage],
+            'perPageOptions' => self::PER_PAGE_OPTIONS,
             'stats' => [
-                'total' => $leads->count(),
-                'not_contacted' => $leads->where('status', SalesNavigatorLead::STATUS_NOT_CONTACTED)->count(),
-                'in_progress' => $leads->whereIn('status', [
+                'total' => SalesNavigatorLead::count(),
+                'not_contacted' => SalesNavigatorLead::where('status', SalesNavigatorLead::STATUS_NOT_CONTACTED)->count(),
+                'in_progress' => SalesNavigatorLead::whereIn('status', [
                     SalesNavigatorLead::STATUS_MESSAGE_1_SENT,
                     SalesNavigatorLead::STATUS_MESSAGE_2_SENT,
                     SalesNavigatorLead::STATUS_MESSAGE_3_SENT,
                     SalesNavigatorLead::STATUS_CONNECTED_NO_RESPONSE,
                 ])->count(),
-                'replied' => $leads->where('status', SalesNavigatorLead::STATUS_REPLIED)->count(),
+                'replied' => SalesNavigatorLead::where('status', SalesNavigatorLead::STATUS_REPLIED)->count(),
             ],
         ]);
     }

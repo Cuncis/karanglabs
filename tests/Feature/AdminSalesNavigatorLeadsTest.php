@@ -83,8 +83,62 @@ HTML;
             ->assertOk()
             ->assertInertia(fn (AssertableInertia $page) => $page
                 ->component('Admin/SalesNavigatorLeads')
-                ->has('leads', 2)
+                ->has('leads.data', 2)
+                ->where('leads.per_page', 25)
+                ->where('filters.per_page', 25)
+                ->where('perPageOptions', [10, 25, 50])
                 ->where('stats.total', 2));
+    }
+
+    public function test_the_leads_list_paginates_with_a_default_of_25_per_page(): void
+    {
+        SalesNavigatorLead::factory()->count(30)->create();
+        $admin = User::factory()->admin()->create();
+
+        $this->actingAs($admin)
+            ->get(route('admin.sales-navigator-leads'))
+            ->assertInertia(fn (AssertableInertia $page) => $page
+                ->has('leads.data', 25)
+                ->where('leads.total', 30)
+                ->where('leads.last_page', 2));
+    }
+
+    public function test_the_per_page_option_can_be_customized_to_10_or_50(): void
+    {
+        SalesNavigatorLead::factory()->count(30)->create();
+        $admin = User::factory()->admin()->create();
+
+        $this->actingAs($admin)
+            ->get(route('admin.sales-navigator-leads', ['per_page' => 10]))
+            ->assertInertia(fn (AssertableInertia $page) => $page
+                ->has('leads.data', 10)
+                ->where('filters.per_page', 10));
+    }
+
+    public function test_an_invalid_per_page_value_falls_back_to_the_default(): void
+    {
+        SalesNavigatorLead::factory()->count(5)->create();
+        $admin = User::factory()->admin()->create();
+
+        $this->actingAs($admin)
+            ->get(route('admin.sales-navigator-leads', ['per_page' => 999]))
+            ->assertInertia(fn (AssertableInertia $page) => $page
+                ->where('filters.per_page', 25));
+    }
+
+    public function test_the_status_filter_only_returns_matching_leads_but_stats_stay_global(): void
+    {
+        SalesNavigatorLead::factory()->count(2)->create(['status' => 'not_contacted']);
+        SalesNavigatorLead::factory()->count(3)->create(['status' => 'replied']);
+        $admin = User::factory()->admin()->create();
+
+        $this->actingAs($admin)
+            ->get(route('admin.sales-navigator-leads', ['status' => 'replied']))
+            ->assertInertia(fn (AssertableInertia $page) => $page
+                ->has('leads.data', 3)
+                ->where('leads.total', 3)
+                ->where('stats.total', 5)
+                ->where('stats.replied', 3));
     }
 
     public function test_an_admin_can_import_leads_from_pasted_html(): void

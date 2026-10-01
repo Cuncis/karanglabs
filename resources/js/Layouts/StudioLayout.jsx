@@ -23,7 +23,7 @@ function NavItem({ href, active, icon: Icon, children, accent }) {
     );
 }
 
-export default function StudioLayout({ children }) {
+export default function StudioLayout({ children, fullWidth = false }) {
     const { auth } = usePage().props;
     const currentUrl = usePage().url;
     const [open, setOpen] = useState(false);
@@ -206,7 +206,7 @@ export default function StudioLayout({ children }) {
             )}
 
             <main className="overflow-x-clip lg:pl-64">
-                <div className="mx-auto max-w-5xl px-5 py-8 lg:px-10 lg:py-12">
+                <div className={`mx-auto px-5 py-8 lg:px-10 lg:py-12 ${fullWidth ? 'max-w-none' : 'max-w-5xl'}`}>
                     {children}
                 </div>
             </main>
