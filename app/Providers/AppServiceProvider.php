@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Services\LeadFinder\CompanyDataProvider;
+use App\Services\LeadFinder\OverpassCompanyProvider;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
@@ -15,7 +17,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Swap this binding for a paid source later without touching the job
+        // or controller that type-hint CompanyDataProvider.
+        $this->app->bind(CompanyDataProvider::class, OverpassCompanyProvider::class);
     }
 
     /**

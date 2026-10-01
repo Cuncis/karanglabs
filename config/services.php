@@ -37,6 +37,26 @@ return [
 
     'anthropic' => [
         'key' => env('ANTHROPIC_API_KEY'),
+
+        // A cheaper/faster model for small, high-volume calls (like turning a
+        // segment into OpenStreetMap search tags). Defaults to the same model
+        // as everything else until a real fast-model id and its pricing below
+        // are set, so this stays safe to use out of the box.
+        'fast_model' => env('ANTHROPIC_FAST_MODEL', 'claude-sonnet-4-6'),
+
+        // Price per token in USD, by model, for cost_usd calculation on logged AI calls.
+        // See https://docs.anthropic.com/en/docs/about-claude/pricing for current rates.
+        'pricing' => [
+            'claude-sonnet-4-6' => [
+                'input_per_token' => 3 / 1_000_000,
+                'output_per_token' => 15 / 1_000_000,
+            ],
+        ],
+    ],
+
+    // Outbound fetches the Lead Finder tool makes against a user-supplied website.
+    'fetch' => [
+        'user_agent' => env('FETCH_USER_AGENT', 'KarangLabsLeadFinder/1.0 (+https://karanglabs.cloud)'),
     ],
 
     'telegram' => [

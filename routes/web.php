@@ -17,6 +17,9 @@ use App\Http\Controllers\GenerateQuestionsController;
 use App\Http\Controllers\GenerateSocializerController;
 use App\Http\Controllers\GenerateStudioBriefController;
 use App\Http\Controllers\GenerateWhispererController;
+use App\Http\Controllers\LeadFinderCompanyController;
+use App\Http\Controllers\LeadFinderController;
+use App\Http\Controllers\LeadFinderSegmentController;
 use App\Http\Controllers\MayarNotificationController;
 use App\Http\Controllers\PdfImageExtractorController;
 use App\Http\Controllers\ProfileController;
@@ -243,6 +246,21 @@ Route::middleware('auth')->group(function () {
                 'history' => $history,
             ]);
         })->name('dynamic-tool');
+
+        // Lead Finder — multi-step pipeline (reads a website, builds a verified
+        // company profile), so it gets a real controller + background job
+        // instead of the single-request generate-and-save pattern above.
+        Route::get('/lead-finder', [LeadFinderController::class, 'index'])->name('lead-finder');
+        Route::post('/lead-finder', [LeadFinderController::class, 'store'])->name('lead-finder.store');
+        Route::get('/lead-finder/{project}', [LeadFinderController::class, 'show'])->name('lead-finder.show');
+        Route::post('/lead-finder/{project}/segments', [LeadFinderSegmentController::class, 'store'])->name('lead-finder.segments.store');
+        Route::patch('/lead-finder/{project}/segments/{segment}', [LeadFinderSegmentController::class, 'update'])->name('lead-finder.segments.update');
+
+        Route::get('/lead-finder/{project}/segments/{segment}/companies', [LeadFinderCompanyController::class, 'index'])->name('lead-finder.companies.index');
+        Route::post('/lead-finder/{project}/segments/{segment}/companies/map', [LeadFinderCompanyController::class, 'storeMap'])->name('lead-finder.companies.map');
+        Route::post('/lead-finder/{project}/segments/{segment}/companies/paste', [LeadFinderCompanyController::class, 'storePaste'])->name('lead-finder.companies.paste');
+        Route::post('/lead-finder/{project}/segments/{segment}/companies/csv', [LeadFinderCompanyController::class, 'storeCsv'])->name('lead-finder.companies.csv');
+        Route::get('/lead-finder/{project}/segments/{segment}/companies/export', [LeadFinderCompanyController::class, 'export'])->name('lead-finder.companies.export');
 
         Route::get('/terminal-converter', [TerminalSnippetController::class, 'index'])->name('terminal-converter.index');
         Route::post('/terminal-converter', [TerminalSnippetController::class, 'store'])->name('terminal-converter.store');
