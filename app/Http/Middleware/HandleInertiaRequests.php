@@ -45,6 +45,10 @@ class HandleInertiaRequests extends Middleware
                 // One-time plaintext credential shown to an admin after a manual
                 // password set / failed resend, so they can hand it over.
                 'credential' => fn () => $request->session()->get('credential'),
+                // Names skipped as already-tracked duplicates on the last Sales
+                // Navigator import, so the admin can see exactly who was skipped
+                // instead of just a count.
+                'duplicateLeads' => fn () => $request->session()->get('duplicateLeads'),
             ],
         ];
     }

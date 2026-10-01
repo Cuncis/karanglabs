@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\EngineRequestController;
 use App\Http\Controllers\Admin\OrderController;
+use App\Http\Controllers\Admin\SalesNavigatorLeadController;
 use App\Http\Controllers\Admin\TrafficController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\WhitelabelController;
@@ -299,6 +300,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/engine-requests', [EngineRequestController::class, 'index'])->name('admin.engine-requests');
         Route::patch('/engine-requests/{engineRequest}', [EngineRequestController::class, 'update'])->name('admin.engine-requests.update');
         Route::delete('/engine-requests/{engineRequest}', [EngineRequestController::class, 'destroy'])->name('admin.engine-requests.destroy');
+        Route::get('/sales-navigator-leads', [SalesNavigatorLeadController::class, 'index'])->name('admin.sales-navigator-leads');
+        Route::post('/sales-navigator-leads/import', [SalesNavigatorLeadController::class, 'import'])->name('admin.sales-navigator-leads.import');
+        Route::patch('/sales-navigator-leads/{salesNavigatorLead}', [SalesNavigatorLeadController::class, 'update'])->name('admin.sales-navigator-leads.update');
+        Route::delete('/sales-navigator-leads/{salesNavigatorLead}', [SalesNavigatorLeadController::class, 'destroy'])->name('admin.sales-navigator-leads.destroy');
         Route::get('/whitelabel/download', WhitelabelController::class)->name('admin.whitelabel.download');
     });
 });
