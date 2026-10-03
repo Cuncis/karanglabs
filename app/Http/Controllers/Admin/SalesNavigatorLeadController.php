@@ -31,8 +31,16 @@ class SalesNavigatorLeadController extends Controller
         $status = $request->query('status');
         $status = in_array($status, SalesNavigatorLead::STATUSES, true) ? $status : null;
 
+        $search = trim((string) $request->query('search', ''));
+        $search = $search === '' ? null : $search;
+
         $leads = SalesNavigatorLead::query()
             ->when($status, fn ($query) => $query->where('status', $status))
+            ->when($search, fn ($query) => $query->where(
+                fn ($query) => $query
+                    ->where('name', 'like', "%{$search}%")
+                    ->orWhere('title', 'like', "%{$search}%")
+            ))
             ->latest()
             ->paginate($perPage)
             ->withQueryString();
@@ -40,7 +48,7 @@ class SalesNavigatorLeadController extends Controller
         // Stats always reflect every lead, not just the current filter/page.
         return Inertia::render('Admin/SalesNavigatorLeads', [
             'leads' => $leads,
-            'filters' => ['status' => $status, 'per_page' => $perPage],
+            'filters' => ['status' => $status, 'search' => $search, 'per_page' => $perPage],
             'perPageOptions' => self::PER_PAGE_OPTIONS,
             'stats' => [
                 'total' => SalesNavigatorLead::count(),

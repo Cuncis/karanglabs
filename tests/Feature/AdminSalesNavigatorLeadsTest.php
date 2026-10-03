@@ -141,6 +141,40 @@ HTML;
                 ->where('stats.replied', 3));
     }
 
+    public function test_the_search_filter_matches_by_name_or_title(): void
+    {
+        SalesNavigatorLead::factory()->create(['name' => 'Jane Example', 'title' => 'CEO']);
+        SalesNavigatorLead::factory()->create(['name' => 'Bob Sample', 'title' => 'CTO']);
+        SalesNavigatorLead::factory()->create(['name' => 'Alice Other', 'title' => 'Designer']);
+        $admin = User::factory()->admin()->create();
+
+        $this->actingAs($admin)
+            ->get(route('admin.sales-navigator-leads', ['search' => 'CTO']))
+            ->assertInertia(fn (AssertableInertia $page) => $page
+                ->has('leads.data', 1)
+                ->where('leads.data.0.name', 'Bob Sample')
+                ->where('filters.search', 'CTO'));
+
+        $this->actingAs($admin)
+            ->get(route('admin.sales-navigator-leads', ['search' => 'Jane']))
+            ->assertInertia(fn (AssertableInertia $page) => $page
+                ->has('leads.data', 1)
+                ->where('leads.data.0.name', 'Jane Example'));
+    }
+
+    public function test_the_search_filter_and_status_filter_combine(): void
+    {
+        SalesNavigatorLead::factory()->create(['name' => 'Jane Example', 'title' => 'CEO', 'status' => 'replied']);
+        SalesNavigatorLead::factory()->create(['name' => 'Jane Other', 'title' => 'CEO', 'status' => 'not_contacted']);
+        $admin = User::factory()->admin()->create();
+
+        $this->actingAs($admin)
+            ->get(route('admin.sales-navigator-leads', ['search' => 'Jane', 'status' => 'replied']))
+            ->assertInertia(fn (AssertableInertia $page) => $page
+                ->has('leads.data', 1)
+                ->where('leads.data.0.name', 'Jane Example'));
+    }
+
     public function test_an_admin_can_import_leads_from_pasted_html(): void
     {
         $admin = User::factory()->admin()->create();

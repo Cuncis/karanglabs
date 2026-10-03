@@ -1,6 +1,6 @@
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
-import { useState } from 'react';
-import { Users as UsersIcon, Clock, MessageSquare, CheckCircle2, Download, ExternalLink, Trash2, AlertTriangle, Check, Upload } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { Users as UsersIcon, Clock, MessageSquare, CheckCircle2, Download, ExternalLink, Trash2, AlertTriangle, Check, Upload, Search, ChevronDown } from 'lucide-react';
 import StudioLayout from '@/Layouts/StudioLayout';
 
 const STATUS_LABELS = {
@@ -55,6 +55,8 @@ export default function SalesNavigatorLeads() {
     const [confirming, setConfirming] = useState(null);
     const [deleting, setDeleting] = useState(false);
     const [showImport, setShowImport] = useState(false);
+    const [searchInput, setSearchInput] = useState(filters.search || '');
+    const searchDebounce = useRef(null);
 
     const importForm = useForm({ html: '' });
 
@@ -62,6 +64,7 @@ export default function SalesNavigatorLeads() {
         const next = { ...filters, ...changes };
         const params = {};
         if (next.status) params.status = next.status;
+        if (next.search) params.search = next.search;
         if (next.per_page) params.per_page = next.per_page;
 
         router.get(route('admin.sales-navigator-leads'), params, {
@@ -70,6 +73,22 @@ export default function SalesNavigatorLeads() {
             replace: true,
         });
     };
+
+    const handleSearchChange = (value) => {
+        setSearchInput(value);
+        if (searchDebounce.current) {
+            clearTimeout(searchDebounce.current);
+        }
+        searchDebounce.current = setTimeout(() => {
+            updateQuery({ search: value.trim() || undefined });
+        }, 400);
+    };
+
+    useEffect(() => () => {
+        if (searchDebounce.current) {
+            clearTimeout(searchDebounce.current);
+        }
+    }, []);
 
     const goToPage = (url) => {
         if (!url) return;
@@ -198,30 +217,48 @@ export default function SalesNavigatorLeads() {
             </div>
 
             <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
-                <div className="flex items-center gap-2">
-                    <label className="text-xs font-medium text-[#52525B] dark:text-[#A1A1AA]">Filter:</label>
-                    <select
-                        value={filters.status || 'all'}
-                        onChange={(e) => updateQuery({ status: e.target.value === 'all' ? undefined : e.target.value })}
-                        className="rounded-md border border-[#D4D4D8] dark:border-[#333] bg-white dark:bg-[#0D0D0D] px-2.5 py-1.5 text-xs text-[#27272A] dark:text-[#EDEDED] focus:border-emerald-400/50 focus:outline-none focus:ring-1 focus:ring-emerald-400/30"
-                    >
-                        <option value="all">All statuses</option>
-                        {Object.entries(STATUS_LABELS).map(([value, label]) => (
-                            <option key={value} value={value}>{label}</option>
-                        ))}
-                    </select>
+                <div className="flex flex-wrap items-center gap-3">
+                    <div className="relative">
+                        <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#9CA3AF] dark:text-[#666]" />
+                        <input
+                            type="text"
+                            value={searchInput}
+                            onChange={(e) => handleSearchChange(e.target.value)}
+                            placeholder="Search name or position (e.g. CEO, CTO)"
+                            className="w-64 rounded-md border border-[#D4D4D8] dark:border-[#333] bg-white dark:bg-[#0D0D0D] py-1.5 pl-8 pr-3 text-xs text-[#27272A] dark:text-[#EDEDED] focus:border-emerald-400/50 focus:outline-none focus:ring-1 focus:ring-emerald-400/30"
+                        />
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <label className="text-xs font-medium text-[#52525B] dark:text-[#A1A1AA]">Filter:</label>
+                        <div className="relative">
+                            <select
+                                value={filters.status || 'all'}
+                                onChange={(e) => updateQuery({ status: e.target.value === 'all' ? undefined : e.target.value })}
+                                className="appearance-none rounded-md border border-[#D4D4D8] dark:border-[#333] bg-white dark:bg-[#0D0D0D] py-1.5 pl-2.5 pr-7 text-xs text-[#27272A] dark:text-[#EDEDED] focus:border-emerald-400/50 focus:outline-none focus:ring-1 focus:ring-emerald-400/30"
+                            >
+                                <option value="all">All statuses</option>
+                                {Object.entries(STATUS_LABELS).map(([value, label]) => (
+                                    <option key={value} value={value}>{label}</option>
+                                ))}
+                            </select>
+                            <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#9CA3AF] dark:text-[#666]" />
+                        </div>
+                    </div>
                 </div>
                 <div className="flex items-center gap-2">
                     <label className="text-xs font-medium text-[#52525B] dark:text-[#A1A1AA]">Per page:</label>
-                    <select
-                        value={filters.per_page}
-                        onChange={(e) => updateQuery({ per_page: Number(e.target.value) })}
-                        className="rounded-md border border-[#D4D4D8] dark:border-[#333] bg-white dark:bg-[#0D0D0D] px-2.5 py-1.5 text-xs text-[#27272A] dark:text-[#EDEDED] focus:border-emerald-400/50 focus:outline-none focus:ring-1 focus:ring-emerald-400/30"
-                    >
-                        {perPageOptions.map((n) => (
-                            <option key={n} value={n}>{n}</option>
-                        ))}
-                    </select>
+                    <div className="relative">
+                        <select
+                            value={filters.per_page}
+                            onChange={(e) => updateQuery({ per_page: Number(e.target.value) })}
+                            className="appearance-none rounded-md border border-[#D4D4D8] dark:border-[#333] bg-white dark:bg-[#0D0D0D] py-1.5 pl-2.5 pr-7 text-xs text-[#27272A] dark:text-[#EDEDED] focus:border-emerald-400/50 focus:outline-none focus:ring-1 focus:ring-emerald-400/30"
+                        >
+                            {perPageOptions.map((n) => (
+                                <option key={n} value={n}>{n}</option>
+                            ))}
+                        </select>
+                        <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#9CA3AF] dark:text-[#666]" />
+                    </div>
                 </div>
             </div>
 
