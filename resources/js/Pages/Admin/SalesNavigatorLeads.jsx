@@ -212,33 +212,31 @@ export default function SalesNavigatorLeads() {
                 ))}
             </div>
 
-            <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
-                <div className="flex flex-wrap items-center gap-3">
+            <div className="mt-6 flex flex-wrap items-center gap-3">
+                <div className="relative min-w-[200px] flex-1">
+                    <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#9CA3AF] dark:text-[#666]" />
+                    <input
+                        type="text"
+                        value={searchInput}
+                        onChange={(e) => handleSearchChange(e.target.value)}
+                        placeholder="Search name or position (e.g. CEO, CTO)"
+                        className="w-full rounded-md border border-[#D4D4D8] dark:border-[#333] bg-white dark:bg-[#0D0D0D] py-1.5 pl-8 pr-3 text-xs text-[#27272A] dark:text-[#EDEDED] focus:border-emerald-400/50 focus:outline-none focus:ring-1 focus:ring-emerald-400/30"
+                    />
+                </div>
+                <div className="flex items-center gap-2">
+                    <label className="text-xs font-medium text-[#52525B] dark:text-[#A1A1AA]">Filter:</label>
                     <div className="relative">
-                        <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#9CA3AF] dark:text-[#666]" />
-                        <input
-                            type="text"
-                            value={searchInput}
-                            onChange={(e) => handleSearchChange(e.target.value)}
-                            placeholder="Search name or position (e.g. CEO, CTO)"
-                            className="w-64 rounded-md border border-[#D4D4D8] dark:border-[#333] bg-white dark:bg-[#0D0D0D] py-1.5 pl-8 pr-3 text-xs text-[#27272A] dark:text-[#EDEDED] focus:border-emerald-400/50 focus:outline-none focus:ring-1 focus:ring-emerald-400/30"
-                        />
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <label className="text-xs font-medium text-[#52525B] dark:text-[#A1A1AA]">Filter:</label>
-                        <div className="relative">
-                            <select
-                                value={filters.status || 'all'}
-                                onChange={(e) => updateQuery({ status: e.target.value === 'all' ? undefined : e.target.value })}
-                                className="appearance-none bg-none rounded-md border border-[#D4D4D8] dark:border-[#333] bg-white dark:bg-[#0D0D0D] py-1.5 pl-2.5 pr-7 text-xs text-[#27272A] dark:text-[#EDEDED] focus:border-emerald-400/50 focus:outline-none focus:ring-1 focus:ring-emerald-400/30"
-                            >
-                                <option value="all">All statuses</option>
-                                {Object.entries(STATUS_LABELS).map(([value, label]) => (
-                                    <option key={value} value={value}>{label}</option>
-                                ))}
-                            </select>
-                            <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#9CA3AF] dark:text-[#666]" />
-                        </div>
+                        <select
+                            value={filters.status || 'all'}
+                            onChange={(e) => updateQuery({ status: e.target.value === 'all' ? undefined : e.target.value })}
+                            className="appearance-none bg-none rounded-md border border-[#D4D4D8] dark:border-[#333] bg-white dark:bg-[#0D0D0D] py-1.5 pl-2.5 pr-7 text-xs text-[#27272A] dark:text-[#EDEDED] focus:border-emerald-400/50 focus:outline-none focus:ring-1 focus:ring-emerald-400/30"
+                        >
+                            <option value="all">All statuses</option>
+                            {Object.entries(STATUS_LABELS).map(([value, label]) => (
+                                <option key={value} value={value}>{label}</option>
+                            ))}
+                        </select>
+                        <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#9CA3AF] dark:text-[#666]" />
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
