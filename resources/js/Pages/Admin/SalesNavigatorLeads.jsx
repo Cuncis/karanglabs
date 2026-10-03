@@ -234,7 +234,7 @@ export default function SalesNavigatorLeads() {
                             <select
                                 value={filters.status || 'all'}
                                 onChange={(e) => updateQuery({ status: e.target.value === 'all' ? undefined : e.target.value })}
-                                className="appearance-none rounded-md border border-[#D4D4D8] dark:border-[#333] bg-white dark:bg-[#0D0D0D] py-1.5 pl-2.5 pr-7 text-xs text-[#27272A] dark:text-[#EDEDED] focus:border-emerald-400/50 focus:outline-none focus:ring-1 focus:ring-emerald-400/30"
+                                className="appearance-none bg-none rounded-md border border-[#D4D4D8] dark:border-[#333] bg-white dark:bg-[#0D0D0D] py-1.5 pl-2.5 pr-7 text-xs text-[#27272A] dark:text-[#EDEDED] focus:border-emerald-400/50 focus:outline-none focus:ring-1 focus:ring-emerald-400/30"
                             >
                                 <option value="all">All statuses</option>
                                 {Object.entries(STATUS_LABELS).map(([value, label]) => (
@@ -251,7 +251,7 @@ export default function SalesNavigatorLeads() {
                         <select
                             value={filters.per_page}
                             onChange={(e) => updateQuery({ per_page: Number(e.target.value) })}
-                            className="appearance-none rounded-md border border-[#D4D4D8] dark:border-[#333] bg-white dark:bg-[#0D0D0D] py-1.5 pl-2.5 pr-7 text-xs text-[#27272A] dark:text-[#EDEDED] focus:border-emerald-400/50 focus:outline-none focus:ring-1 focus:ring-emerald-400/30"
+                            className="appearance-none bg-none rounded-md border border-[#D4D4D8] dark:border-[#333] bg-white dark:bg-[#0D0D0D] py-1.5 pl-2.5 pr-7 text-xs text-[#27272A] dark:text-[#EDEDED] focus:border-emerald-400/50 focus:outline-none focus:ring-1 focus:ring-emerald-400/30"
                         >
                             {perPageOptions.map((n) => (
                                 <option key={n} value={n}>{n}</option>
