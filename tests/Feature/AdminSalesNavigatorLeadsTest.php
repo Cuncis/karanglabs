@@ -277,12 +277,12 @@ HTML;
         $lead = SalesNavigatorLead::factory()->create(['status' => 'not_contacted', 'last_contacted_at' => null]);
 
         $this->actingAs($admin)
-            ->patch(route('admin.sales-navigator-leads.update', $lead), ['status' => 'message_1_sent'])
+            ->patch(route('admin.sales-navigator-leads.update', $lead), ['status' => 'deal'])
             ->assertSessionHasNoErrors()
             ->assertRedirect();
 
         $lead->refresh();
-        $this->assertSame('message_1_sent', $lead->status);
+        $this->assertSame('deal', $lead->status);
         $this->assertNotNull($lead->last_contacted_at);
     }
 

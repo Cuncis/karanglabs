@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('connection_degree', 8)->nullable(); // '1st', '2nd', '3rd'
             $table->text('about')->nullable();
             $table->string('status', 32)->default('not_contacted');
-            // not_contacted, message_1_sent, message_2_sent, message_3_sent, connected_no_response, replied
+            // not_contacted, connected_no_response, replied, deal
             $table->text('notes')->nullable();
             $table->timestamp('last_contacted_at')->nullable();
             $table->foreignId('added_by')->nullable()->constrained('users')->nullOnDelete();

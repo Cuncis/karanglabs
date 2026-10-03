@@ -4,21 +4,17 @@ import { Users as UsersIcon, Clock, MessageSquare, CheckCircle2, Download, Exter
 import StudioLayout from '@/Layouts/StudioLayout';
 
 const STATUS_LABELS = {
-    not_contacted: 'Not Contacted',
-    message_1_sent: 'Message 1 Sent',
-    message_2_sent: 'Message 2 Sent',
-    message_3_sent: 'Message 3 Sent',
+    not_contacted: 'Not Connected',
     connected_no_response: 'Connected (No Response)',
     replied: 'Replied',
+    deal: 'Deal',
 };
 
 const STATUS_BADGE = {
     not_contacted: 'border-[#D4D4D8] dark:border-[#333] text-[#71717A] dark:text-[#888]',
-    message_1_sent: 'border-sky-400/30 bg-sky-400/10 text-sky-700 dark:text-sky-300',
-    message_2_sent: 'border-blue-400/30 bg-blue-400/10 text-blue-700 dark:text-blue-300',
-    message_3_sent: 'border-indigo-400/30 bg-indigo-400/10 text-indigo-700 dark:text-indigo-300',
     connected_no_response: 'border-amber-400/30 bg-amber-400/10 text-amber-700 dark:text-amber-300',
     replied: 'border-emerald-400/30 bg-emerald-400/10 text-emerald-700 dark:text-emerald-300',
+    deal: 'border-violet-400/30 bg-violet-400/10 text-violet-700 dark:text-violet-300',
 };
 
 function SubNav({ active, hasPackage }) {
@@ -132,7 +128,7 @@ export default function SalesNavigatorLeads() {
 
     const cards = [
         { icon: UsersIcon, label: 'Total leads', value: stats.total },
-        { icon: Clock, label: 'Not contacted', value: stats.not_contacted },
+        { icon: Clock, label: 'Not connected', value: stats.not_contacted },
         { icon: MessageSquare, label: 'In progress', value: stats.in_progress },
         { icon: CheckCircle2, label: 'Replied', value: stats.replied },
     ];

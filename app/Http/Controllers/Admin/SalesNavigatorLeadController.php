@@ -53,12 +53,7 @@ class SalesNavigatorLeadController extends Controller
             'stats' => [
                 'total' => SalesNavigatorLead::count(),
                 'not_contacted' => SalesNavigatorLead::where('status', SalesNavigatorLead::STATUS_NOT_CONTACTED)->count(),
-                'in_progress' => SalesNavigatorLead::whereIn('status', [
-                    SalesNavigatorLead::STATUS_MESSAGE_1_SENT,
-                    SalesNavigatorLead::STATUS_MESSAGE_2_SENT,
-                    SalesNavigatorLead::STATUS_MESSAGE_3_SENT,
-                    SalesNavigatorLead::STATUS_CONNECTED_NO_RESPONSE,
-                ])->count(),
+                'in_progress' => SalesNavigatorLead::where('status', SalesNavigatorLead::STATUS_CONNECTED_NO_RESPONSE)->count(),
                 'replied' => SalesNavigatorLead::where('status', SalesNavigatorLead::STATUS_REPLIED)->count(),
             ],
         ]);

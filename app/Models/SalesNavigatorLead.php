@@ -14,23 +14,17 @@ class SalesNavigatorLead extends Model
 
     public const STATUS_NOT_CONTACTED = 'not_contacted';
 
-    public const STATUS_MESSAGE_1_SENT = 'message_1_sent';
-
-    public const STATUS_MESSAGE_2_SENT = 'message_2_sent';
-
-    public const STATUS_MESSAGE_3_SENT = 'message_3_sent';
-
     public const STATUS_CONNECTED_NO_RESPONSE = 'connected_no_response';
 
     public const STATUS_REPLIED = 'replied';
 
+    public const STATUS_DEAL = 'deal';
+
     public const STATUSES = [
         self::STATUS_NOT_CONTACTED,
-        self::STATUS_MESSAGE_1_SENT,
-        self::STATUS_MESSAGE_2_SENT,
-        self::STATUS_MESSAGE_3_SENT,
         self::STATUS_CONNECTED_NO_RESPONSE,
         self::STATUS_REPLIED,
+        self::STATUS_DEAL,
     ];
 
     protected $fillable = [
