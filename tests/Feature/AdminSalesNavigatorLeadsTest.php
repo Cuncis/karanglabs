@@ -175,6 +175,53 @@ HTML;
                 ->where('leads.data.0.name', 'Jane Example'));
     }
 
+    public function test_the_headquarters_filter_buckets_leads_most_specific_first(): void
+    {
+        SalesNavigatorLead::factory()->create(['name' => 'Cali Lead', 'location' => 'San Francisco, California, United States']);
+        SalesNavigatorLead::factory()->create(['name' => 'US Lead', 'location' => 'Austin, Texas, United States']);
+        SalesNavigatorLead::factory()->create(['name' => 'England Lead', 'location' => 'London, England, United Kingdom']);
+        SalesNavigatorLead::factory()->create(['name' => 'Canada Lead', 'location' => 'Toronto, Ontario, Canada']);
+        SalesNavigatorLead::factory()->create(['name' => 'APAC Lead', 'location' => 'Singapore']);
+        SalesNavigatorLead::factory()->create(['name' => 'Other Lead', 'location' => 'Sao Paulo, Brazil']);
+        SalesNavigatorLead::factory()->create(['name' => 'No Location Lead', 'location' => null]);
+        $admin = User::factory()->admin()->create();
+
+        $cases = [
+            'california_us' => 'Cali Lead',
+            'united_states' => 'US Lead',
+            'england_uk' => 'England Lead',
+            'north_america' => 'Canada Lead',
+            'apac' => 'APAC Lead',
+        ];
+
+        foreach ($cases as $bucket => $expectedName) {
+            $this->actingAs($admin)
+                ->get(route('admin.sales-navigator-leads', ['headquarters' => $bucket]))
+                ->assertInertia(fn (AssertableInertia $page) => $page
+                    ->has('leads.data', 1)
+                    ->where('leads.data.0.name', $expectedName)
+                    ->where('filters.headquarters', $bucket));
+        }
+
+        $this->actingAs($admin)
+            ->get(route('admin.sales-navigator-leads', ['headquarters' => 'others']))
+            ->assertInertia(fn (AssertableInertia $page) => $page
+                ->has('leads.data', 2)
+                ->where('filters.headquarters', 'others'));
+    }
+
+    public function test_an_invalid_headquarters_bucket_is_ignored(): void
+    {
+        SalesNavigatorLead::factory()->count(3)->create();
+        $admin = User::factory()->admin()->create();
+
+        $this->actingAs($admin)
+            ->get(route('admin.sales-navigator-leads', ['headquarters' => 'mars']))
+            ->assertInertia(fn (AssertableInertia $page) => $page
+                ->has('leads.data', 3)
+                ->where('filters.headquarters', null));
+    }
+
     public function test_an_admin_can_import_leads_from_pasted_html(): void
     {
         $admin = User::factory()->admin()->create();

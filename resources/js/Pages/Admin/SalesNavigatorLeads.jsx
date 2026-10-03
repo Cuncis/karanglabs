@@ -44,7 +44,7 @@ function formatDate(value) {
 }
 
 export default function SalesNavigatorLeads() {
-    const { leads, stats, filters, perPageOptions, hasPackage, flash } = usePage().props;
+    const { leads, stats, filters, perPageOptions, headquartersOptions, hasPackage, flash } = usePage().props;
     const [savingId, setSavingId] = useState(null);
     const [savedId, setSavedId] = useState(null);
     const [expandedId, setExpandedId] = useState(null);
@@ -61,6 +61,7 @@ export default function SalesNavigatorLeads() {
         const params = {};
         if (next.status) params.status = next.status;
         if (next.search) params.search = next.search;
+        if (next.headquarters) params.headquarters = next.headquarters;
         if (next.per_page) params.per_page = next.per_page;
 
         router.get(route('admin.sales-navigator-leads'), params, {
@@ -233,6 +234,22 @@ export default function SalesNavigatorLeads() {
                         >
                             <option value="all">All statuses</option>
                             {Object.entries(STATUS_LABELS).map(([value, label]) => (
+                                <option key={value} value={value}>{label}</option>
+                            ))}
+                        </select>
+                        <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#9CA3AF] dark:text-[#666]" />
+                    </div>
+                </div>
+                <div className="flex items-center gap-2">
+                    <label className="text-xs font-medium text-[#52525B] dark:text-[#A1A1AA]">HQ:</label>
+                    <div className="relative">
+                        <select
+                            value={filters.headquarters || 'all'}
+                            onChange={(e) => updateQuery({ headquarters: e.target.value === 'all' ? undefined : e.target.value })}
+                            className="appearance-none bg-none rounded-md border border-[#D4D4D8] dark:border-[#333] bg-white dark:bg-[#0D0D0D] py-1.5 pl-2.5 pr-7 text-xs text-[#27272A] dark:text-[#EDEDED] focus:border-emerald-400/50 focus:outline-none focus:ring-1 focus:ring-emerald-400/30"
+                        >
+                            <option value="all">All locations</option>
+                            {Object.entries(headquartersOptions).map(([value, label]) => (
                                 <option key={value} value={value}>{label}</option>
                             ))}
                         </select>

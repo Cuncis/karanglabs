@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\SalesNavigatorLead;
+use App\Services\SalesNavigator\LeadHeadquartersFilter;
 use App\Services\SalesNavigator\LinkedInSalesNavigatorParser;
 use App\Services\SalesNavigator\SalesNavigatorLeadImporter;
 use Illuminate\Http\RedirectResponse;
@@ -34,6 +35,9 @@ class SalesNavigatorLeadController extends Controller
         $search = trim((string) $request->query('search', ''));
         $search = $search === '' ? null : $search;
 
+        $headquarters = $request->query('headquarters');
+        $headquarters = in_array($headquarters, LeadHeadquartersFilter::BUCKETS, true) ? $headquarters : null;
+
         $leads = SalesNavigatorLead::query()
             ->when($status, fn ($query) => $query->where('status', $status))
             ->when($search, fn ($query) => $query->where(
@@ -41,6 +45,7 @@ class SalesNavigatorLeadController extends Controller
                     ->where('name', 'like', "%{$search}%")
                     ->orWhere('title', 'like', "%{$search}%")
             ))
+            ->when($headquarters, fn ($query) => LeadHeadquartersFilter::apply($query, $headquarters))
             ->latest()
             ->paginate($perPage)
             ->withQueryString();
@@ -48,8 +53,9 @@ class SalesNavigatorLeadController extends Controller
         // Stats always reflect every lead, not just the current filter/page.
         return Inertia::render('Admin/SalesNavigatorLeads', [
             'leads' => $leads,
-            'filters' => ['status' => $status, 'search' => $search, 'per_page' => $perPage],
+            'filters' => ['status' => $status, 'search' => $search, 'headquarters' => $headquarters, 'per_page' => $perPage],
             'perPageOptions' => self::PER_PAGE_OPTIONS,
+            'headquartersOptions' => LeadHeadquartersFilter::LABELS,
             'stats' => [
                 'total' => SalesNavigatorLead::count(),
                 'not_contacted' => SalesNavigatorLead::where('status', SalesNavigatorLead::STATUS_NOT_CONTACTED)->count(),
