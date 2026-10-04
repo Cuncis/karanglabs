@@ -24,19 +24,22 @@ class UserController extends Controller
     {
         $adminEmails = config('studio.admin_emails', []);
 
-        $users = User::latest()->limit(200)->get([
-            'id', 'name', 'email', 'role', 'has_studio_access', 'license_key', 'created_at',
-        ])->map(fn (User $user): array => [
-            'id' => $user->id,
-            'name' => $user->name,
-            'email' => $user->email,
-            'role' => $user->role,
-            'role_label' => $user->roleLabel(),
-            'is_email_admin' => in_array($user->email, $adminEmails, true),
-            'has_studio_access' => (bool) $user->has_studio_access,
-            'license_key' => $user->license_key,
-            'created_at' => $user->created_at,
-        ]);
+        $users = User::latest()
+            ->withMax('pageVisits', 'visited_at')
+            ->limit(200)
+            ->get(['id', 'name', 'email', 'role', 'has_studio_access', 'license_key', 'created_at'])
+            ->map(fn (User $user): array => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role,
+                'role_label' => $user->roleLabel(),
+                'is_email_admin' => in_array($user->email, $adminEmails, true),
+                'has_studio_access' => (bool) $user->has_studio_access,
+                'license_key' => $user->license_key,
+                'created_at' => $user->created_at,
+                'last_active_at' => $user->page_visits_max_visited_at,
+            ]);
 
         return Inertia::render('Admin/Users', [
             'users' => $users,

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\PageVisit;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
@@ -37,6 +38,34 @@ class AdminUsersTest extends TestCase
                 ->where('stats.total', 4)
                 ->where('stats.admin', 1)
                 ->has('users', 4));
+    }
+
+    public function test_the_users_list_includes_each_users_latest_activity(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $member = User::factory()->create();
+
+        PageVisit::factory()->create(['user_id' => $member->id, 'visited_at' => now()->subDays(5)]);
+        PageVisit::factory()->create(['user_id' => $member->id, 'visited_at' => now()->subDay()]);
+
+        $response = $this->actingAs($admin)->get(route('admin.users'))->assertOk();
+        $users = $response->viewData('page')['props']['users'];
+        $memberRow = collect($users)->firstWhere('id', $member->id);
+
+        $this->assertNotNull($memberRow['last_active_at']);
+        $this->assertTrue(now()->subDay()->isSameMinute($memberRow['last_active_at']));
+    }
+
+    public function test_a_user_with_no_recorded_visits_has_a_null_last_active_at(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $member = User::factory()->create();
+
+        $response = $this->actingAs($admin)->get(route('admin.users'))->assertOk();
+        $users = $response->viewData('page')['props']['users'];
+        $memberRow = collect($users)->firstWhere('id', $member->id);
+
+        $this->assertNull($memberRow['last_active_at']);
     }
 
     public function test_an_admin_can_update_a_user_name_and_email(): void

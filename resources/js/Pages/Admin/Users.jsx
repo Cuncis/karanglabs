@@ -130,13 +130,14 @@ export default function Users() {
             </div>
 
             <div className="mt-8 overflow-x-auto rounded-xl border border-[#E4E4E7] dark:border-[#222] bg-white dark:bg-[#111]">
-                <table className="w-full min-w-[760px] text-left text-sm">
+                <table className="w-full min-w-[820px] text-left text-sm">
                     <thead className="border-b border-[#E4E4E7] dark:border-[#222] text-xs uppercase tracking-wider text-[#9CA3AF] dark:text-[#666]">
                         <tr>
                             <th className="px-5 py-3 font-medium">User</th>
                             <th className="px-5 py-3 font-medium">Level</th>
                             <th className="px-5 py-3 font-medium">License</th>
                             <th className="px-5 py-3 font-medium">Bergabung</th>
+                            <th className="px-5 py-3 font-medium">Aktivitas terakhir</th>
                             <th className="px-5 py-3 font-medium">Ubah level</th>
                             <th className="px-5 py-3 text-right font-medium">Aksi</th>
                         </tr>
@@ -159,6 +160,7 @@ export default function Users() {
                                     </td>
                                     <td className="px-5 py-4 font-mono text-xs text-[#52525B] dark:text-[#A1A1AA]">{u.license_key || '-'}</td>
                                     <td className="px-5 py-4 text-xs text-[#71717A] dark:text-[#888]">{formatDate(u.created_at)}</td>
+                                    <td className="px-5 py-4 text-xs text-[#71717A] dark:text-[#888]">{formatDate(u.last_active_at)}</td>
                                     <td className="px-5 py-4">
                                         {isSelf ? (
                                             <span className="text-xs text-[#B4B4BB] dark:text-[#555]">-</span>
@@ -177,22 +179,22 @@ export default function Users() {
                                         )}
                                     </td>
                                     <td className="px-5 py-4">
-                                        <div className="flex items-center justify-end gap-2">
+                                        <div className="flex items-center justify-end gap-1.5">
                                             <button
                                                 type="button"
                                                 onClick={() => openEdit(u)}
-                                                className="inline-flex items-center gap-1.5 rounded-md border border-[#D4D4D8] dark:border-[#333] px-3 py-1.5 text-xs font-medium text-[#27272A] dark:text-[#EDEDED] transition-colors hover:border-[#A1A1AA] dark:hover:border-[#555] hover:bg-[#EFEFF1] dark:hover:bg-[#1A1A1A]"
+                                                className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-[#D4D4D8] dark:border-[#333] text-[#27272A] dark:text-[#EDEDED] transition-colors hover:border-[#A1A1AA] dark:hover:border-[#555] hover:bg-[#EFEFF1] dark:hover:bg-[#1A1A1A]"
                                                 title="Edit nama & email"
                                             >
-                                                <Pencil className="h-3.5 w-3.5" /> Edit
+                                                <Pencil className="h-3.5 w-3.5" />
                                             </button>
                                             <button
                                                 type="button"
                                                 onClick={() => openPassword(u)}
-                                                className="inline-flex items-center gap-1.5 rounded-md border border-[#D4D4D8] dark:border-[#333] px-3 py-1.5 text-xs font-medium text-[#27272A] dark:text-[#EDEDED] transition-colors hover:border-[#A1A1AA] dark:hover:border-[#555] hover:bg-[#EFEFF1] dark:hover:bg-[#1A1A1A]"
+                                                className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-[#D4D4D8] dark:border-[#333] text-[#27272A] dark:text-[#EDEDED] transition-colors hover:border-[#A1A1AA] dark:hover:border-[#555] hover:bg-[#EFEFF1] dark:hover:bg-[#1A1A1A]"
                                                 title="Set / ganti password"
                                             >
-                                                <Lock className="h-3.5 w-3.5" /> Password
+                                                <Lock className="h-3.5 w-3.5" />
                                             </button>
                                             {isProtected ? (
                                                 <span className="text-xs text-[#B4B4BB] dark:text-[#555]">-</span>
@@ -200,10 +202,10 @@ export default function Users() {
                                                 <button
                                                     type="button"
                                                     onClick={() => setConfirming(u)}
-                                                    className="inline-flex items-center gap-1.5 rounded-md border border-red-300/60 dark:border-red-500/30 px-3 py-1.5 text-xs font-medium text-red-600 dark:text-red-400 transition-colors hover:bg-red-50 dark:hover:bg-red-500/10"
+                                                    className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-red-300/60 dark:border-red-500/30 text-red-600 dark:text-red-400 transition-colors hover:bg-red-50 dark:hover:bg-red-500/10"
                                                     title="Hapus user"
                                                 >
-                                                    <Trash2 className="h-3.5 w-3.5" /> Hapus
+                                                    <Trash2 className="h-3.5 w-3.5" />
                                                 </button>
                                             )}
                                         </div>

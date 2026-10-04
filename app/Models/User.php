@@ -140,4 +140,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Subscription::class);
     }
+
+    public function pageVisits()
+    {
+        return $this->hasMany(PageVisit::class);
+    }
 }
