@@ -73,16 +73,15 @@ class TerminalSnippetController extends Controller
             ->with('success', 'Snippet saved successfully.');
     }
 
+    /**
+     * Public, read-only view. Anyone with the UUID link can open it; only the
+     * owner gets the management actions.
+     */
     public function show(TerminalSnippet $terminalSnippet)
     {
-        // Check if the snippet belongs to the user, or maybe it's public.
-        // If we want it to be private to the user:
-        if ($terminalSnippet->user_id !== auth()->id()) {
-            abort(403);
-        }
-
         return Inertia::render('TerminalSnippets/Show', [
-            'snippet' => $terminalSnippet,
+            'snippet' => $terminalSnippet->only(['slug', 'title', 'content', 'created_at']),
+            'isOwner' => auth()->check() && $terminalSnippet->user_id === auth()->id(),
         ]);
     }
 

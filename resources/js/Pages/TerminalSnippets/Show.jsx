@@ -1,13 +1,36 @@
 import { Head, Link, useForm } from '@inertiajs/react';
-import { ArrowLeft, Trash2, Copy, Check } from 'lucide-react';
+import { ArrowLeft, Trash2, Copy, Check, Link2 } from 'lucide-react';
 import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
 
-export default function Show({ auth, snippet }) {
+const BLOCKED_TAGS = new Set(['script', 'iframe', 'object', 'embed', 'style', 'form', 'link', 'meta', 'base']);
+
+// Public pages render AI output as HTML, so strip anything executable.
+function rehypeSanitizeLite() {
+    const clean = (node) => {
+        if (!node.children) return;
+        node.children = node.children.filter((child) => !(child.type === 'element' && BLOCKED_TAGS.has(child.tagName)));
+        node.children.forEach((child) => {
+            if (child.type === 'element' && child.properties) {
+                for (const key of Object.keys(child.properties)) {
+                    const value = String(child.properties[key] ?? '');
+                    if (/^on/i.test(key) || (/^(href|src|action|formAction|xlinkHref)$/i.test(key) && /^\s*(javascript|data|vbscript):/i.test(value.replace(/[\u0000-\u0020]/g, '')))) {
+                        delete child.properties[key];
+                    }
+                }
+            }
+            clean(child);
+        });
+    };
+    return (tree) => clean(tree);
+}
+
+export default function Show({ snippet, isOwner }) {
     const { delete: destroy, processing } = useForm();
     const [copied, setCopied] = useState(false);
+    const [linkCopied, setLinkCopied] = useState(false);
 
     const handleDelete = () => {
         if (confirm('Are you sure you want to permanently delete this archive?')) {
@@ -19,6 +42,12 @@ export default function Show({ auth, snippet }) {
         navigator.clipboard.writeText(snippet.content);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
+    };
+
+    const handleCopyLink = () => {
+        navigator.clipboard.writeText(route('terminal-converter.show', snippet.slug));
+        setLinkCopied(true);
+        setTimeout(() => setLinkCopied(false), 2000);
     };
 
     let displayContent = snippet.content;
@@ -34,13 +63,17 @@ export default function Show({ auth, snippet }) {
             <main className="container mx-auto px-4 py-12 md:py-20 max-w-6xl">
                 {/* Header Actions */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-                    <Link 
-                        href={route('terminal-converter.index')} 
-                        className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors text-sm font-medium bg-gray-900 hover:bg-gray-800 px-4 py-2 rounded-lg border border-gray-800 w-fit"
-                    >
-                        <ArrowLeft className="w-4 h-4" />
-                        Back to Converter
-                    </Link>
+                    {isOwner ? (
+                        <Link 
+                            href={route('terminal-converter.index')} 
+                            className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors text-sm font-medium bg-gray-900 hover:bg-gray-800 px-4 py-2 rounded-lg border border-gray-800 w-fit"
+                        >
+                            <ArrowLeft className="w-4 h-4" />
+                            Back to Converter
+                        </Link>
+                    ) : (
+                        <span className="text-sm text-gray-500">Shared terminal output (read-only)</span>
+                    )}
 
                     <div className="flex items-center gap-3">
                         <button 
@@ -52,6 +85,18 @@ export default function Show({ auth, snippet }) {
                             {copied ? 'Copied!' : 'Copy Markdown'}
                         </button>
                         
+                        {isOwner && (
+                        <button
+                            onClick={handleCopyLink}
+                            className="px-4 py-2 rounded-lg bg-gray-900 hover:bg-gray-800 border border-gray-800 text-gray-300 hover:text-white flex items-center gap-2 transition-colors text-sm font-medium"
+                            title="Anyone with this link can view it, no login needed"
+                        >
+                            {linkCopied ? <Check className="w-4 h-4 text-green-500" /> : <Link2 className="w-4 h-4" />}
+                            {linkCopied ? 'Link copied!' : 'Copy public link'}
+                        </button>
+                        )}
+
+                        {isOwner && (
                         <button 
                             onClick={handleDelete}
                             disabled={processing}
@@ -60,6 +105,7 @@ export default function Show({ auth, snippet }) {
                             <Trash2 className="w-4 h-4" />
                             Delete
                         </button>
+                        )}
                     </div>
                 </div>
 
@@ -105,7 +151,7 @@ export default function Show({ auth, snippet }) {
                         >
                             <ReactMarkdown 
                                 remarkPlugins={[remarkGfm]} 
-                                rehypePlugins={[rehypeRaw]}
+                                rehypePlugins={[rehypeRaw, rehypeSanitizeLite]}
                             >
                                 {displayContent}
                             </ReactMarkdown>

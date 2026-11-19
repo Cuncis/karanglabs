@@ -106,6 +106,9 @@ Route::domain(config('aitools.domain'))->group(function () {
     });
 });
 
+// Shared terminal snippets: read-only, no login. The UUID slug is the unguessable link.
+Route::get('/terminal-converter/{terminalSnippet}', [TerminalSnippetController::class, 'show'])->name('terminal-converter.show');
+
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -265,7 +268,6 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/terminal-converter', [TerminalSnippetController::class, 'index'])->name('terminal-converter.index');
         Route::post('/terminal-converter', [TerminalSnippetController::class, 'store'])->name('terminal-converter.store');
-        Route::get('/terminal-converter/{terminalSnippet}', [TerminalSnippetController::class, 'show'])->name('terminal-converter.show');
         Route::delete('/terminal-converter/{terminalSnippet}', [TerminalSnippetController::class, 'destroy'])->name('terminal-converter.destroy');
     });
 
