@@ -11,12 +11,13 @@ export default function Index({ auth, snippets }) {
     const { data, setData, post, processing, errors, reset } = useForm({
         title: '',
         content: '',
+        anonymize: true,
     });
 
     const submit = (e) => {
         e.preventDefault();
         post(route('terminal-converter.store'), {
-            onSuccess: () => reset(),
+            onSuccess: () => reset('title', 'content'),
         });
     };
 
@@ -114,6 +115,21 @@ export default function Index({ auth, snippets }) {
                                     />
                                     {errors.content && <p className="mt-1 text-sm text-red-500">{errors.content}</p>}
                                 </div>
+
+                                <label className="flex items-start gap-3 text-sm text-gray-300 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={data.anonymize}
+                                        onChange={(e) => setData('anonymize', e.target.checked)}
+                                        className="mt-1 rounded border-gray-700 bg-gray-950 text-slate-500 focus:ring-slate-500"
+                                    />
+                                    <span>
+                                        Anonymize sensitive data
+                                        <span className="block text-xs text-gray-500">
+                                            Masks passwords, API keys, tokens, emails, IPs and credentials in .env, JSON, YAML, URLs and commands before AI processing and before the result can be shared.
+                                        </span>
+                                    </span>
+                                </label>
 
                                 <button
                                     type="submit"

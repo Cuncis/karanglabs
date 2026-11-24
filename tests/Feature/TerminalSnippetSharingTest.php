@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\TerminalSnippet;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Http;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
@@ -64,5 +65,30 @@ class TerminalSnippetSharingTest extends TestCase
         $this->delete(route('terminal-converter.destroy', $snippet->slug))->assertRedirect(route('login'));
         $this->get(route('terminal-converter.index'))->assertRedirect(route('login'));
         $this->assertModelExists($snippet);
+    }
+
+    public function test_secrets_are_masked_before_ai_call_and_storage_by_default(): void
+    {
+        Http::fake(['api.anthropic.com/*' => Http::response(['content' => [['text' => '## Env']]], 200)]);
+        $user = User::factory()->admin()->create();
+
+        $this->actingAs($user)->post(route('terminal-converter.store'), [
+            'content' => "DB_PASSWORD=Fake-Pass-123!\nAPP_ENV=production",
+        ])->assertRedirect();
+
+        Http::assertSent(fn ($request) => ! str_contains($request->body(), 'Fake-Pass-123')
+            && str_contains($request->body(), 'REDACTED'));
+    }
+
+    public function test_masking_can_be_turned_off(): void
+    {
+        Http::fake(['api.anthropic.com/*' => Http::response(['content' => [['text' => '## Env']]], 200)]);
+
+        $this->actingAs(User::factory()->admin()->create())->post(route('terminal-converter.store'), [
+            'content' => 'DB_PASSWORD=Fake-Pass-123!',
+            'anonymize' => false,
+        ])->assertRedirect();
+
+        Http::assertSent(fn ($request) => str_contains($request->body(), 'Fake-Pass-123'));
     }
 }

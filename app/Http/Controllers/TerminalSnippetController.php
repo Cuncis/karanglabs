@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\TerminalSnippet;
+use App\Services\SensitiveDataAnonymizer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -21,15 +22,22 @@ class TerminalSnippetController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(Request $request, SensitiveDataAnonymizer $anonymizer)
     {
         $validated = $request->validate([
             'title' => 'nullable|string|max:255',
             'content' => 'required|string',
+            'anonymize' => 'sometimes|boolean',
         ]);
 
-        $rawContent = $validated['content'];
-        $title = $validated['title'] ?: 'Terminal Archive';
+        // Snippets are shareable by public link, so mask secrets before the text
+        // reaches the AI provider or is stored (on by default).
+        $shouldAnonymize = $request->boolean('anonymize', true);
+        $rawContent = $shouldAnonymize ? $anonymizer->anonymize($validated['content']) : $validated['content'];
+        $title = ($validated['title'] ?? null) ?: 'Terminal Archive';
+        if ($shouldAnonymize) {
+            $title = $anonymizer->anonymize($title);
+        }
 
         try {
             $response = Http::withHeaders([
@@ -39,7 +47,7 @@ class TerminalSnippetController extends Controller
             ])->post('https://api.anthropic.com/v1/messages', [
                 'model' => 'claude-3-5-sonnet-20240620',
                 'max_tokens' => 4000,
-                'system' => 'You are an expert developer tool. The user will give you a raw terminal output or code snippet. Your job is to convert it into a beautiful, structured Markdown document. Use h2 headings, bullet points, colorful syntax-highlighted code blocks, and structured sections to make it extremely readable and easy to digest. DO NOT wrap the entire response in a markdown code block, just output the markdown directly. NEVER use the "—" (em dash) symbol, as it strongly implies AI generation; use commas, hyphens (-), or separate sentences instead. NEVER use raw emoji characters anywhere in the output.',
+                'system' => 'You are an expert developer tool. The user will give you a raw terminal output or code snippet. Your job is to convert it into a beautiful, structured Markdown document. Use h2 headings, bullet points, colorful syntax-highlighted code blocks, and structured sections to make it extremely readable and easy to digest. DO NOT wrap the entire response in a markdown code block, just output the markdown directly. NEVER use the "—" (em dash) symbol, as it strongly implies AI generation; use commas, hyphens (-), or separate sentences instead. NEVER use raw emoji characters anywhere in the output. The input may contain redaction placeholders such as [REDACTED], [EMAIL], [IP] or [USER]; keep them exactly as written and never invent or guess the hidden values.',
                 'messages' => [
                     [
                         'role' => 'user',
