@@ -78,4 +78,20 @@ class DynamicToolTest extends TestCase
         $this->assertSame('Much Shorter', $history->inputs['shorten_level']);
         $this->assertSame('This is easy to read now.', $history->outputs['simplified']);
     }
+
+    public function test_data_anonymizer_masks_env_secrets_before_the_ai_call_and_history(): void
+    {
+        $this->fakeAnthropicResponse(['anonymized_data' => 'DB_PASSWORD=[REDACTED]']);
+        $user = $this->subscribedUser();
+
+        $this->actingAs($user)->postJson('/api/tools/data-anonymizer/generate', [
+            'data' => "APP_ENV=production\nDB_PASSWORD=Fake-Pass-123!\nadmin_email=jane@example.com",
+        ])->assertOk()->assertJsonPath('anonymized_data', 'DB_PASSWORD=[REDACTED]');
+
+        Http::assertSent(fn ($request) => ! str_contains($request->body(), 'Fake-Pass-123')
+            && ! str_contains($request->body(), 'jane@example.com')
+            && str_contains($request->body(), 'APP_ENV=production'));
+
+        $this->assertStringNotContainsString('Fake-Pass-123', json_encode(ToolHistory::first()->inputs));
+    }
 }

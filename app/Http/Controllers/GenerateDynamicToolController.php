@@ -3,13 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\ToolHistory;
+use App\Services\SensitiveDataAnonymizer;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
 class GenerateDynamicToolController extends Controller
 {
-    public function __invoke(Request $request, $slug)
+    public function __invoke(Request $request, $slug, SensitiveDataAnonymizer $anonymizer)
     {
         $tools = config('karangtools');
         if (! isset($tools[$slug])) {
@@ -30,6 +31,10 @@ class GenerateDynamicToolController extends Controller
         }
 
         $validated = $request->validate($rules);
+
+        if ($tool['mask_secrets'] ?? false) {
+            $validated = array_map(fn ($value) => is_string($value) ? $anonymizer->anonymize($value) : $value, $validated);
+        }
 
         $userPrompt = '';
         foreach ($tool['inputs'] as $input) {

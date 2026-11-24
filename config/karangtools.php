@@ -319,15 +319,17 @@ return [
     'data-anonymizer' => [
         'title' => 'Data Anonymizer',
         'category' => 'Code & Data Lifesavers',
-        'description' => 'Replace sensitive data in JSON datasets with fake equivalents for safe testing.',
+        'description' => 'Mask secrets and replace personal data in .env files, JSON, YAML, logs, SQL, CSV or any text with safe equivalents.',
         'color' => 'blue',
         'icon' => '<svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>',
+        // Secrets are masked server-side before the AI ever sees the input.
+        'mask_secrets' => true,
         'inputs' => [
-            ['name' => 'json_data', 'label' => 'JSON Dataset', 'type' => 'textarea', 'placeholder' => '[{"name": "John Doe", "email": "john@example.com"}]'],
+            ['name' => 'data', 'label' => 'Data to Anonymize', 'type' => 'textarea', 'placeholder' => "Paste .env, JSON, YAML, logs, SQL, CSV or any text...\n\nDB_PASSWORD=secret\n[{\"name\": \"John Doe\", \"email\": \"john@example.com\"}]"],
         ],
-        'system_prompt' => "You are a data privacy expert. Analyze the provided JSON array or object. Replace all personally identifiable information (PII) such as real names, emails, phone numbers, addresses, and IP addresses with realistic but fake synthetic data (e.g., John Doe -> Alex Smith). Keep the JSON structure and non-sensitive data completely identical. Output ONLY valid JSON, do not wrap in markdown blocks. Return a JSON object with a single key 'anonymized_json' containing the formatted JSON string.",
+        'system_prompt' => "You are a data privacy expert. The user will paste data in ANY text format: .env files, JSON, YAML, INI, logs, SQL, CSV, terminal output, config files or plain prose. Detect the format and keep it exactly the same (structure, keys, comments, ordering, whitespace, and all non-sensitive values). Secrets such as passwords, API keys, tokens and private keys have already been replaced with placeholders like [REDACTED], [EMAIL] and [IP]; keep those placeholders exactly as written. Replace any remaining personally identifiable information (real names, phone numbers, street addresses, company names tied to a person, usernames, ID numbers, account numbers) with realistic but fake synthetic data, and use the same fake value every time the same real value repeats. Never invent working credentials. Return a JSON object with a single key 'anonymized_data' containing the full anonymized text as a string, without markdown fences.",
         'outputs' => [
-            ['key' => 'anonymized_json', 'label' => 'Anonymized JSON', 'type' => 'code'],
+            ['key' => 'anonymized_data', 'label' => 'Anonymized Output', 'type' => 'code'],
         ],
     ],
     'corporate-translator' => [
